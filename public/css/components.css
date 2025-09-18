@@ -1,0 +1,79 @@
+.location-field {
+    display: flex;
+    align-items: center;
+    border: 2px solid #333;
+    border-radius: 6px;
+    justify-content: space-between;
+    max-width: 400px;
+    cursor: pointer;
+    overflow: hidden;
+    height: 56px;
+    background: rgba(255, 255, 255, .5);
+    padding-left: 16px;
+    text-transform: uppercase;
+  }
+
+  .current-location-btn, .file-info {
+    border: none;
+    outline: none;
+    border-left: 2px solid var(--dark);
+    height: 56px;
+    width: 54px;
+    background: var(--color-bg);
+  }
+
+  #locationList {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  #locationList li {
+    padding: 16px 0;
+    border-bottom: 1px solid #ccc;
+    cursor: pointer;
+    list-style: none;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  #locationList li:hover {
+    background: #f0f0f0;
+  }
+
+  .input-none {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    height: 56px;
+  }
+
+  .lh-alert {
+    width: 100%;
+    padding: 12px 20px;
+    border: 2px solid;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .lh-alert-error {
+    background: var(--red);
+    border-color: var(--red-dark);
+    color: #fff;
+    box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.2);
+  }
+
+  .lh-alert-close {
+    width: auto;
+    padding: 0;
+    border: none;
+    background: none;
+    outline: none;
+  }
+
+  .lh-small-icon {
+    width: 22px !important;
+  }
