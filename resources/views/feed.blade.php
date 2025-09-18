@@ -9,7 +9,7 @@
 <div class="container-sm">
     @foreach($ads as $ad)
     <!-- Feed list -->
-    <a href="{{ url('/ad/'.$ad->box_number) }}" class="lh-feed-card lh-feed-featured text-decoration-none text-dark" >
+    <a href="{{ url('/ad/'.$ad->box_number) }}" class="lh-feed-card text-decoration-none text-dark" >
       <div>
         <h2>
           <b>{{ $ad->snapshot_name }}, {{ $ad->snapshot_age }}, {{ $ad->snapshot_gender }}, {{ $ad->location }}, {{ $ad->snapshot_status }} .</b> {{ substr($ad->description, 0, 50) . '...' }}

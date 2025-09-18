@@ -38,6 +38,15 @@ class Ads extends Controller
         ]);
     }
 
+    public function confirmation($box): View
+    {
+        $ad = DB::table('ads')->where('box_number', $box)->first();
+
+        return view('ads.create_confirmation', [
+            'ad' => $ad
+        ]);
+    }
+
     public function reply_second($box): View
     {
         return view('ads.reply_second', [
@@ -60,11 +69,12 @@ class Ads extends Controller
         return view('ads.create_second');
     }
 
-    public function writing(): View
+    public function writing($box): View
     {
         return view('ads.writing', [
             'redirectUrl' => route('home'), // or any route you want
-            'delay' => 5000, // delay in milliseconds
+            'delay' => 5000,
+            'box' => $box
         ]);
     }
 
@@ -108,7 +118,7 @@ class Ads extends Controller
                     'updated_at'            => now(),
                 ]);
 
-                return redirect()->route('ad.writing');
+                return redirect()->route('ad.writing', ['box' => $box]);
             }
         }
     }

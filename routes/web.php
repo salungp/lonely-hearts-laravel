@@ -27,14 +27,12 @@ Route::get('/verify', [AuthController::class, 'verify_code'])->name('auth.verify
 Route::post('/verify_code', [AuthController::class, 'verifyOtp'])->name('auth.verify_code');
 
 Route::middleware(['web', 'ensure.auth'])->group(function () {
-    Route::get('/ad/writing/', [Ads::class, 'writing'])->name('ad.writing');
+    Route::get('/ad/writing/{box}', [Ads::class, 'writing'])->name('ad.writing');
 });
 
 // Ad routes
 Route::get('/ad/create/', [Ads::class, 'create_ad'])->name('create_ad');
-Route::get('/confirmation', function() {
-    return view('ads.confirmation');
-});
+Route::get('/ad/confirmation/{box}', [Ads::class, 'confirmation'])->name('confirmation');
 Route::post('/ad/store/', [Ads::class, 'store'])->name('create.store');
 Route::post('/ad/check_box', [Home::class, 'check_box']);
 Route::get('/ad/reply/{box}', [Ads::class, 'reply']);
@@ -43,14 +41,14 @@ Route::post('/ad/{ad}/toggle-like', [Ads::class, 'toggleLike'])
      ->name('ad.toggleLike');
 Route::get('/ad/{box}', [Home::class, 'detail']);
 
-Route::get('/test-mail', function () {
-    Mail::send('mail.verify_code', ['code' => 34580], function ($message) {
-        $message->to('salung@22-22.co')
-                ->subject('Test Email');
-    });
+// Route::get('/test-mail', function () {
+//     Mail::send('mail.verify_code', ['code' => 34580], function ($message) {
+//         $message->to('salung@22-22.co')
+//                 ->subject('Test Email');
+//     });
 
-    return 'Test email sent!';
-});
+//     return 'Test email sent!';
+// });
 
 
 // Profile

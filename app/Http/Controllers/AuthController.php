@@ -173,7 +173,7 @@ class AuthController extends Controller
                 $request->session()->forget('ads');
                 $request->session()->forget('otp');
 
-                return redirect()->route('ad.writing');
+                return redirect()->route('ad.writing', ['box' => $box]);
             } else {
                 return redirect()->route('home');
             }
