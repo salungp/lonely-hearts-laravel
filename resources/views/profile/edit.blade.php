@@ -9,7 +9,7 @@
 <div class="container-sm">
 
     <!-- Form start line -->
-    <form action="{{ route('profile.store') }}" method="POST">
+    <form action="{{ route('profile.update') }}" method="POST">
         @csrf
 
         @if ($errors->any())
@@ -23,11 +23,20 @@
             </div>
         @endif
 
+        @if (session('error'))
+          <div class="lh-alert mb-3 lh-alert-error" id="alert">
+            {{ session('error') }}
+            <button class="lh-alert-close" type="button">
+              <img src="{{ asset('icons/close.svg') }}" alt="Close button icon">
+            </button>
+          </div>
+        @endif
+
 
         <div class="d-flex mb-3">
             <span style="font-size: 20px; text-transform: uppercase; margin-right: 16px;" >My Name is</span
             >
-            <input style="text-transform: uppercase;" type="text" name="person_name" class="input-line" required />
+            <input style="text-transform: uppercase;" value="{{ $user->display_name }}" type="text" name="person_name" class="input-line" required />
         </div>
 
         <div class="sentence d-inline-block text-uppercase mb-2">
@@ -35,9 +44,9 @@
         </div>
 
         <div class="lh-dropdown-wrap" data-field="height">
-            <button class="lh-dropdown-button" type="button">Work</button>
+            <button class="lh-dropdown-button" type="button">{{ $user->occupation }}</button>
             <div class="lh-dropdown-menu">
-                <input type="hidden" name="occupation" value="work">
+                <input type="hidden" name="occupation" value="{{ $user->occupation }}">
                 <div class="lh-option">Work</div>
                 <div class="lh-option">School</div>
                 <div class="lh-option">Freelance</div>
@@ -50,9 +59,9 @@
         </div>
 
         <div class="lh-dropdown-wrap" data-field="height">
-            <button class="lh-dropdown-button" type="button">30</button>
+            <button class="lh-dropdown-button" type="button">{{ $user->age }}</button>
             <div class="lh-dropdown-menu">
-                <input type="hidden" name="age" value="30">
+                <input type="hidden" name="age" value="{{ $user->age }}">
                 <div class="lh-option">18</div>
                 <div class="lh-option">20</div>
                 <div class="lh-option">25</div>
@@ -70,9 +79,9 @@
         </div>
 
         <div class="lh-dropdown-wrap" data-field="height">
-            <button class="lh-dropdown-button" type="button">MALE</button>
+            <button class="lh-dropdown-button" type="button">{{ $user->gender }}</button>
             <div class="lh-dropdown-menu">
-                <input type="hidden" name="gender" value="MALE">
+                <input type="hidden" name="gender" value="{{ $user->gender }}">
                 <div class="lh-option">MALE</div>
                 <div class="lh-option">FEMALE</div>
                 <div class="lh-option">ALL</div>
@@ -84,9 +93,9 @@
         </div>
 
         <div class="lh-dropdown-wrap" data-field="height">
-            <button class="lh-dropdown-button" type="button">Single</button>
+            <button class="lh-dropdown-button" type="button">{{ $user->status }}</button>
             <div class="lh-dropdown-menu">
-                <input type="hidden" name="status" value="Single">
+                <input type="hidden" name="status" value="{{ $user->status }}">
                 <div class="lh-option">Single</div>
                 <div class="lh-option">Taken</div>
                 <div class="lh-option">Complicated</div>
@@ -96,7 +105,18 @@
 
         <div class="mb-4"></div>
 
-        <button class="lh-button" type="submit">Continue</button>
+        <label for="email">Add email address</label>
+
+        <div class="location-field" id="locationField" style="margin-bottom: 16px;">
+            <div class="d-flex align-items-center" style="gap: 12px;">
+                <span class="icon">
+                    <img src="{{ asset('icons/mail.svg') }}" alt="Pin svg icon">
+                </span>
+                <input name="email" type="mail" id="selectedLocation" placeholder="Email address" value="{{ $email }}">
+            </div>
+        </div>
+
+        <button class="lh-button" type="submit">Save changes</button>
         
     </form>
     
@@ -104,6 +124,15 @@
 @endsection
 @section('script')
 <script>
+const alert = document.getElementById("alert");
+// Initialize setelah DOM loaded
+document.addEventListener("DOMContentLoaded", () => {
+    new BootstrapPinInput();
+});
+
+clickAction(".lh-alert-close", (e) => {
+    alert.style.display = "none";
+});
 document.querySelectorAll(".lh-dropdown-button").forEach((btn) => {
   btn.addEventListener("click", function () {
     const wrap = this.parentElement;

@@ -6,6 +6,7 @@ use App\Http\Controllers\Ads;
 use App\Http\Controllers\Profiles;
 use App\Http\Controllers\Package;
 use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Mail;
 
 // Home
 Route::get('/', [Home::class, 'show'])->name('home');
@@ -39,11 +40,24 @@ Route::post('/ad/{ad}/toggle-like', [Ads::class, 'toggleLike'])
      ->name('ad.toggleLike');
 Route::get('/ad/{box}', [Home::class, 'detail']);
 
+Route::get('/test-mail', function () {
+    Mail::send('mail.verify_code', ['code' => 34580], function ($message) {
+        $message->to('salung@22-22.co')
+                ->subject('Test Email');
+    });
+
+    return 'Test email sent!';
+});
+
+
 // Profile
 Route::get('/account', [Profiles::class, 'profile'])->name('profile.view')->middleware('auth');
 Route::get('/account/profile', [Profiles::class, 'profile_edit'])->name('profile.edit')->middleware('auth');
 Route::get('/account/create', [Profiles::class, 'create'])->name('profile.create');
 Route::post('/account/store', [Profiles::class, 'store'])->name('profile.store');
+Route::post('/account/update', [Profiles::class, 'update'])->name('profile.update');
+Route::get('/account/verify-email', [Profiles::class, 'verify_email'])->name('profile.verify_email');
+Route::post('/account/verify-email-code', [Profiles::class, 'verify_email_code'])->name('profile.verify_email_code');
 
 
 // Package

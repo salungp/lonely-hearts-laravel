@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('ads', function (Blueprint $table) {
-            $table->string('slug')->unique()->after('description');
+        Schema::create('email_verifications', function (Blueprint $table) {
+            $table->id();
+            $table->string('email')->index();
+            $table->string('code');
+            $table->timestamp('expires_at');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('ads', function (Blueprint $table) {
-            $table->dropColumn('slug');
-        });
+        Schema::dropIfExists('email_verifications');
     }
 };

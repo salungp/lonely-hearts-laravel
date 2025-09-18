@@ -4,13 +4,20 @@
     border: 2px solid #333;
     border-radius: 6px;
     justify-content: space-between;
-    max-width: 400px;
     cursor: pointer;
     overflow: hidden;
     height: 56px;
     background: rgba(255, 255, 255, .5);
     padding-left: 16px;
     text-transform: uppercase;
+    width: 100%;
+  }
+
+  .location-field input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100% !important;
   }
 
   .current-location-btn, .file-info {

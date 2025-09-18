@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -180,6 +182,34 @@ class AuthController extends Controller
             return redirect()->route('auth.verify')->with('error', 'Your otp is not correct');
         }
     }
+
+    public function sendVerification(Request $request)
+    {
+        $email = $request->input('email');
+        $code = random_int(100000, 999999); // 6-digit code
+
+        // Store in DB
+        DB::table('email_verifications')->updateOrInsert(
+            ['email' => $email],
+            [
+                'code' => $code,
+                'expires_at' => Carbon::now()->addMinutes(10),
+                'updated_at' => Carbon::now(),
+                'created_at' => Carbon::now(),
+            ]
+        );
+
+        // Send email using Blade template
+        Mail::send('emails.verify-code', ['code' => $code], function ($message) use ($email) {
+            $message->to($email)
+                    ->subject('Your Email Verification Code');
+        });
+
+        return response()->json(['status' => 'verification_sent']);
+    }
+
+    
+
 
     // protected function sendPhoneVerification($phone_number)
     // {
