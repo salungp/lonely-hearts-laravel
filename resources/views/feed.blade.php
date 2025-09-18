@@ -56,4 +56,87 @@
     </a>
 
 </div>
+<!-- Location pop up -->
+<div class="lh-popup" id="locationPopup">
+  <div class="lh-popup-header">
+    <button id="closePopupLocation">
+      <img src="{{ asset('icons/close.svg') }}" alt="Close button" />
+    </button>
+  </div>
+  <div class="lh-popup-body">
+    <h2 class="lh-title mb-3" style="text-align: left">Change location</h2>
+    <div class="location-field">
+      <input type="text" id="searchInput" placeholder="Search city..." class="input-none" />
+      <button class="current-location-btn">
+        <img src="{{ asset('icons/search.svg') }}" alt="Search svg icon" />
+      </button>
+    </div>
+    <ul id="locationList"></ul>
+  </div>
+</div>
+@endsection
+@section('script')
+<script>
+    const locationList = document.getElementById("locationList");
+    const alert = document.getElementById("alert");
+    const ctaLocation = document.getElementById("ctaLocation");
+    // Sample locations
+    const locations = [
+    "All Locations", // ✅ Add this at the top
+    "London",
+    "Manchester",
+    "Leicester",
+    "Birmingham",
+    "Bristol",
+    "Plymouth",
+    "Leeds",
+    "Bradford",
+    "Coventry",
+    "Sheffield"
+    ];
+
+    function renderLocations(list) {
+        locationList.innerHTML = "";
+        list.forEach((loc) => {
+            const li = document.createElement("li");
+            li.textContent = loc;
+            li.addEventListener("click", () => {
+                // Special case: reset location if "All Locations" is chosen
+                const payload = loc === "All Locations" ? { location: null } : { location: loc };
+
+                fetch("{{ route('location.set') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                    },
+                    body: JSON.stringify(payload),
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        locationPopup.classList.remove("active");
+                        window.location.reload();
+                    }
+                })
+                .catch(err => console.error("Error setting location:", err));
+            });
+            locationList.appendChild(li);
+        });
+    }
+
+    clickAction(".lh-location", (el) => {
+        locationPopup.classList.add("active");
+        renderLocations(locations);
+    });
+
+    clickAction("#closePopupLocation", (el) => {
+        locationPopup.classList.remove("active");
+    });
+
+    // Initialize setelah DOM loaded
+    document.addEventListener("DOMContentLoaded", () => {
+        ctaLocation.style.textDecoration = "underline";
+    });
+</script>
 @endsection

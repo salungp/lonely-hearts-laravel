@@ -32,6 +32,15 @@
           </div>
         @endif
 
+        @if (session('success'))
+          <div class="lh-alert mb-3 lh-alert-success" id="alert">
+            {{ session('success') }}
+            <button class="lh-alert-close" type="button">
+              <img src="{{ asset('icons/close.svg') }}" alt="Close button icon">
+            </button>
+          </div>
+        @endif
+
 
         <div class="d-flex mb-3">
             <span style="font-size: 20px; text-transform: uppercase; margin-right: 16px;" >My Name is</span
@@ -104,17 +113,6 @@
         </div>
 
         <div class="mb-4"></div>
-
-        <label for="email">Add email address</label>
-
-        <div class="location-field" id="locationField" style="margin-bottom: 16px;">
-            <div class="d-flex align-items-center" style="gap: 12px;">
-                <span class="icon">
-                    <img src="{{ asset('icons/mail.svg') }}" alt="Pin svg icon">
-                </span>
-                <input name="email" type="mail" id="selectedLocation" placeholder="Email address" value="{{ $email }}">
-            </div>
-        </div>
 
         <button class="lh-button" type="submit">Save changes</button>
         

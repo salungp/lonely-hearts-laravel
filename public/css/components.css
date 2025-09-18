@@ -73,6 +73,13 @@
     box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.2);
   }
 
+  .lh-alert-success {
+    background: var(--green);
+    border-color: var(--green-dark);
+    color: #fff;
+    box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.2);
+  }
+
   .lh-alert-close {
     width: auto;
     padding: 0;

@@ -208,6 +208,46 @@ class AuthController extends Controller
         return response()->json(['status' => 'verification_sent']);
     }
 
+    public function update_email(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email|max:255',
+        ]);
+
+        $email = $validated['email'];
+        $code = random_int(100000, 999999);
+        $check_email = DB::table('users')->where('email', $email)->first();
+        $id = Auth::id();
+
+        if (!$check_email) {
+            // Store in DB
+            DB::table('email_verifications')->updateOrInsert(
+                ['email' => $email],
+                [
+                    'code' => $code,
+                    'expires_at' => Carbon::now()->addMinutes(10),
+                    'updated_at' => Carbon::now(),
+                    'created_at' => Carbon::now(),
+                ]
+            );
+
+            DB::table('users')->where('id', $id)->update([
+                'email' => $email
+            ]);
+
+            // Send email using Blade template
+            Mail::send('mail.verify_code', ['code' => $code], function ($message) use ($email) {
+                $message->to($email)
+                        ->subject('Your Email Verification Code');
+            });
+
+            return redirect()->route('profile.verify_email');
+
+        } else {
+            return redirect()->route('profile.email')->with('error', 'The email is already exists!');
+        }
+    }
+
     
 
 

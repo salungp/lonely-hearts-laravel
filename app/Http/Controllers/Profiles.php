@@ -26,16 +26,22 @@ class Profiles extends Controller
         ]);
     }
 
+    public function email(): View
+    {
+        $id = Auth::id();
+        $user = DB::table('users')->where('id', $id)->first();
+        return view('profile.email', [
+            'user' => $user
+        ]);
+    }
+
     public function profile_edit(): View
     {
         $id = Auth::id();
         $user = DB::table('table_profiles')->where('user_id', $id)->first();
-        $get_email = DB::table('users')->where('id', $id)->first();
-        $email = $get_email->email;
 
         return view('profile.edit', [
             'user' => $user,
-            'email' => $email
         ]);
     }
 
@@ -50,45 +56,17 @@ class Profiles extends Controller
             'email'      => 'email|max:255',
         ]);
 
-        $email = $request->input('email');
-        $code = random_int(100000, 999999); // 6-digit code
         $id = Auth::id();
-        $check_email = DB::table('users')->where('email', $email)->first();
-        
-        if ($check_email) {
-            return redirect()->route('profile.edit')->with('error', 'The email is already exists!');
-        } else {
-            // Store in DB
-            DB::table('email_verifications')->updateOrInsert(
-                ['email' => $email],
-                [
-                    'code' => $code,
-                    'expires_at' => Carbon::now()->addMinutes(10),
-                    'updated_at' => Carbon::now(),
-                    'created_at' => Carbon::now(),
-                ]
-            );
 
-            DB::table('table_profiles')->where('user_id', $id)->update([
-                'display_name' => $validated['person_name'],
-                'occupation' => $validated['occupation'],
-                'age' => $validated['age'],
-                'status' => $validated['status'],
-                'gender' => $validated['gender'],
-            ]);
+        DB::table('table_profiles')->where('user_id', $id)->update([
+            'display_name' => $validated['person_name'],
+            'occupation' => $validated['occupation'],
+            'age' => $validated['age'],
+            'status' => $validated['status'],
+            'gender' => $validated['gender'],
+        ]);
 
-            DB::table('users')->where('id', $id)->update([
-                'email' => $email
-            ]);
-
-            // Send email using Blade template
-            Mail::send('mail.verify_code', ['code' => $code], function ($message) use ($email) {
-                $message->to($email)
-                        ->subject('Your Email Verification Code');
-            });
-
-            return redirect()->route('profile.verify_email');
-        }
+        return redirect()->route('profile.edit')->with('success', 'The data has been updated!');
     }
 
     public function verify_email_code(Request $request)
@@ -116,10 +94,10 @@ class Profiles extends Controller
             // Optionally delete verification record
             DB::table('email_verifications')->where('code', $code)->delete();
 
-            return redirect()->route('profile.edit')->with('succes', 'The profile has been updated!');
+            return redirect()->route('profile.email')->with('succes', 'The profile has been updated!');
         }
 
-        return redirect()->route('profile.edit')->with('error', 'Something went wrong!');
+        return redirect()->route('profile.email')->with('error', 'Something went wrong!');
     }
 
 

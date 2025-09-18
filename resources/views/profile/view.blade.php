@@ -28,6 +28,13 @@
 
     <div class="d-flex lh-link-list mb-3">
         <span class="lh-link-icon">
+        <img src="{{ asset('icons/mail-white.svg') }}" alt="Chain icon" />
+        </span>
+        <a href="{{ route('profile.email') }}">Email address</a>
+    </div>
+
+    <div class="d-flex lh-link-list mb-3">
+        <span class="lh-link-icon">
         <img src="{{ asset('icons/dollar.svg') }}" alt="Chain icon" />
         </span>
         <a href="#">Payments</a>

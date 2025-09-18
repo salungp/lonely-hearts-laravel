@@ -32,6 +32,9 @@ Route::middleware(['web', 'ensure.auth'])->group(function () {
 
 // Ad routes
 Route::get('/ad/create/', [Ads::class, 'create_ad'])->name('create_ad');
+Route::get('/confirmation', function() {
+    return view('ads.confirmation');
+});
 Route::post('/ad/store/', [Ads::class, 'store'])->name('create.store');
 Route::post('/ad/check_box', [Home::class, 'check_box']);
 Route::get('/ad/reply/{box}', [Ads::class, 'reply']);
@@ -55,9 +58,11 @@ Route::get('/account', [Profiles::class, 'profile'])->name('profile.view')->midd
 Route::get('/account/profile', [Profiles::class, 'profile_edit'])->name('profile.edit')->middleware('auth');
 Route::get('/account/create', [Profiles::class, 'create'])->name('profile.create');
 Route::post('/account/store', [Profiles::class, 'store'])->name('profile.store');
-Route::post('/account/update', [Profiles::class, 'update'])->name('profile.update');
-Route::get('/account/verify-email', [Profiles::class, 'verify_email'])->name('profile.verify_email');
+Route::post('/account/update', [Profiles::class, 'update'])->name('profile.update')->middleware('auth');
+Route::get('/account/verify-email', [Profiles::class, 'verify_email'])->name('profile.verify_email')->middleware('auth');
+Route::get('/account/email', [Profiles::class, 'email'])->name('profile.email')->middleware('auth');
 Route::post('/account/verify-email-code', [Profiles::class, 'verify_email_code'])->name('profile.verify_email_code');
+Route::post('/account/email_update', [AuthController::class, 'update_email'])->name('profile.email_update');
 
 
 // Package
