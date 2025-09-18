@@ -8,13 +8,21 @@ use Illuminate\Http\Request;
 use Twilio\Rest\Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
     public function login(): View
     {
-        return view('auth.login');
+        $user = '';
+        if (session()->has('profile')) {
+            $user = session('profile')['display_name'];
+        } 
+
+        return view('auth.login', [
+            'user' => $user
+        ]);
     }
 
     public function verify_code(): View
@@ -34,70 +42,94 @@ class AuthController extends Controller
     public function LoginOrRegister(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'country_code' => 'required|string|max:5',
             'phone_number' => 'required|string|max:20',
         ]);
 
-        $name = $request->name;
-        $code = $request->country_code;
-        $phone = $request->phone_number;
-        $phone_number = $code.$phone;
-
+        $phone_number = $request->country_code . preg_replace('/\D+/', '', $request->phone_number);
+        $profile = session('profile');
         $user = User::where('phone_number', $phone_number)->first();
 
-        if (!$user) {
-            // Create new user
+        // One-time OTP (for both new or existing users)
+        $otp = rand(10000, 99999);
+
+        if ($profile) {
+            // Always create new user if profile session exists
             $user = User::create([
-                'name' => $name,
+                'name'         => $profile['display_name'] ?? '',
                 'phone_number' => $phone_number,
-                'email' => null, // leave email empty
+                'email'        => null,
             ]);
 
-            // Define the profile data
-            $profile = session('profile');
-            $age = $profile['age'] ?? '';
-            $occupation = strtolower($profile['occupation'] ?? '');
-            $status = strtolower($profile['status'] ?? '');
-            $gender = $profile['gender'];
-            $location = session('ads')['location'] ?? '';
-            $display_name = $profile['display_name'] ?? '';
-
-            if ($profile) {
+            if ($user) {
                 // Insert profile
                 DB::table('table_profiles')->insert([
                     'user_id'      => $user->id,
-                    'display_name' => $display_name,
-                    'occupation'   => $occupation,
-                    'age'          => $age,
-                    'status'       => $status,
-                    'gender'       => $gender,
-                    'location'     => $location,
+                    'display_name' => $profile['display_name'] ?? '',
+                    'occupation'   => strtolower($profile['occupation'] ?? ''),
+                    'age'          => $profile['age'] ?? '',
+                    'status'       => strtolower($profile['status'] ?? ''),
+                    'gender'       => $profile['gender'] ?? '',
+                    'location'     => session('ads')['location'] ?? '',
                     'bio'          => '',
                     'created_at'   => now(),
                     'updated_at'   => now(),
                 ]);
-            } else {
-                // Log error if session missing
-                logger()->warning('Profile session data not found for new user: ' . $user->id);
+
+                // Store OTP session
+                session([
+                    'otp' => [
+                        'otp'     => $otp,
+                        'user_id' => $user->id,
+                    ],
+                ]);
+
+                // Clear profile session to avoid duplicates
+                $request->session()->forget('profile');
+
+                Auth::login($user);
+                return redirect()->route('auth.verify');
             }
+
+            logger()->error("Failed to create user from profile session");
+            return back()->withErrors(['msg' => 'Unable to create account. Try again.']);
         }
 
-        $otp = rand(10000, 99999);
+        // No profile session = normal login/register
+        if (!$user) {
+            $user = User::create([
+                'name'         => '',
+                'phone_number' => $phone_number,
+                'email'        => null,
+            ]);
+
+            // Existing user -> login
+            Auth::login($user);
+
+            session([
+                'otp' => [
+                    'otp'     => $otp,
+                    'user_id' => $user->id,
+                ],
+                'current_url' => $phone_number, // mark that we must create profile
+            ]);
+
+            return redirect()->route('profile.create');
+        }
+
+        // Existing user -> login
+        Auth::login($user);
 
         session([
             'otp' => [
-                'otp'       => $otp,
-                'user_id'   => $user->id,
+                'otp'     => $otp,
+                'user_id' => $user->id,
             ],
         ]);
 
-        $request->session()->forget('profile');
-
-        // Log in user
-        Auth::login($user);
-
         return redirect()->route('auth.verify');
     }
+
 
     public function verifyOtp(Request $request)
     {

@@ -41,14 +41,13 @@ Route::get('/ad/{box}', [Home::class, 'detail']);
 
 // Profile
 Route::get('/account', [Profiles::class, 'profile'])->name('profile.view')->middleware('auth');
+Route::get('/account/profile', [Profiles::class, 'profile_edit'])->name('profile.edit')->middleware('auth');
+Route::get('/account/create', [Profiles::class, 'create'])->name('profile.create');
+Route::post('/account/store', [Profiles::class, 'store'])->name('profile.store');
 
 
 // Package
 Route::get('/offer', [Package::class, 'offer'])->name('offer');
-
-// Profile routes
-Route::get('/profile/create', [Profiles::class, 'create'])->name('profile.create');
-Route::post('/profile/store', [Profiles::class, 'store'])->name('profile.store');
 
 // Set up for 404 page
 Route::fallback(function () {

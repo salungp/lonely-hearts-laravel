@@ -8,7 +8,7 @@
         <img src="{{ asset('images/ad-image.png') }}" alt="Profile image" style="width: 90px;">
         <div class="text-content">
             <h3 class="ad-title">{{ $user->display_name ?? '' }}, {{ $user->age ?? '' }}</h3>
-            <a href="#" class="lh-link" style="padding: 0 !important; text-align: left;">Edit profile</a>
+            <a href="{{ route('profile.edit') }}" class="lh-link" style="padding: 0 !important; text-align: left;">Edit profile</a>
         </div>
     </div>
 

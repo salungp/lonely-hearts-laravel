@@ -21,7 +21,7 @@ $profile = session('profile')
 
     <form action="{{ route('login_or_register') }}" method="POST">
         @csrf
-        <div class="lh-input-group mb-3">
+        <!-- <div class="lh-input-group mb-3">
             <label for="name">Name</label>
             <input
             type="text"
@@ -32,7 +32,7 @@ $profile = session('profile')
             @error('name')
                 <div class="text-uppercase text-danger">{{ $message }}</div>
             @enderror
-        </div>
+        </div> -->
 
         <div class="lh-input-group mb-3 position-relative">
             <label for="name">Phone number</label>
@@ -40,7 +40,7 @@ $profile = session('profile')
                 <div id="countrySelector" class="lh-country-display">
                     +62 🇮🇩
                 </div>
-                <input type="hidden" id="country_code" name="country_code" value="+1">
+                <input type="hidden" id="country_code" name="country_code" value="+62">
                 <input
                     type="tel"
                     class="lh-input lh-input-tel"

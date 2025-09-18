@@ -23,6 +23,11 @@ class Profiles extends Controller
         ]);
     }
 
+    public function profile_edit(): View
+    {
+        return view('profile.edit');
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -32,21 +37,47 @@ class Profiles extends Controller
             'status'     => 'required|string|max:255',
             'gender'     => 'required|string|max:10',
         ]);
-    
-        // Save to session
-        session([
-            'profile' => [
+
+        // Check if the user come from create ad or login
+        if (session()->has('current_url')) {
+            // user come from login
+            $user_id = session('otp')['user_id'];
+
+            DB::table('users')->where('id', $user_id)->update(['name' => $validated['person_name']]);
+
+            $user = DB::table('users')->where('id', $user_id)->first();
+
+            DB::table('table_profiles')->insert([
+                'user_id'      => session('otp')['user_id'],
                 'display_name' => $validated['person_name'],
                 'occupation'   => $validated['occupation'],
                 'age'          => $validated['age'],
                 'status'       => $validated['status'],
                 'gender'       => $validated['gender'],
-            ],
-        ]);
-    
-        // Retrieve intended URL or fallback
-        $redirectTo = session()->pull('intended_url', route('home'));
-    
-        return redirect($redirectTo);
+                'location'     => 'London',
+                'bio'          => '',
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ]);
+
+            $request->session()->forget('current_url');
+            return redirect()->route('auth.verify');
+        } else {
+            // Save to session
+            session([
+                'profile' => [
+                    'display_name' => $validated['person_name'],
+                    'occupation'   => $validated['occupation'],
+                    'age'          => $validated['age'],
+                    'status'       => $validated['status'],
+                    'gender'       => $validated['gender'],
+                ],
+            ]);
+
+            // Retrieve intended URL or fallback
+            $redirectTo = session()->pull('intended_url', route('home'));
+        
+            return redirect($redirectTo);
+        }
     }
 }
