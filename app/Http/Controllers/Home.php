@@ -22,6 +22,9 @@ class Home extends Controller
             $query->where('ads.location', session('selected_location'));
         }
 
+        // Clear session if user came from create flow
+        session()->forget(['profile', 'ads']);
+
         $ads = $query->get();
 
         // Cache ads feed (optionally include location in cache key)

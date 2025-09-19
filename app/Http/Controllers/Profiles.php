@@ -103,6 +103,9 @@ class Profiles extends Controller
 
     public function verify_email(): View
     {
+        // Clear session if user came from create flow
+        session()->forget(['profile', 'ads']);
+        
         return view('auth.verify_email');
     }
 
