@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 
 class Ads extends Controller
 {
@@ -33,8 +35,23 @@ class Ads extends Controller
 
     public function reply_first($box): View
     {
+        $ad = DB::table('ads')->where('box_number', $box)->first();
+        if (!$ad) {
+            abort(404);
+        }
         return view('ads.reply_first', [
-            'box' => $box
+            'ad' => $ad
+        ]);
+    }
+
+    public function reply_second($box): View
+    {
+        $ad = DB::table('ads')->where('box_number', $box)->first();
+        if (!$ad) {
+            abort(404);
+        }
+        return view('ads.reply_second', [
+            'ad' => $ad
         ]);
     }
 
@@ -47,11 +64,9 @@ class Ads extends Controller
         ]);
     }
 
-    public function reply_second($box): View
+    public function reply_confirmation(): View
     {
-        return view('ads.reply_second', [
-            'box' => $box
-        ]);
+        return view('ads.reply_confirmation');
     }
 
     public function create_ad(): View
@@ -77,6 +92,118 @@ class Ads extends Controller
             'box' => $box
         ]);
     }
+
+    public function reply_store(Request $request)
+    {
+        $validated = $request->validate([
+            'content' => 'required|string|max:1000',
+        ]);
+
+        $adId = $request->input('ad_id');
+
+        // If not logged in → save reply to session
+        if (!Auth::check()) {
+            session([
+                'reply' => [
+                    'ad_id'   => $adId,
+                    'content' => $validated['content'],
+                ],
+            ]);
+
+            return redirect()->route('profile.create'); // or login
+        }
+
+        // Logged in user
+        $userId = Auth::id();
+        $ad     = DB::table('ads')->where('id', $adId)->first();
+        $author = DB::table('users')->where('id', $ad->user_id)->first();
+
+        if (!$ad) {
+            return back()->withErrors(['Ad not found.']);
+        }
+
+        if ($ad->user_id == $userId) {
+            return back()->withErrors(['You cannot reply to your own ad.']);
+        }
+
+        // Find or create conversation
+        $conversation = DB::table('conversations')
+            ->where('ad_id', $ad->id)
+            ->where('author_id', $ad->user_id)
+            ->where('replier_id', $userId)
+            ->first();
+
+        if (!$conversation) {
+            $conversationId = DB::table('conversations')->insertGetId([
+                'ad_id'          => $ad->id,
+                'author_id'      => $ad->user_id,
+                'replier_id'     => $userId,
+                'progress'       => '0%',
+                'unlocked_photo' => false,
+                'created_at'     => now(),
+                'updated_at'     => now(),
+            ]);
+        } else {
+            $conversationId = $conversation->id;
+        }
+
+        // ✅ Insert message
+        DB::table('messages')->insert([
+            'conversation_id' => $conversationId,
+            'sender_id'       => $userId,
+            'content'         => $validated['content'],
+            'status'          => 'sent',
+            'created_at'      => now(),
+            'updated_at'      => now(),
+        ]);
+
+        // ✅ Count messages to update progress
+        $messageCount = DB::table('messages')
+            ->where('conversation_id', $conversationId)
+            ->count();
+
+        $progress = '0%';
+        if ($messageCount >= 8) {
+            $progress = '100%';
+        } elseif ($messageCount >= 6) {
+            $progress = '75%';
+        } elseif ($messageCount >= 4) {
+            $progress = '50%';
+        } elseif ($messageCount >= 2) {
+            $progress = '25%';
+        }
+
+        $unlockedPhoto = $messageCount >= 3;
+
+        DB::table('conversations')
+            ->where('id', $conversationId)
+            ->update([
+                'progress'       => $progress,
+                'unlocked_photo' => $unlockedPhoto,
+                'updated_at'     => now(),
+            ]);
+
+        // ✅ (Optional) trigger email notification to ad author
+        // Mail::to($ad->email)->send(new NewReplyMail($validated['content']));
+
+        $email = $author->email;
+        $content = $validated['content'];
+
+        // Send email using Blade template
+        if ($email != null) {
+            Mail::send('mail.reply', [
+                'name' => $author->name,
+                'content' => $content
+            ], function ($content) use ($email) {
+                $content->to($email)
+                        ->subject('You just got a reply!');
+            });
+        }
+
+        return redirect()->route('reply_confirmation');
+    }
+
+
 
     public function store(Request $request)
     {

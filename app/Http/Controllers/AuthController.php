@@ -200,7 +200,7 @@ class AuthController extends Controller
         );
 
         // Send email using Blade template
-        Mail::send('emails.verify-code', ['code' => $code], function ($message) use ($email) {
+        Mail::send('mail.verify-code-2', ['code' => $code], function ($message) use ($email) {
             $message->to($email)
                     ->subject('Your Email Verification Code');
         });
@@ -236,7 +236,7 @@ class AuthController extends Controller
             ]);
 
             // Send email using Blade template
-            Mail::send('mail.verify_code', ['code' => $code], function ($message) use ($email) {
+            Mail::send('mail.verify-code-2', ['code' => $code], function ($message) use ($email) {
                 $message->to($email)
                         ->subject('Your Email Verification Code');
             });

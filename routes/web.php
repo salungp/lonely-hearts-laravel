@@ -13,10 +13,12 @@ Route::get('/', [Home::class, 'show'])->name('home');
 Route::get('/feed', [Home::class, 'feed'])->name('feed');
 Route::post('/set-location', [Ads::class, 'filter_location'])->name('location.set');
 
+// Check when create/reply ad
 Route::middleware(['profile.or.create'])->group(function () {
     Route::get('/ad/create_first/', [Ads::class, 'create_first']);
     Route::get('/ad/create_second/', [Ads::class, 'create_second']);
-    Route::get('/ad/reply_first/{box}', [Ads::class, 'reply_first']);
+    Route::get('/ad/reply_first/{box}', [Ads::class, 'reply_first'])->name('ad.reply_first');
+    Route::get('/ad/reply_second/{box}', [Ads::class, 'reply_second'])->name('ad.reply_second');
 });
 
 // Auth
@@ -33,7 +35,9 @@ Route::middleware(['web', 'ensure.auth'])->group(function () {
 // Ad routes
 Route::get('/ad/create/', [Ads::class, 'create_ad'])->name('create_ad');
 Route::get('/ad/confirmation/{box}', [Ads::class, 'confirmation'])->name('confirmation');
+Route::get('/ad/confirmation/', [Ads::class, 'reply_confirmation'])->name('reply_confirmation');
 Route::post('/ad/store/', [Ads::class, 'store'])->name('create.store');
+Route::post('/ad/reply_store/', [Ads::class, 'reply_store'])->name('ad.reply_store');
 Route::post('/ad/check_box', [Home::class, 'check_box']);
 Route::get('/ad/reply/{box}', [Ads::class, 'reply']);
 Route::post('/ad/{ad}/toggle-like', [Ads::class, 'toggleLike'])
@@ -41,14 +45,15 @@ Route::post('/ad/{ad}/toggle-like', [Ads::class, 'toggleLike'])
      ->name('ad.toggleLike');
 Route::get('/ad/{box}', [Home::class, 'detail']);
 
-// Route::get('/test-mail', function () {
-//     Mail::send('mail.verify_code', ['code' => 34580], function ($message) {
-//         $message->to('salung@22-22.co')
-//                 ->subject('Test Email');
-//     });
+// Test mail
+Route::get('/test-mail', function () {
+    Mail::send('mail.verify-code-2', ['code' => 34580], function ($message) {
+        $message->to('salung@22-22.co')
+                ->subject('Test Email');
+    });
 
-//     return 'Test email sent!';
-// });
+    return 'Test email sent!';
+});
 
 
 // Profile

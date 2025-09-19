@@ -55,15 +55,19 @@ class Home extends Controller
     public function detail_slug($slug): View
     {
         $ad = DB::table('ads')->where('slug', $slug)->first();
-        
-        $sessionKey = 'viewed_ad_' . $ad->id;
 
-        if (!session()->has($sessionKey)) {
-            DB::table('ads')
-                ->where('slug', $slug)
-                ->increment('views');
-    
+        if (!$ad) {
+            abort(404);
+        }
+
+        $sessionKey = 'viewed_ad_' . $ad->id;
+        $viewedAt = session($sessionKey);
+
+        if (!$viewedAt || now()->diffInHours($viewedAt) > 1) {
+            DB::table('ads')->where('slug', $slug)->increment('views');
             session([$sessionKey => now()]);
+            // re-fetch to show updated views count
+            $ad = DB::table('ads')->where('slug', $slug)->first();
         }
 
         return view('detail', [
@@ -75,6 +79,10 @@ class Home extends Controller
     public function detail($box): View
     {
         $ad = DB::table('ads')->where('box_number', $box)->first();
+
+        if (!$ad) {
+            abort(404);
+        }
         
         $sessionKey = 'viewed_ad_' . $ad->id;
 

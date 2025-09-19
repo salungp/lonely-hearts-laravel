@@ -12,7 +12,7 @@
     <div>
         <div class="lh-radio mb-3">
             <label for="one" class="d-flex align-items-center">
-                <input class="lh-radio-input" type="radio" name="replyOption" id="one" value="{{ url('/ad/reply_first/'.$box) }}" />
+                <input class="lh-radio-input" type="radio" name="replyOption" id="one" value="{{ route('ad.reply_first', ['box' => $box]) }}" />
             <span class="lh-radio-circle"></span>
                 I'll write it
             </label>
@@ -25,7 +25,7 @@
                 type="radio"
                 name="replyOption"
                 id="two"
-                value="{{ url('/ad/reply_first/'.$box) }}"
+                value="{{ route('ad.reply_second', ['box' => $box]) }}"
             />
             <span class="lh-radio-circle"></span>
             Help me write it

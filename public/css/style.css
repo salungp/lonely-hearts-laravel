@@ -944,6 +944,8 @@
   
   .lh-popup-body {
     padding: 16px;
+    max-height: 80vh;
+    overflow-y: scroll;
   }
   
   .lh-popup.active {

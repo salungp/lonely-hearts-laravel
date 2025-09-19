@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Home Page')
 @section('back')
-<a href="{{ url('/ad/create') }}" class="lh-nav-button">
+<a href="{{ url()->previous() }}" class="lh-nav-button">
     <img src="{{ asset('/icons/arrow-left-bold.svg') }}" alt="Icon back button" />
 </a>
 @endsection
