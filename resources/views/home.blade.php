@@ -53,7 +53,7 @@
     @foreach($ads as $ad)
     <!-- Feed list -->
     <a href="{{ url($ad->slug.'.html') }}" class="lh-feed-card text-decoration-none text-dark" >
-      <div>
+      <div class="w-100">
         <h2>
           <b>{{ $ad->snapshot_name }}, {{ $ad->snapshot_age }}, {{ $ad->snapshot_gender }}, {{ $ad->location }}, {{ $ad->snapshot_status }} .</b> {{ substr($ad->description, 0, 50) . '...' }}
         </h2>
