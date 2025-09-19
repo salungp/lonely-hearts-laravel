@@ -6,7 +6,7 @@ $profile = session('profile')
 @endphp
 @if($profile)
 <a href="{{ url('/ad/') }}" class="lh-nav-button">
-    <img src="{{ asset('/icons/back.svg') }}" alt="Icon back button" />
+    <img src="{{ asset('/icons/arrow-left-bold.svg') }}" alt="Icon back button" />
 </a>
 @endif
 @endsection

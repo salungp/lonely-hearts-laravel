@@ -49,7 +49,7 @@
 @endsection
 @section('back')
 <a href="{{ url('/ad/create/') }}" class="lh-nav-button">
-    <img src="{{ asset('/icons/back.svg') }}" alt="Icon back button" />
+    <img src="{{ asset('/arrow-left-bold.svg') }}" alt="Icon back button" />
 </a>
 @endsection
 @section('content')

@@ -2,7 +2,7 @@
 @section('title', 'Home Page')
 @section('back')
 <a href="{{ url('/ad/'.$box) }}" class="lh-nav-button">
-    <img src="{{ asset('/icons/back.svg') }}" alt="Icon back button" />
+    <img src="{{ asset('/icons/arrow-left-bold.svg') }}" alt="Icon back button" />
 </a>
 @endsection
 @section('content')

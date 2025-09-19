@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous" />
 
     <style>
-        @import url("{{ asset('css/font-style.ttf') }}");
+        @import url("https://lonelyhearts.me/assets/font-style.ttf");
         @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&display=swap');
 
         body {
@@ -102,14 +102,14 @@
     <div class="mail-wrapper">
         <div class="mail-header">
             <a class="mail-header-logo" href="{{ route('home') }}">
-                <img src="{{ asset('images/logo-new.svg') }}" alt="Mail logo lonely hearts">
+                <img src="https://ik.imagekit.io/pras09jeor/logo-new.svg?updatedAt=1758210771190" alt="Mail logo lonely hearts">
             </a>
         </div>
         <div class="mail-body">
-            <div class="d-flex justify-content-center">
-                <img class="mail-icon" src="{{ asset('images/envelope-icon.png') }}" alt="Envelope icon">
+            <div style="display: flex; justify-content: center;">
+                <img class="mail-icon" src="https://lonelyhearts.me/assets/envelope-icon.png" alt="Envelope icon">
             </div>
-            <h1 class="text-center">Your verification code</h1>
+            <h1 style="text-align: center;">Your verification code</h1>
             <p>This code will expire in 10 minutes.</p>
             <h2 class="verification-code">{{ $code }}</h2>
         </div>
@@ -117,11 +117,11 @@
             <p>Simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
         </div>
         <div class="mail-footer">
-            <small class="text-center">You are receiving this email because you opted in via our website.</small>
+            <small style="text-align: center;">You are receiving this email because you opted in via our website.</small>
             <a class="mail-footer-link" href="#">Unsubscribe.</a>
-            <div class="d-flex justify-content-center">
+            <div style="display: flex; justify-content: center;">
                 <a class="mail-footer-logo" href="{{ route('home') }}">
-                    <img src="{{ asset('images/logo-new.svg') }}" alt="Mail logo lonely hearts">
+                    <img src="https://ik.imagekit.io/pras09jeor/logo-new.svg?updatedAt=1758210771190" alt="Mail logo lonely hearts">
                 </a>
             </div>
         </div>
