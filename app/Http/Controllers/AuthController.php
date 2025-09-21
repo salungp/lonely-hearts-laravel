@@ -174,6 +174,94 @@ class AuthController extends Controller
                 $request->session()->forget('otp');
 
                 return redirect()->route('ad.writing', ['box' => $box]);
+            } else if(session()->has('reply')) {
+                $ad_session = session('reply');
+                $userId = Auth::id();
+                $ad     = DB::table('ads')->where('id', $ad_session['ad_id'])->first();
+                $author = DB::table('users')->where('id', $ad->user_id)->first();
+
+                if (!$ad) {
+                    return back()->withErrors(['Ad not found.']);
+                }
+
+                // Find or create conversation
+                $conversation = DB::table('conversations')
+                ->where('ad_id', $ad->id)
+                ->where('author_id', $ad->user_id)
+                ->where('replier_id', $userId)
+                ->first();
+
+                if (!$conversation) {
+                    $conversationId = DB::table('conversations')->insertGetId([
+                        'ad_id'          => $ad->id,
+                        'author_id'      => $ad->user_id,
+                        'replier_id'     => $userId,
+                        'progress'       => '0%',
+                        'unlocked_photo' => false,
+                        'created_at'     => now(),
+                        'updated_at'     => now(),
+                    ]);
+                } else {
+                    $conversationId = $conversation->id;
+                }
+
+                // ✅ Insert message
+                DB::table('messages')->insert([
+                    'conversation_id' => $conversationId,
+                    'sender_id'       => $userId,
+                    'content'         => $ad_session['content'],
+                    'status'          => 'sent',
+                    'created_at'      => now(),
+                    'updated_at'      => now(),
+                ]);
+
+                // ✅ Count messages to update progress
+                $messageCount = DB::table('messages')
+                    ->where('conversation_id', $conversationId)
+                    ->count();
+
+                $progress = '0%';
+                if ($messageCount >= 8) {
+                    $progress = '100%';
+                } elseif ($messageCount >= 6) {
+                    $progress = '75%';
+                } elseif ($messageCount >= 4) {
+                    $progress = '50%';
+                } elseif ($messageCount >= 2) {
+                    $progress = '25%';
+                }
+
+                $unlockedPhoto = $messageCount >= 3;
+
+                DB::table('conversations')
+                    ->where('id', $conversationId)
+                    ->update([
+                        'progress'       => $progress,
+                        'unlocked_photo' => $unlockedPhoto,
+                        'updated_at'     => now(),
+                    ]);
+
+                // ✅ (Optional) trigger email notification to ad author
+                // Mail::to($ad->email)->send(new NewReplyMail($validated['content']));
+
+                $email = $author->email;
+                $content = $ad_session['content'];
+
+                // Send email using Blade template
+                if ($email != null) {
+                    Mail::send('mail.reply', [
+                        'name' => $author->name,
+                        'content' => $content
+                    ], function ($content) use ($email) {
+                        $content->to($email)
+                                ->subject('You just got a reply!');
+                    });
+                }
+
+                $request->session()->forget('reply');
+                $request->session()->forget('otp');
+
+                return redirect()->route('reply_confirmation');
             } else {
                 return redirect()->route('home');
             }

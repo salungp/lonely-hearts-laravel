@@ -6,6 +6,7 @@ use App\Http\Controllers\Ads;
 use App\Http\Controllers\Profiles;
 use App\Http\Controllers\Package;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MessageController;
 use Illuminate\Support\Facades\Mail;
 
 // Home
@@ -30,11 +31,11 @@ Route::post('/verify_code', [AuthController::class, 'verifyOtp'])->name('auth.ve
 
 Route::middleware(['web', 'ensure.auth'])->group(function () {
     Route::get('/ad/writing/{box}', [Ads::class, 'writing'])->name('ad.writing');
+    Route::get('/ad/confirmation/{box}', [Ads::class, 'confirmation'])->name('confirmation');
 });
 
 // Ad routes
 Route::get('/ad/create/', [Ads::class, 'create_ad'])->name('create_ad');
-Route::get('/ad/confirmation/{box}', [Ads::class, 'confirmation'])->name('confirmation');
 Route::get('/ad/confirmation/', [Ads::class, 'reply_confirmation'])->name('reply_confirmation');
 Route::post('/ad/store/', [Ads::class, 'store'])->name('create.store');
 Route::post('/ad/reply_store/', [Ads::class, 'reply_store'])->name('ad.reply_store');
@@ -62,6 +63,14 @@ Route::get('/account/profile', [Profiles::class, 'profile_edit'])->name('profile
 Route::get('/account/create', [Profiles::class, 'create'])->name('profile.create');
 Route::post('/account/store', [Profiles::class, 'store'])->name('profile.store');
 Route::post('/account/update', [Profiles::class, 'update'])->name('profile.update')->middleware('auth');
+
+// Message
+Route::get('/message', [MessageController::class, 'show'])->name('message')->middleware('auth');
+Route::get('/message/{sender_Id}', [MessageController::class, 'show_by_sender']);
+Route::middleware('auth')->get('/conversations/{conversationId}/messages', [MessageController::class, 'conversationMessages']);
+
+
+// Profile email
 Route::get('/account/verify-email', [Profiles::class, 'verify_email'])->name('profile.verify_email')->middleware('auth');
 Route::get('/account/email', [Profiles::class, 'email'])->name('profile.email')->middleware('auth');
 Route::post('/account/verify-email-code', [Profiles::class, 'verify_email_code'])->name('profile.verify_email_code');

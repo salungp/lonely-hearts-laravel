@@ -102,7 +102,18 @@ class Ads extends Controller
         $adId = $request->input('ad_id');
 
         // If not logged in → save reply to session
-        if (!Auth::check()) {
+        // if (!Auth::check()) {
+        //     session([
+        //         'reply' => [
+        //             'ad_id'   => $adId,
+        //             'content' => $validated['content'],
+        //         ],
+        //     ]);
+
+        //     return redirect()->route('profile.create'); // or login
+        // }
+
+        if (session()->has('profile')) {
             session([
                 'reply' => [
                     'ad_id'   => $adId,
@@ -110,7 +121,7 @@ class Ads extends Controller
                 ],
             ]);
 
-            return redirect()->route('profile.create'); // or login
+            return redirect()->route('offer'); // or login
         }
 
         // Logged in user

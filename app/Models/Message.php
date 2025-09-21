@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Message extends Model
 {
@@ -18,6 +19,12 @@ class Message extends Model
         'read_at',
     ];
 
+    public function receiver()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'receiver_id');
+    }
+
+
     // 🔗 Each message belongs to a conversation
     public function conversation()
     {
@@ -28,5 +35,11 @@ class Message extends Model
     public function sender()
     {
         return $this->belongsTo(User::class, 'sender_id');
+        
+    }
+
+    public function ad(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Ad::class, 'ad_id');
     }
 }

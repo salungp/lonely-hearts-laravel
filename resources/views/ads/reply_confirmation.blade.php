@@ -79,7 +79,7 @@
     <div class="bottom">
         <div class="container-sm">
             <div class="d-flex" style="gap: 16px">
-
+                
                 <a href="{{ route('profile.email') }}" class="lh-button d-flex justify-content-center align-items-center">
                     Notify me
                 </a>

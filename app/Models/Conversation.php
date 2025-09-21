@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 
 class Conversation extends Model
 {
@@ -24,10 +26,10 @@ class Conversation extends Model
     }
 
     // 🔗 Conversation belongs to an ad
-    public function ad()
-    {
-        return $this->belongsTo(Ad::class);
-    }
+    // public function ad(): BelongsTo
+    // {
+    //     return $this->belongsTo(Ad::class, 'ad_id');
+    // }
 
     // 🔗 Author of the ad
     public function author()

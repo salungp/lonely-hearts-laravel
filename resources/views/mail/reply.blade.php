@@ -190,7 +190,7 @@ text-decoration: none
 <!--<![endif]-->
 <tr><td align="center">
 <table class="t54" role="presentation" cellpadding="0" cellspacing="0" style="Margin-left:auto;Margin-right:auto;"><tr><td width="438" class="t53" style="width:541px;">
-<table class="t52" role="presentation" cellpadding="0" cellspacing="0" width="100%" style="width:100%;"><tr><td class="t51"><h1 class="t49" style="margin:0;Margin:0;font-family:Merriweather,Georgia,Times New Roman,Times,serif;line-height:41px;font-weight:800;font-style:normal;font-size:30px;text-decoration:none;text-transform:none;letter-spacing:-0.2px;direction:ltr;color:#191919;text-align:center;mso-line-height-rule:exactly;mso-text-raise:3px;">{{ $content }}</h1></td></tr></table>
+<table class="t52" role="presentation" cellpadding="0" cellspacing="0" width="100%" style="width:100%;"><tr><td class="t51"><h1 class="t49" style="margin:0;Margin:0;font-family:Merriweather,Georgia,Times New Roman,Times,serif;line-height:41px;font-weight:800;font-style:normal;font-size:30px;text-decoration:none;text-transform:none;letter-spacing:-0.2px;direction:ltr;color:#191919;text-align:center;mso-line-height-rule:exactly;mso-text-raise:3px;">{!! $content !!}</h1></td></tr></table>
 </td></tr></table>
 </td></tr><tr><td><div class="t55" style="mso-line-height-rule:exactly;mso-line-height-alt:25px;line-height:25px;font-size:1px;display:block;">&nbsp;&nbsp;</div></td></tr>
 <!--[if !mso]>-->
@@ -198,7 +198,7 @@ text-decoration: none
 <!--<![endif]-->
 <tr><td align="center">
 <table class="t61" role="presentation" cellpadding="0" cellspacing="0" style="Margin-left:auto;Margin-right:auto;"><tr><td width="438" class="t60" style="width:541px;">
-<table class="t59" role="presentation" cellpadding="0" cellspacing="0" width="100%" style="width:100%;"><tr><td class="t58"><h1 class="t56" style="margin:0;Margin:0;font-family:Merriweather,Georgia,Times New Roman,Times,serif;line-height:41px;font-weight:800;font-style:normal;font-size:30px;text-decoration:none;text-transform:none;letter-spacing:-0.2px;direction:ltr;color:#191919;text-align:center;mso-line-height-rule:exactly;mso-text-raise:3px;">Mon, 18 aug 2025</h1></td></tr></table>
+<table class="t59" role="presentation" cellpadding="0" cellspacing="0" width="100%" style="width:100%;"><tr><td class="t58"><h1 class="t56" style="margin:0;Margin:0;font-family:Merriweather,Georgia,Times New Roman,Times,serif;line-height:41px;font-weight:800;font-style:normal;font-size:30px;text-decoration:none;text-transform:none;letter-spacing:-0.2px;direction:ltr;color:#191919;text-align:center;mso-line-height-rule:exactly;mso-text-raise:3px;">{{ date('D, j M Y', strtotime('2025-08-18')) }}</h1></td></tr></table>
 </td></tr></table>
 </td></tr><tr><td><div class="t62" style="mso-line-height-rule:exactly;mso-line-height-alt:25px;line-height:25px;font-size:1px;display:block;">&nbsp;&nbsp;</div></td></tr></table></td></tr></table>
 </td></tr></table>

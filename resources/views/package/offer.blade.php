@@ -97,7 +97,7 @@
             with apple google
         </button>
 
-        <a href="{{ route('ad.writing') }}" class="lh-link">No, thank you</a>
+        <a href="{{ url($link) }}" class="lh-link">No, thank you</a>
 </div>
 @endsection
 @section('script')

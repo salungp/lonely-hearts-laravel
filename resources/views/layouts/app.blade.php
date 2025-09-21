@@ -37,7 +37,7 @@
     
               <div class="lh-dropdown" id="lhMobileMenu">
                 <a href="{{ route('home') }}">Home</a>
-                <a href="#">Message</a>
+                <a href="{{ route('message') }}">Message</a>
                 <a href="{{ route('profile.view') }}">Account</a>
                 <a href="#">ABOUT LONELY HEARTS DATING</a>
                 <a href="#">LOOKING FOR LOVE?</a>
