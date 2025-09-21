@@ -53,8 +53,8 @@
 @section('content')
 <div class="container-sm">
     <div class="d-flex justify-content-between">
-        <h1 class="lh-title mb-3">Messages</h1>
-        <a href="{{ route('message.sent') }}" class="lh-link" style="padding: 0 !important; text-align: right;">Sent</a>
+        <h1 class="lh-title mb-3">Sent</h1>
+        <a href="{{ route('message') }}" class="lh-link" style="padding: 0 !important; text-align: right;">Receive</a>
     </div>
 
     @foreach ($messages as $message)
@@ -63,20 +63,20 @@
 
             @if ($message->is_read == 0)
                 <img
-                    style="width: 58px; height: 44px"
+                    style="width: 58px;"
                     src="{{ asset('images/envelope-icon.png') }}"
                     alt="Envelope icon"
                 />
             @else
                 <img
-                    style="width: 58px; height: 44px"
+                    style="width: 58px;"
                     src="{{ asset('images/envelope-open.png') }}"
                     alt="Envelope icon"
                 />
             @endif
 
             <div class="text-content" style="flex-grow: 1">
-              <h4 class="lh-sub-title">{{ $message->sender->name }}</h4>
+              <h4 class="lh-sub-title">{{ $message->conversation->author->name }}</h4>
               <p class="lh-text-small">{{ substr($message->content, 0, 50) . '...' }}</p>
             </div>
             <img

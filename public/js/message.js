@@ -10,6 +10,7 @@ document.querySelectorAll(".lh-feed-card").forEach(item => {
           }
         });
         const messages = await res.json();
+        const is_read = messages[0].is_read;
   
         // Fill popup
         const popupBody = document.getElementById("popupBody");

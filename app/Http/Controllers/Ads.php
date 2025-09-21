@@ -101,18 +101,6 @@ class Ads extends Controller
 
         $adId = $request->input('ad_id');
 
-        // If not logged in → save reply to session
-        // if (!Auth::check()) {
-        //     session([
-        //         'reply' => [
-        //             'ad_id'   => $adId,
-        //             'content' => $validated['content'],
-        //         ],
-        //     ]);
-
-        //     return redirect()->route('profile.create'); // or login
-        // }
-
         if (session()->has('profile')) {
             session([
                 'reply' => [
@@ -128,6 +116,7 @@ class Ads extends Controller
         $userId = Auth::id();
         $ad     = DB::table('ads')->where('id', $adId)->first();
         $author = DB::table('users')->where('id', $ad->user_id)->first();
+        $replier = DB::table('users')->where('id', $userId)->first();
 
         if (!$ad) {
             return back()->withErrors(['Ad not found.']);
@@ -203,7 +192,7 @@ class Ads extends Controller
         // Send email using Blade template
         if ($email != null) {
             Mail::send('mail.reply', [
-                'name' => $author->name,
+                'name' => $replier->name,
                 'content' => $content
             ], function ($content) use ($email) {
                 $content->to($email)

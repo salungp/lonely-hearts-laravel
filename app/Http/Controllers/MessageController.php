@@ -33,6 +33,21 @@ class MessageController extends Controller
         return view('message.show', compact('messages'));
     }
 
+    public function sent(): View
+    {
+        $user_id = Auth::id();
+
+        $messages = Message::where('sender_id', $user_id)
+            ->with([
+                'conversation.author',   // ✅ load ad creator
+                'conversation.replier',  // ✅ load replier
+            ])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('message.sent', ['messages' => $messages]);
+    }
+
     public function conversationMessages($replier_id)
     {
         $userId = Auth::id();

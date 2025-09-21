@@ -66,6 +66,7 @@ Route::post('/account/update', [Profiles::class, 'update'])->name('profile.updat
 
 // Message
 Route::get('/message', [MessageController::class, 'show'])->name('message')->middleware('auth');
+Route::get('/message/sent', [MessageController::class, 'sent'])->name('message.sent')->middleware('auth');
 Route::get('/message/{sender_Id}', [MessageController::class, 'show_by_sender']);
 Route::middleware('auth')->get('/conversations/{conversationId}/messages', [MessageController::class, 'conversationMessages']);
 
