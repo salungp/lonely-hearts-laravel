@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
-use Ramsey\Uuid\Type\Integer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
@@ -13,9 +12,9 @@ class Home extends Controller
     public function show(): View
     {
         $query = DB::table('ads')
-        ->leftJoin('like', 'ads.id', '=', 'like.ad_id') // ✅ make sure table is correct
-        ->select('ads.*', DB::raw('COUNT(like.id) as likes_count'))
-        ->groupBy('ads.id');
+            ->leftJoin('like', 'ads.id', '=', 'like.ad_id') // ✅ make sure table is correct
+            ->select('ads.*', DB::raw('COUNT(like.id) as likes_count'))
+            ->groupBy('ads.id');
 
         // Filter by selected location (if exists)
         if (session()->has('selected_location')) {
@@ -25,7 +24,7 @@ class Home extends Controller
         // Clear session if user came from create flow
         session()->forget(['profile', 'ads']);
 
-        $ads = $query->get();
+        $ads = $query->limit(6)->orderBy('ads.created_at', 'desc')->get();
 
         // Cache ads feed (optionally include location in cache key)
         $cacheKey = 'ads_feed_' . (session('selected_location') ?? 'all');
@@ -42,6 +41,7 @@ class Home extends Controller
         $ads = DB::table('ads')
                     ->leftJoin('like', 'ads.id', '=', 'like.ad_id')
                     ->select('ads.*', DB::raw('COUNT(like.id) as likes_count'))
+                    ->orderBy('ads.created_at', 'desc')
                     ->groupBy('ads.id')
                     ->get();
     
