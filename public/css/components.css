@@ -91,3 +91,65 @@
   .lh-small-icon {
     width: 22px !important;
   }
+
+  .lh-link {
+    border: none;
+    background: transparent;
+    outline: none;
+    text-decoration: underline;
+  }
+
+  .lh-mini-dropdown-wrapper {
+    position: relative;
+  }
+
+  .lh-mini-dropdown {
+    width: 190px;
+    background: var(--fill);
+    border: 2px solid var(--dark);
+    position: absolute;
+    top: 60px;
+    right: 0;
+    opacity: 0;
+    transition: .2s ease-in-out;
+  }
+
+  .lh-mini-dropdown a {
+    width: 100%;
+    height: 48px;
+    line-height: 48px;
+    text-decoration: none;
+    color: var(--dark);
+    display: flex;
+    padding: 0 20px;
+    text-transform: uppercase;
+    font-size: 16px;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .lh-mini-dropdown a:nth-child(1) {
+    border-bottom: 2px solid var(--dark);
+  }
+
+  .lh-mini-dropdown a img {
+    width: 24px;
+  }
+
+  .lh-mini-dropdown.active {
+    opacity: 1;
+    top: 36px;
+  }
+
+  .lh-btn-link {
+    border: none;
+    background: transparent;
+    outline: none;
+    padding: 0;
+    text-transform: uppercase;
+    height: 48px;
+    line-height: 48px;
+    padding: 0 20px;
+    width: 100%;
+    text-align: left;
+  }

@@ -8,7 +8,7 @@
           src="{{ asset('images/envelope-icon.png') }}"
           alt="Envelope icon symbol of lonely hearts"
         />
-      </div>
+    </div>
 
       <h2 class="text-center mb-3">
         Enter Box Number

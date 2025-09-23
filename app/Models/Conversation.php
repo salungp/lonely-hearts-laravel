@@ -19,6 +19,11 @@ class Conversation extends Model
         'unlocked_photo',
     ];
 
+    public function ad()
+    {
+        return $this->belongsTo(Ad::class, 'ad_id');
+    }
+
     // 🔗 One conversation has many messages
     public function messages()
     {

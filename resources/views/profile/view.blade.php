@@ -16,7 +16,7 @@
         <span class="lh-link-icon">
         <img src="{{ asset('icons/frame.svg') }}" alt="Chain icon" />
         </span>
-        <a href="#">My Ads</a>
+        <a href="{{ route('profile.my_ads') }}">My Ads</a>
     </div>
 
     <div class="d-flex lh-link-list mb-3">

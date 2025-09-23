@@ -14,6 +14,7 @@ class Message extends Model
         'conversation_id',
         'sender_id',
         'content',
+        'to_id',
         'has_attachment',
         'status',
         'read_at',

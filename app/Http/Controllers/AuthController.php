@@ -336,47 +336,44 @@ class AuthController extends Controller
         }
     }
 
-    
+    protected function send_phone_verification($phone_number)
+    {
+        $sid = env('TWILIO_SID');
+        $token = env('TWILIO_AUTH_TOKEN');
+        $serviceSid = env('TWILIO_VERIFY_SERVICE_SID');
 
+        $twilio = new Client($sid, $token);
 
-    // protected function sendPhoneVerification($phone_number)
-    // {
-    //     $sid = env('TWILIO_SID');
-    //     $token = env('TWILIO_AUTH_TOKEN');
-    //     $serviceSid = env('TWILIO_VERIFY_SERVICE_SID');
+        $twilio->verify->v2->services($serviceSid)
+            ->verifications
+            ->create($phone_number, "sms");
+    }
 
-    //     $twilio = new Client($sid, $token);
+    public function verify(Request $request)
+    {
+        $request->validate([
+            'phone_number' => 'required|string',
+            'code' => 'required|string',
+        ]);
 
-    //     $twilio->verify->v2->services($serviceSid)
-    //         ->verifications
-    //         ->create($phone_number, "sms");
-    // }
+        $sid = env('TWILIO_SID');
+        $token = env('TWILIO_AUTH_TOKEN');
+        $serviceSid = env('TWILIO_VERIFY_SERVICE_SID');
 
-    // public function verify(Request $request)
-    // {
-    //     $request->validate([
-    //         'phone_number' => 'required|string',
-    //         'code' => 'required|string',
-    //     ]);
+        $twilio = new Client($sid, $token);
 
-    //     $sid = env('TWILIO_SID');
-    //     $token = env('TWILIO_AUTH_TOKEN');
-    //     $serviceSid = env('TWILIO_VERIFY_SERVICE_SID');
+        $verification_check = $twilio->verify->v2->services($serviceSid)
+            ->verificationChecks
+            ->create([
+                'to' => $request->phone_number,
+                'code' => $request->code,
+            ]);
 
-    //     $twilio = new Client($sid, $token);
-
-    //     $verification_check = $twilio->verify->v2->services($serviceSid)
-    //         ->verificationChecks
-    //         ->create([
-    //             'to' => $request->phone_number,
-    //             'code' => $request->code,
-    //         ]);
-
-    //     if ($verification_check->status === "approved") {
-    //         // Phone verified
-    //         return redirect()->route('home')->with('success', 'Phone verified!');
-    //     } else {
-    //         return back()->withErrors(['code' => 'Invalid verification code']);
-    //     }
-    // }
+        if ($verification_check->status === "approved") {
+            // Phone verified
+            return redirect()->route('home')->with('success', 'Phone verified!');
+        } else {
+            return back()->withErrors(['code' => 'Invalid verification code']);
+        }
+    }
 }

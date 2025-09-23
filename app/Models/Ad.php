@@ -35,4 +35,9 @@ class Ad extends Model
     {
         return $this->hasMany(Conversation::class);
     }
+
+    public function adOwner()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

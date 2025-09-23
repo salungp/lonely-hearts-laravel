@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
+use App\Models\Ad;
 
 class Ads extends Controller
 {
@@ -18,6 +19,49 @@ class Ads extends Controller
             'box' => $box
         ]);
     }
+
+    public function ad_edit($id): View
+    {
+        $ad = Ad::where('id', $id)->first();
+
+        return view('profile.ads.edit', ['ad' => $ad]);
+    }
+
+    public function update(Request $request)
+    {
+        $validated = $request->validate([
+            'description' => 'required|string|max:255',
+            'id'          => 'required|integer',
+        ]);
+
+        $id = $validated['id'];
+        $description = $validated['description'];
+
+        $update = Ad::where('id', $id)->update([
+            'description' => $description
+        ]);
+
+        if ($update) {
+            return redirect()->back()->with('success', 'Your ad has been updated!');
+        } else {
+            return redirect()->back()->with('error', 'Something went wrong!');
+        }
+    }
+
+    public function destroy($id)
+    {
+        $ad = Ad::findOrFail($id);
+
+        // optional: check ownership
+        if ($ad->user_id !== Auth::id()) {
+            return redirect()->back()->with('error', 'Unauthorized');
+        }
+
+        $ad->delete();
+
+        return redirect()->back()->with('success', 'Ad deleted successfully');
+    }
+
 
     public function filter_location(Request $request)
     {

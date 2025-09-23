@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
+use App\Models\Ad;
 
 class Profiles extends Controller
 {
@@ -33,6 +34,15 @@ class Profiles extends Controller
         return view('profile.email', [
             'user' => $user
         ]);
+    }
+
+    public function my_ads(): View
+    {
+        $id = Auth::id();
+
+        $ads = Ad::where('user_id', $id)->get();
+
+        return view('profile.my_ads', ['ads' => $ads]);
     }
 
     public function profile_edit(): View
