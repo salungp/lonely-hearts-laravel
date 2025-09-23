@@ -12,7 +12,6 @@
         <a href="{{ route('message') }}" class="lh-link" style="padding: 0 !important; text-align: right;">Receive</a>
     </div>
 
-
     @foreach ($messages as $message)
         <!-- Feed list -->
         <div data-target="{{ $message->message_id }}" id="messageItem3" class="lh-feed-card gap-2 d-flex flex-direction-row text-decoration-none text-dark">

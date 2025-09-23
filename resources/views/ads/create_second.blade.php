@@ -117,7 +117,6 @@
         <!-- One textarea to store the final description -->
         <textarea style="display: none;" name="description" id="description" rows="3" class="w-full mt-3" readonly></textarea>
 
-
         <div class="mb-4"></div>
 
         <div class="location-field" id="locationField" style="margin-bottom: 16px;">
@@ -175,7 +174,14 @@
 @endsection
 @section('script')
 <script>
-const selections = {}; // store selected values
+const selections = {
+  height: "Average height",
+  hair: "Black hair",
+  eyes: "Brown eyes",
+  behavior: "Kind",
+  seeking: "Friends",
+  hobby: "Reading"
+};
 const locationField = document.getElementById("locationField");
 const locationPopup = document.getElementById("locationPopup");
 const closePopup = document.getElementById("closePopupLocation");
@@ -196,16 +202,56 @@ closePopup.addEventListener("click", () => {
 });
 
 const locations = [
-    "London",
-    "Manchester",
-    "Leicester",
-    "Birmingham",
-    "Bristol",
-    "Plymouth",
-    "Leeds",
-    "Bradford",
-    "Coventry",
-    "Sheffield"
+  "London",
+  "Birmingham",
+  "Manchester",
+  "Leeds",
+  "Sheffield",
+  "Liverpool",
+  "Bristol",
+  "Newcastle upon Tyne",
+  "Sunderland",
+  "Leicester",
+  "Coventry",
+  "Kingston upon Hull",
+  "Bradford",
+  "Stoke-on-Trent",
+  "Wolverhampton",
+  "Nottingham",
+  "Derby",
+  "Southampton",
+  "Portsmouth",
+  "Plymouth",
+  "Brighton",
+  "Reading",
+  "Northampton",
+  "Luton",
+  "Swindon",
+  "Milton Keynes",
+  "Oxford",
+  "Cambridge",
+  "York",
+  "Blackpool",
+  "Middlesbrough",
+  "Bolton",
+  "Stockport",
+  "Warrington",
+  "Huddersfield",
+  "Preston",
+  "Norwich",
+  "Peterborough",
+  "Exeter",
+  "Chelmsford",
+  "Gloucester",
+  "Bath",
+  "Colchester",
+  "Ipswich",
+  "Chester",
+  "Dundee",
+  "Edinburgh",
+  "Glasgow",
+  "Aberdeen",
+  "Belfast"
 ];
 
 // Render list dynamically
@@ -324,6 +370,10 @@ document.addEventListener("click", function (e) {
       el.classList.remove("open");
     });
   }
+});
+
+document.addEventListener("DOMContentLoaded", (e) => {
+    updateDescription();
 });
 
 function updateDescription() {
