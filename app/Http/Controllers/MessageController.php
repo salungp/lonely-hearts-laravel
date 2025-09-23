@@ -13,20 +13,19 @@ class MessageController extends Controller
 {
     public function show(): View
     {
-        $userId = Auth::id();
+        $user_id = Auth::id();
 
-        $messages = Message::query()
-        ->where('sender_id', '!=', $userId) // only messages sent to me
-        ->whereIn('id', function ($sub) use ($userId) {
-            $sub->selectRaw('MAX(id)')
-                ->from('messages')
-                ->where('sender_id', '!=', $userId) // only last received messages
-                ->groupBy('sender_id', 'conversation_id');
-        })
-        ->latest()
-        ->with(['sender', 'conversation.replier']) // just eager load
-        ->get();
+        // first, get the latest message IDs for each sender_id
+        $latestMessageIds = Message::selectRaw('MAX(id) as id')
+            ->where('sender_id', '!=', $user_id)
+            ->groupBy('sender_id')
+            ->pluck('id');
 
+        // then, fetch the actual message records
+        $messages = Message::whereIn('id', $latestMessageIds)
+            ->with('conversation')
+            ->orderByDesc('id')
+            ->get();
 
         return view('message.show', compact('messages'));
     }
@@ -54,10 +53,11 @@ class MessageController extends Controller
                 'm.is_read',
                 'm.created_at',
                 'c.id as conversation_id',
+                'c.progress as progress',
                 'a.slug as ad_slug',
                 'a.description as ad_description',
                 'adOwner.name as ad_owner_name',
-                'replier.name as replier_name'
+                'replier.name as replier_name',
             )
             ->orderBy('m.created_at', 'desc')
             ->get();

@@ -51,18 +51,18 @@
         <span class="lh-link-icon">
         <img src="{{ asset('icons/doc.svg') }}" alt="Chain icon" />
         </span>
-        <a href="#">Terms of services</a>
+        <a href="{{ route('toc') }}">Terms of services</a>
     </div>
 
     <div class="d-flex lh-link-list mb-3">
         <span class="lh-link-icon">
         <img src="{{ asset('icons/doc.svg') }}" alt="Chain icon" />
         </span>
-        <a href="#">Privacy policy</a>
+        <a href="{{ route('policy') }}">Privacy policy</a>
     </div>
 </div>
 <div class="container-sm">
-    <form action="{{ route('logout') }}" method="POST">
+    <form action="{{ route('logout') }}" method="POST" onsubmit="return confirm('Are you sure you want to logout?');">
         @csrf
         <button class="lh-link" type="submit">Logout</button>
     </form>

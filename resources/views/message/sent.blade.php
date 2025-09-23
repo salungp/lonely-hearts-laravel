@@ -18,28 +18,46 @@
         <div data-target="{{ $message->message_id }}" id="messageItem3" class="lh-feed-card gap-2 d-flex flex-direction-row text-decoration-none text-dark">
 
             @if ($message->is_read == 0)
-                <img
-                    style="width: 58px;"
-                    src="{{ asset('images/envelope-icon.png') }}"
-                    alt="Envelope icon"
-                />
+                <div style="
+                        width: 48px;
+                        height: 48px;
+                        background: url('{{ asset('images/envelope.png') }}');
+                        background-size: contain;
+                        background-position: center;
+                        background-repeat: no-repeat;
+                        flex-basis: 48px;
+                        flex-grow: 0;
+                        flex-shrink: 0;">
+                </div>
             @else
-                <img
-                    style="width: 58px;"
-                    src="{{ asset('images/envelope-open.png') }}"
-                    alt="Envelope icon"
-                />
+                <div style="
+                        width: 48px;
+                        height: 48px;
+                        background: url('{{ asset('images/mail-open.png') }}');
+                        background-size: contain;
+                        background-position: center;
+                        background-repeat: no-repeat;
+                        flex-basis: 48px;
+                        flex-grow: 0;
+                        flex-shrink: 0;">
+                </div>
             @endif
 
             <div class="text-content" style="flex-grow: 1">
               <h4 class="lh-sub-title">{{ $message->ad_owner_name }}</h4>
               <p class="lh-text-small">{{ substr($message->content, 0, 50) . '...' }}</p>
             </div>
-            <img
-              style="width: 24px"
-              src="{{ asset('images/heart-fill-20.svg') }}"
-              alt="Heart fill progress"
-            />
+            @if ($message->progress == '0%')
+                <img style="width: 24px" src="{{ asset('images/heart-fill-0.svg') }}" alt="Heart fill progress" />
+            @elseif ($message->progress == '25%')
+                <img style="width: 24px" src="{{ asset('images/heart-fill-25.svg') }}" alt="Heart fill progress" />
+            @elseif ($message->progress == '50%')
+                <img style="width: 24px" src="{{ asset('images/heart-fill-50.svg') }}" alt="Heart fill progress" />
+            @elseif ($message->progress == '75%')
+                <img style="width: 24px" src="{{ asset('images/heart-fill-75.svg') }}" alt="Heart fill progress" />
+            @elseif ($message->progress == '100%')
+                <img style="width: 24px" src="{{ asset('images/heart-fill-100.svg') }}" alt="Heart fill progress" />
+            @endif
           </div>
     @endforeach
 
@@ -70,11 +88,17 @@
                     </div>
                     <div class="right">
                         <p class="lh-text-small">12, June 2025</p>
-                        <img
-                            style="width: 24px"
-                            src="{{ asset('images/heart-fill-20.svg') }}"
-                            alt="Heart fill progress"
-                        />
+                        @if ($message->progress == '0%')
+                            <img style="width: 24px" src="{{ asset('images/heart-fill-0.svg') }}" alt="Heart fill progress" />
+                        @elseif ($message->progress == '25%')
+                            <img style="width: 24px" src="{{ asset('images/heart-fill-25.svg') }}" alt="Heart fill progress" />
+                        @elseif ($message->progress == '50%')
+                            <img style="width: 24px" src="{{ asset('images/heart-fill-50.svg') }}" alt="Heart fill progress" />
+                        @elseif ($message->progress == '75%')
+                            <img style="width: 24px" src="{{ asset('images/heart-fill-75.svg') }}" alt="Heart fill progress" />
+                        @elseif ($message->progress == '100%')
+                            <img style="width: 24px" src="{{ asset('images/heart-fill-100.svg') }}" alt="Heart fill progress" />
+                        @endif
                     </div>
                 </div>
                 <div class="lh-message-body">
