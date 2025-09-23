@@ -39,9 +39,8 @@
                 <a href="{{ route('home') }}">Home</a>
                 <a href="{{ route('message') }}">Message</a>
                 <a href="{{ route('profile.view') }}">Account</a>
-                <a href="#">ABOUT LONELY HEARTS DATING</a>
-                <a href="#">LOOKING FOR LOVE?</a>
-                <a href="#">LOOKING FOR LOVE?</a>
+                <a href="{{ route('about') }}">ABOUT LONELY HEARTS DATING</a>
+                <a href="{{ route('create_ad') }}">LOOKING FOR LOVE?</a>
               </div>
             </nav>
     
@@ -62,7 +61,11 @@
     {{-- Footer --}}
     <footer class="lh-footer">
         <div class="container-sm text-center">
-            <p>&copy; {{ date('Y') }} My App. All rights reserved.</p>
+            <a href="{{ route('about') }}" class="lh-link">WHAT IS LONELY HEARTS?</a>
+            <a href="{{ route('how_it_works') }}" class="lh-link">HOW TO USE LONELY HEARTS?</a>
+            <a href="{{ route('toc') }}" class="lh-link">Terms of service</a>
+            <a href="{{ route('policy') }}" class="lh-link">Privacy policy</a>
+            <p class="mt-3 mb-3">&copy; {{ date('Y') }} My App. All rights reserved.</p>
         </div>
     </footer>
 

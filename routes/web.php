@@ -73,17 +73,28 @@ Route::get('/message', [MessageController::class, 'show'])->name('message')->mid
 Route::get('/message/sent', [MessageController::class, 'sent'])->name('message.sent')->middleware('auth');
 Route::get('/message/{sender_Id}', [MessageController::class, 'show_by_sender']);
 Route::middleware('auth')->get('/conversations/{conversationId}/messages', [MessageController::class, 'conversationMessages']);
-// routes/web.php
 Route::post('/conversations/{conversation}/messages', [MessageController::class, 'store']);
 Route::get('/conversations/{receiver}/sent-messages', [MessageController::class, 'sent_messages']);
 
+// Site links
+Route::get('/what-is-lonely-hearts', function() {
+    return view('links.about');
+})->name('about');
+Route::get('/terms-of-service', function() {
+    return view('links.terms_of_service');
+})->name('toc');
+Route::get('/privacy-policy', function() {
+    return view('links.privacy_policy');
+})->name('policy');
+Route::get('/how-it-works', function() {
+    return view('links.how_it_works');
+})->name('how_it_works');
 
 // Profile email
 Route::get('/account/verify-email', [Profiles::class, 'verify_email'])->name('profile.verify_email')->middleware('auth');
 Route::get('/account/email', [Profiles::class, 'email'])->name('profile.email')->middleware('auth');
 Route::post('/account/verify-email-code', [Profiles::class, 'verify_email_code'])->name('profile.verify_email_code');
 Route::post('/account/email_update', [AuthController::class, 'update_email'])->name('profile.email_update');
-
 
 // Package
 Route::get('/offer', [Package::class, 'offer'])->name('offer');
