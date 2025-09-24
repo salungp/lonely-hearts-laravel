@@ -15,7 +15,7 @@
 @section('content')
 <div class="container-sm">
     <div class="ad-content" style="margin-bottom: 150px">
-        <h2 class="ad-title" style="margin-bottom: 16px">
+        <h2 class="ad-title text-uppercase mb-2">
             {{ $ad->snapshot_name }}, {{ $ad->snapshot_age }}, {{ $ad->snapshot_gender }}, {{ strtoupper($ad->location) }}, {{ $ad->snapshot_status }}
         </h2>
 

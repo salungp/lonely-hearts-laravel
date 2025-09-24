@@ -15,15 +15,18 @@ class MessageController extends Controller
     {
         $user_id = Auth::id();
 
-        // first, get the latest message IDs for each sender_id
+        // Step 1: get latest message IDs (same as before)
         $latestMessageIds = Message::selectRaw('MAX(id) as id')
             ->where('sender_id', '!=', $user_id)
             ->groupBy('sender_id')
             ->pluck('id');
 
-        // then, fetch the actual message records
+        // Step 2: fetch messages + conversation, filtered by author_id
         $messages = Message::whereIn('id', $latestMessageIds)
-            ->with('conversation')
+            ->whereHas('conversation', function ($q) use ($user_id) {
+                $q->where('author_id', $user_id);
+            })
+            ->with('conversation') // eager load
             ->orderByDesc('id')
             ->get();
 
@@ -71,10 +74,6 @@ class MessageController extends Controller
 
         // 1) make sure conversation exists and user is a participant
         $conversation = DB::table('conversations')->where('replier_id', $replier_id)->first();
-
-        // if (! $conversation || ! in_array($userId, [(int)$conversation->author_id, (int)$conversation->replier_id])) {
-        //     return response()->json(['message' => 'Forbidden'], 403);
-        // }
 
         // 2) mark as read all messages from the other person in this conversation
         DB::table('messages')

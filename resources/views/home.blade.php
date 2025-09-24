@@ -55,7 +55,7 @@
     <a href="{{ url($ad->slug.'.html') }}" class="lh-feed-card text-decoration-none text-dark" >
       <div class="w-100">
         <h2>
-          <b>{{ $ad->snapshot_name }}, {{ $ad->snapshot_age }}, {{ $ad->snapshot_gender }}, {{ $ad->location }}, {{ $ad->snapshot_status }} .</b> {{ substr($ad->description, 0, 50) . '...' }}
+          <b class="text-uppercase">{{ $ad->snapshot_name }}, {{ $ad->snapshot_age }}, {{ $ad->snapshot_gender }}, {{ $ad->location }}, {{ $ad->snapshot_status }} .</b> {{ substr($ad->description, 0, 50) . '...' }}
         </h2>
 
         <div class="d-flex justify-content-between align-items-center mt-2">
@@ -90,8 +90,7 @@
     </a>
     @endforeach
 
-    <a href="{{ route('feed') }}" class="lh-link" style="margin-bottom: 20px"
-          >See all ads</a>
+    <a href="{{ route('feed') }}" class="lh-link" style="margin-bottom: 20px">See all ads</a>
 
     <div class="lh-feed-card lh-cta-card" style="display: block !important">
       <img
