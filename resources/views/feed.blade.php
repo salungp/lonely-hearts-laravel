@@ -7,6 +7,7 @@
 @endsection
 @section('content')
 <div class="container-sm">
+  <a href="{{ route('create_ad') }}" class="lh-link mb-2">Looking for ♥️</a>
     @foreach($ads as $ad)
     <!-- Feed list -->
     <a href="{{ url('/ad/'.$ad->box_number) }}" class="lh-feed-card text-decoration-none text-dark" >

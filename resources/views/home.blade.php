@@ -2,7 +2,7 @@
 @section('title', 'Home Page')
 @section('content')
 <div class="container-sm">
-    <div class="d-flex justify-content-center" style="margin-bottom: 20px">
+    <div class="d-flex justify-content-center">
         <img
           style="width: 100px"
           src="{{ asset('images/envelope-icon.png') }}"
@@ -39,7 +39,7 @@
         @endif
 
         <!-- Action Buttons -->
-        <div class="d-grid gap-2 mb-3">
+        <div class="d-grid gap-2 mb-2">
           <button class="lh-button" id="submitBtn" disabled>
             <span
               class="spinner-border spinner-border-sm me-2 d-none"
@@ -49,6 +49,8 @@
           </button>
         </div>
       </form>
+
+      <a href="{{ route('create_ad') }}" class="lh-link mb-2">Looking for ♥️</a>
 
     @foreach($ads as $ad)
     <!-- Feed list -->
