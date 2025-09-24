@@ -110,7 +110,7 @@
                         <p class="lh-text-small">12, June 2025</p>
                         <img
                             style="width: 24px"
-                            src="{{ asset('images/heart-fill-20.svg') }}"
+                            src="{{ asset('images/heart-fill-25.svg') }}"
                             alt="Heart fill progress"
                         />
                     </div>

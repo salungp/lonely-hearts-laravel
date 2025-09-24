@@ -8,6 +8,8 @@ use App\Models\Ad;
 use App\Models\Conversation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use League\Uri\IPv4\Converter;
 
 class MessageController extends Controller
 {
@@ -39,7 +41,7 @@ class MessageController extends Controller
         
         $sub = DB::table('messages as m1')
             ->select('m1.conversation_id', DB::raw('MAX(m1.id) as last_message_id'))
-            ->where('m1.sender_id', $userId)   // 👈 berarti pesan keluar
+            ->where('m1.sender_id', $userId)
             ->groupBy('m1.conversation_id');
 
         $sent = DB::table('messages as m')
@@ -134,6 +136,18 @@ class MessageController extends Controller
             'is_read' => false,
         ]);
 
+        $this->update_conversation_progress($message->conversation_id);
+
+        $conversation = Conversation::with('author')->find($message->conversation_id);
+
+        if ($conversation && $conversation->author && $conversation->author->email) {
+            $this->send_email([
+                'email'   => $conversation->author->email,
+                'name'    => $conversation->author->name,
+                'content' => $request->content,
+            ]);
+        }
+
         // return as JSON so frontend can append it
         return response()->json([
             'id' => $message->id,
@@ -142,6 +156,53 @@ class MessageController extends Controller
             'created_at' => $message->created_at,
         ]);
     }
+
+    public function update_conversation_progress($conversation_id)
+    {
+        $conversation = Conversation::find($conversation_id);
+
+        if (!$conversation) return;
+
+        $messages = Message::where('conversation_id', $conversation_id)->get();
+
+        $progress = '0%';
+
+        if ($messages->count() > 0) {
+            $progress = '25%';
+        }
+
+        $senders = $messages->pluck('sender_id')->unique();
+        if ($senders->count() >= 2) {
+            $progress = '50%';
+        }
+
+        if ($messages->count() >= 5 || $conversation->unlocked_photo) {
+            $progress = '75%';
+        }
+
+        // Optional: you can define your own “completed” logic
+        if ($conversation->confirmed) {
+            $progress = '100%';
+        }
+
+        $conversation->progress = $progress;
+        $conversation->save();
+    }
+
+    public function send_email($data = [])
+    {
+        $email = $data['email'];
+        if ($data['email'] != null) {
+            Mail::send('mail.reply', [
+                'name' => $data['name'],
+                'content' => $data['content']
+            ], function ($content) use ($email) {
+                $content->to($email)
+                        ->subject('You just got a reply!');
+            });
+        }
+    }
+
 
     public function sent_messages($receiverId)
     {
