@@ -61,8 +61,8 @@ const selections = {
   hobby: "Reading"
 };
 
-function updateDescription() {
-  const textarea = document.getElementById("description");
+function updateDescription(idText) {
+  const textarea = document.getElementById(idText);
 
   const height = selections.height || "";
   const hair = selections.hair ? ` with ${selections.hair}` : "";

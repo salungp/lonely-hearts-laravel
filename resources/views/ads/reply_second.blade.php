@@ -147,37 +147,39 @@
         </button>
     </div>
     <div class="lh-popup-body">
-        <div class="d-flex justify-content-between">
-            <h2 class="lh-title mb-3" style="text-align: left">Reply</h2>
-            <span>{{ strtoupper(date('D jS M Y', strtotime('2025-06-06'))) }}</span>
-        </div>
-
-        <h3 style="font-family: 'Merriweather'; text-align: left">Dear {{ $ad->snapshot_name }}</h3>
-        <form action="{{ route('ad.reply_store') }}" method="POST">
-            @csrf
-            <!-- One textarea to store the final description -->
-            <div class="position-relative mb-2">
-                <input type="hidden" name="ad_id" id="ad_id" value="{{ $ad->id }}">
-                <textarea
-                    class="lh-textarea"
-                    oninput="updateLHtextarea()"
-                    name="content"
-                    id="lh-textarea"
-                    maxlength="300"
-                    placeholder="Write reply"
-                    style="font-family: 'Merriweather'"
-                ></textarea>
-
-                <div class="lh-textarea-info">
-                    <span id="lh-textarea-info">0</span>/300
-                </div>
-
-                <button data-target="helpMePopup" type="button" class="d-flex textarea-button position-absolute" id="showPopup">
-                    Help me write
-                </button>
+        <div class="container-sm">
+            <div class="d-flex justify-content-between">
+                <h2 class="lh-title mb-3" style="text-align: left">Reply</h2>
+                <span>{{ strtoupper(date('D jS M Y', strtotime('2025-06-06'))) }}</span>
             </div>
-            <button class="lh-button" type="submit">Send reply</button>
-        </form>
+
+            <h3 style="font-family: 'Merriweather'; text-align: left">Dear {{ $ad->snapshot_name }}</h3>
+            <form action="{{ route('ad.reply_store') }}" method="POST">
+                @csrf
+                <!-- One textarea to store the final description -->
+                <div class="position-relative mb-2">
+                    <input type="hidden" name="ad_id" id="ad_id" value="{{ $ad->id }}">
+                    <textarea
+                        class="lh-textarea"
+                        oninput="updateLHtextarea()"
+                        name="content"
+                        id="lh-textarea"
+                        maxlength="300"
+                        placeholder="Write reply"
+                        style="font-family: 'Merriweather'"
+                    ></textarea>
+
+                    <div class="lh-textarea-info">
+                        <span id="lh-textarea-info">0</span>/300
+                    </div>
+
+                    <button data-target="helpMePopup" type="button" class="d-flex textarea-button position-absolute" id="showPopup">
+                        Help me write
+                    </button>
+                </div>
+                <button class="lh-button" type="submit">Send reply</button>
+            </form>
+        </div>
     </div>
 </div>
 <div data-modal id="helpMePopup" class="lh-popup" style="height: 90vh">
@@ -188,7 +190,7 @@
     </div>
     <div class="lh-popup-body">
         <!-- Screen one secenario -->
-        <div id="screenOne">
+        <div class="container-sm" id="screenOne">
             <h2 class="lh-title mb-3" style="text-align: left">Reword it</h2>
             <div id="tags-container" class="tags-container">
                 @foreach ($prompts as $style)
@@ -207,18 +209,10 @@
 @endsection
 @section('script')
 <script>
-const selections = {
-  height: "Average height",
-  hair: "black hair",
-  eyes: "brown eyes",
-  behavior: "kind",
-  seeking: "friends",
-  hobby: "reading"
-};
 const confirmPopup = document.getElementById("confirmPopup");
 
 function openConfirmPopup() {
-    updateDescription();
+    updateDescription("lh-textarea");
     confirmPopup.classList.add("active");
 }
 
@@ -254,7 +248,7 @@ document.querySelectorAll(".lh-option").forEach((option) => {
     wrap.classList.remove("open");
 
     // Update textarea with readable sentence
-    updateDescription();
+    updateDescription("lh-textarea");
   });
 });
 
@@ -325,28 +319,5 @@ document.addEventListener("click", function (e) {
     });
   }
 });
-
-function updateDescription() {
-  const textarea = document.getElementById("lh-textarea");
-
-  const height = selections.height || "";
-  const hair = selections.hair ? ` with ${selections.hair}` : "";
-  const eyes = selections.eyes ? `, ${selections.eyes.toLowerCase()} eyes` : "";
-  const behavior = selections.behavior ? `, who is ${selections.behavior.toLowerCase()}` : "";
-  const seeking = selections.seeking ? `, seeking ${selections.seeking}` : "";
-  const hobby = selections.hobby ? `, into ${selections.hobby}` : "";
-
-  // Build sentence dynamically
-  let sentence = "";
-  if (height) sentence += `I'm ${height}`;
-  sentence += hair;
-  sentence += eyes;
-  sentence += behavior;
-  sentence += seeking;
-  sentence += hobby;
-  if (sentence) sentence += "."; // add period at the end
-
-  textarea.value = sentence;
-}
 </script>
 @endsection

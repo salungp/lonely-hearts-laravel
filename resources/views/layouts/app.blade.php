@@ -47,10 +47,9 @@
 
                 <a href="#">
                     <img
-                    src="{{ asset('images/logo.svg') }}"
+                    src="{{ asset('images/logo-new-white.svg') }}"
                     alt="Lonely hearts logo heart pixelated"
                     />
-                    <h2>LONELY HEARTS</h2>
                 </a>
     
               <div class="lh-hamburger" id="lhHamburger">

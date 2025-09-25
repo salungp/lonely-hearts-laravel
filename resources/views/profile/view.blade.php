@@ -5,7 +5,7 @@
     <h1 class="lh-title mb-3">Account</h1>
 
     <div class="d-flex align-items-center mb-3" style="gap: 20px;">
-        <img src="{{ asset('images/ad-image.png') }}" alt="Profile image" style="width: 90px;">
+        <img src="{{ asset('images/ad-image.png') }}" alt="Profile image" style="width: 70px; border-radius: 8px">
         <div class="text-content">
             <h3 class="ad-title">{{ $user->display_name ?? '' }}, {{ $user->age ?? '' }}</h3>
             <a href="{{ route('profile.edit') }}" class="lh-link" style="padding: 0 !important; text-align: left;">Edit profile</a>

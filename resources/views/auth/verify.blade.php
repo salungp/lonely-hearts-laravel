@@ -13,22 +13,22 @@
         Verification code
     </h1>
 
-    <p>Your verification code <strong>{{ session('otp')['otp'] }}</strong></p>
+    <p class="mb-3">Your verification code <strong>{{ session('otp')['otp'] }}</strong></p>
 
     <form action="{{ route('auth.verify_code') }}" method="POST">
         @csrf
         <!-- PIN Input Container -->
-        <div class="pin-container d-flex mb-5">
-        @for ($i = 1; $i < 6; $i++)
-          <input
-            type="text"
-            class="text-center lh-input pin-input-field"
-            maxlength="1"
-            data-index="{{ $i }}"
-            name="{{ 'box_'.$i }}"
-            inputmode="numeric"
-          />
-        @endfor
+        <div class="pin-container d-flex mb-4">
+          @for ($i = 1; $i < 6; $i++)
+            <input
+              type="text"
+              class="text-center lh-input pin-input-field"
+              maxlength="1"
+              data-index="{{ $i }}"
+              name="{{ 'box_'.$i }}"
+              inputmode="numeric"
+            />
+          @endfor
         </div>
 
         @if (session('error'))
@@ -40,7 +40,7 @@
           </div>
         @endif
 
-        <button class="lh-button" type="submit">Continue</button>
+        <button class="lh-button" id="submitBtn" type="submit">Continue</button>
 
     </form>
 </div>

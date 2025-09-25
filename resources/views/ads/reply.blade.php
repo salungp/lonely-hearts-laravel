@@ -18,7 +18,7 @@
             </label>
         </div>
 
-        <div class="lh-radio">
+        <div class="lh-radio mb-3">
             <label for="two" class="d-flex align-items-center">
                 <input
                 class="lh-radio-input"
@@ -32,11 +32,7 @@
             </label>
         </div>
 
-        <div class="bottom">
-            <div class="container-sm">
-                <button class="lh-button" id="ctaButton">Continue</button>
-            </div>
-        </div>
+        <button class="lh-button" id="ctaButton">Continue</button>
     </div>
 </div>
 @endsection

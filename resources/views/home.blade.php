@@ -9,7 +9,7 @@
 
 @section('content')
 <div class="container-sm">
-    <div class="d-flex justify-content-center">
+    <div class="d-flex justify-content-center mt-3">
         <img
           style="width: 100px"
           src="{{ asset('images/envelope-icon.png') }}"
@@ -126,14 +126,16 @@
     </button>
   </div>
   <div class="lh-popup-body">
-    <h2 class="lh-title mb-3" style="text-align: left">Change location</h2>
-    <div class="location-field">
-      <input type="text" id="searchInput" placeholder="Search city..." class="input-none" />
-      <button class="current-location-btn">
-        <img src="{{ asset('icons/search.svg') }}" alt="Search svg icon" />
-      </button>
+    <div class="container-sm">
+      <h2 class="lh-title mb-3" style="text-align: left">Change location</h2>
+      <div class="location-field">
+        <input type="text" id="searchInput" placeholder="Search city..." class="input-none" />
+        <button class="current-location-btn">
+          <img src="{{ asset('icons/search.svg') }}" alt="Search svg icon" />
+        </button>
+      </div>
+      <ul id="locationList"></ul>
     </div>
-    <ul id="locationList"></ul>
   </div>
 </div>
 @endsection

@@ -32,21 +32,18 @@
         <div class="lh-dropdown-wrap" data-field="height">
             <button class="lh-dropdown-button" type="button">Tall</button>
             <div class="lh-dropdown-menu">
-                <div class="lh-option">Tall</div>
-                <div class="lh-option">Kinda Tall</div>
-                <div class="lh-option">Perfectly average</div>
-                <div class="lh-option">Not too tall</div>
-                <div class="lh-option">Petite</div>
+                @foreach ($options["height"] as $item)
+                    <div class="lh-option">{{ $item }}</div>
+                @endforeach
             </div>
         </div>
 
         <div class="lh-dropdown-wrap" data-field="hair">
             <button class="lh-dropdown-button" type="button">Blue hair</button>
             <div class="lh-dropdown-menu">
-                <div class="lh-option">Blue hair</div>
-                <div class="lh-option">Highlights</div>
-                <div class="lh-option">Two-Tone</div>
-                <div class="lh-option">Rainbow Hair</div>
+                @foreach ($options["hair"] as $item)
+                    <div class="lh-option">{{ $item }}</div>
+                @endforeach
             </div>
         </div>
 
@@ -57,10 +54,9 @@
         <div class="lh-dropdown-wrap" data-field="eyes">
             <button class="lh-dropdown-button" type="button">Who</button>
             <div class="lh-dropdown-menu">
-                <div class="lh-option">Red</div>
-                <div class="lh-option">Blue</div>
-                <div class="lh-option">Brown</div>
-                <div class="lh-option">Black</div>
+                @foreach ($options["eyes"] as $item)
+                    <div class="lh-option">{{ $item }}</div>
+                @endforeach
             </div>
         </div>
 
@@ -71,12 +67,9 @@
         <div class="lh-dropdown-wrap" data-field="behavior">
             <button class="lh-dropdown-button" type="button">Who</button>
             <div class="lh-dropdown-menu">
-                <div class="lh-option">Bubbly</div>
-                <div class="lh-option">Calm</div>
-                <div class="lh-option">Adventurous</div>
-                <div class="lh-option">Playful</div>
-                <div class="lh-option">Serious</div>
-                <div class="lh-option">Confident</div>
+                @foreach ($options["behavior"] as $item)
+                    <div class="lh-option">{{ $item }}</div>
+                @endforeach
             </div>
         </div>
 
@@ -87,12 +80,9 @@
         <div class="lh-dropdown-wrap" data-field="seeking">
             <button class="lh-dropdown-button" type="button">Seeking</button>
             <div class="lh-dropdown-menu">
-                <div class="lh-option">Sugar Daddy</div>
-                <div class="lh-option">Sugar Baby</div>
-                <div class="lh-option">Sugar Mommy</div>
-                <div class="lh-option">Mentor</div>
-                <div class="lh-option">Sponsor</div>
-                <div class="lh-option">Companion</div>
+                @foreach ($options["seeking"] as $item)
+                    <div class="lh-option">{{ $item }}</div>
+                @endforeach
             </div>
         </div>
 
@@ -103,14 +93,9 @@
         <div class="lh-dropdown-wrap" data-field="hobby">
             <button class="lh-dropdown-button" type="button">INTO</button>
             <div class="lh-dropdown-menu">
-                <div class="lh-option">Reading</div>
-                <div class="lh-option">Traveling</div>
-                <div class="lh-option">Cooking</div>
-                <div class="lh-option">Gaming</div>
-                <div class="lh-option">Music</div>
-                <div class="lh-option">Sports</div>
-                <div class="lh-option">Drawing</div>
-                <div class="lh-option">Art</div>
+                @foreach ($options["hobby"] as $item)
+                    <div class="lh-option">{{ $item }}</div>
+                @endforeach
             </div>
         </div>
 
@@ -156,19 +141,21 @@
         </button>
     </div>
     <div class="lh-popup-body">
-        <h2 class="lh-title mb-3" style="text-align: left">Address</h2>
-        <div class="location-field">
-            <input
-            type="text"
-            id="searchInput"
-            placeholder="Search location..."
-            class="input-none"
-            />
-            <button class="current-location-btn">
-            <img src="{{ asset('icons/location.svg') }}" alt="Pin svg icon">
-            </button>
+        <div class="container-sm">
+            <h2 class="lh-title mb-3" style="text-align: left">Address</h2>
+            <div class="location-field">
+                <input
+                type="text"
+                id="searchInput"
+                placeholder="Search location..."
+                class="input-none"
+                />
+                <button class="current-location-btn">
+                <img src="{{ asset('icons/location.svg') }}" alt="Pin svg icon">
+                </button>
+            </div>
+            <ul id="locationList"></ul>
         </div>
-        <ul id="locationList"></ul>
     </div>
 </div>
 @endsection
@@ -179,7 +166,7 @@ const searchInput = document.getElementById("searchInput");
 const selectedLocation = document.getElementById("selectedLocation");
 
 document.addEventListener("DOMContentLoaded", () => {
-    updateDescription();
+    updateDescription("description");
     locations.shift();
     renderLocations(locations, "locationList", "location");
 });
@@ -274,7 +261,7 @@ document.querySelectorAll(".lh-option").forEach((option) => {
     wrap.classList.remove("open");
 
     // Update textarea with readable sentence
-    updateDescription();
+    updateDescription("description");
   });
 });
 

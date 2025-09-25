@@ -6,15 +6,6 @@
     font-weight: normal;
     font-style: normal;
   }
-
-  .merriweather-<uniquifier> {
-    font-family: "Merriweather", serif;
-    font-optical-sizing: auto;
-    font-weight: <weight>;
-    font-style: normal;
-    font-variation-settings:
-      "wdth" 100;
-  }
   
   :root {
     --color-bg: #fff5df;
@@ -37,6 +28,8 @@
     box-sizing: border-box;
     font-family: "VCR OSD Mono", "font-style", "Arial";
     background-image: url("../images/paper.png");
+    background-size: cover;
+    background-repeat: no-repeat;
     color: var(--dark);
   }
   
@@ -146,7 +139,7 @@
   }
   
   .lh-header nav img {
-    width: 22px;
+    width: 160px;
     margin-right: 8px;
   }
   

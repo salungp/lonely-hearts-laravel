@@ -218,7 +218,55 @@ class Ads extends Controller
 
     public function create_second(): View
     {
-        return view('ads.create_second');
+        $options = [
+            "height" => [
+                "Tall",
+                "Kinda Tall",
+                "Perfectly average",
+                "Not too tall",
+                "Petite",
+                "Small"
+            ],
+            "hair" => [
+                "Blue hair",
+                "Highlights",
+                "Two-Tone",
+                "Rainbow Hair"
+            ],
+            "eyes" => [
+                "Red",
+                "Blue",
+                "Brown",
+                "Black"
+            ],
+            "behavior" => [
+                "Bubbly",
+                "Calm",
+                "Adventurous",
+                "Playful",
+                "Serious",
+                "Confident"
+            ],
+            "seeking" => [
+                "Sugar Daddy",
+                "Sugar Baby",
+                "Sugar Mommy",
+                "Mentor",
+                "Sponsor",
+                "Companion"
+            ],
+            "hobby" => [
+                "Reading",
+                "Traveling",
+                "Cooking",
+                "Gaming",
+                "Music",
+                "Sports",
+                "Drawing",
+                "Art"
+            ]
+        ];
+        return view('ads.create_second', ["options" => $options]);
     }
 
     public function writing($box): View

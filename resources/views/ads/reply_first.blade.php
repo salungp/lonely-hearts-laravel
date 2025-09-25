@@ -7,7 +7,12 @@
 @endsection
 @section('content')
 <div class="container-sm">
-    <h1 class="lh-title mb-3">I'll write it</h1>
+    <div class="d-flex justify-content-between">
+        <h2 class="lh-title mb-3" style="text-align: left">Reply</h2>
+        <span>{{ strtoupper(date('D jS M Y', strtotime('2025-06-06'))) }}</span>
+    </div>
+
+    <h3 style="font-family: 'Merriweather'; text-align: left">Dear {{ $ad->snapshot_name }}</h3>
 
     <form action="{{ route('ad.reply_store') }}" method="POST">
         @csrf
@@ -57,7 +62,7 @@
     </div>
     <div class="lh-popup-body">
         <!-- Screen one secenario -->
-        <div id="screenOne">
+        <div class="container-sm" id="screenOne">
             <h2 class="lh-title mb-3" style="text-align: left">Reword it</h2>
             <div id="tags-container" class="tags-container">
                 @foreach ($prompts as $style)
