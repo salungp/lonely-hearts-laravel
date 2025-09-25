@@ -69,32 +69,37 @@ class Ads extends Controller
         $style = $request->input('style'); // e.g. "funny"
 
         $stylePrompts = [
-            'funny' => 'Rewrite the text with humor, witty jokes, and light sarcasm.',
-            'romantic' => 'Rewrite the text in a sweet, affectionate, and heartwarming way.',
-            'casual' => 'Rewrite the text in a relaxed, everyday tone, like chatting with a friend.',
-            'formal' => 'Rewrite the text in a professional, polite, and respectful style.',
-            'literature' => 'Rewrite the text in a poetic, elegant, and descriptive way, like classic literature.',
-            'adventurous' => 'Rewrite with excitement, boldness, and energy. Emphasize discovery and thrill.',
-            'mysterious' => 'Rewrite in a cryptic, intriguing, and slightly dramatic style.',
-            'rom-com' => 'Rewrite like a lighthearted romantic comedy scene, playful and charming.',
-            'philosophical' => 'Rewrite with deep reflections, thoughtful insights, and metaphorical language.',
-            'trendy' => 'Rewrite in a modern, stylish, pop-culture-influenced tone.',
-            'storytelling' => 'Rewrite as if narrating a short story about the text.',
-            'cinematic' => 'Rewrite with vivid, movie-like descriptions, dramatic imagery, and action.',
+            'funny' => 'Write something funny, witty, and playful.',
+            'romantic' => 'Write something sweet, affectionate, and heartwarming.',
+            'casual' => 'Write in a relaxed, everyday tone, like chatting with a friend.',
+            'formal' => 'Write in a professional, polite, and respectful style.',
+            'literature' => 'Write something poetic, elegant, and descriptive, like classic literature.',
+            'adventurous' => 'Write with excitement, boldness, and energy. Emphasize discovery and thrill.',
+            'mysterious' => 'Write in a cryptic, intriguing, and dramatic style.',
+            'rom-com' => 'Write like a playful, lighthearted rom-com scene.',
+            'philosophical' => 'Write with deep reflections, thoughtful insights, and metaphorical language.',
+            'trendy' => 'Write in a modern, stylish, pop-culture-influenced tone.',
+            'storytelling' => 'Write as if narrating a short, engaging story.',
+            'cinematic' => 'Write with vivid, movie-like descriptions, dramatic imagery, and action.',
         ];
     
-        $instruction = ($stylePrompts[$style] ?? "Rewrite the text in a clear, natural style.") . " Keep the rewritten version under 255 characters.";
+        $instruction = $stylePrompts[$style] ?? "Write something in a clear, natural style.";
+    
+        if (!empty($text)) {
+            $instruction = "Rewrite this text in the chosen style. Keep it under 255 characters.\n\nOriginal text: " . $text;
+        } else {
+            $instruction = $instruction . " Keep it under 255 characters.";
+        }
     
         $response = OpenAI::chat()->create([
             'model' => 'gpt-4o-mini',
             'messages' => [
-                ['role' => 'system', 'content' => 'You are a text stylist. Always rewrite text in the given tone, and never exceed 255 characters.'],
-                ['role' => 'user', 'content' => $instruction . "\n\nOriginal text (max 300 chars): " . $text],
+                ['role' => 'system', 'content' => 'You are a text stylist. Always respond under 255 characters.'],
+                ['role' => 'user', 'content' => $instruction],
             ],
         ]);
     
-        $styledText = $response['choices'][0]['message']['content'];
-
+        $styledText = $response['choices'][0]['message']['content'] ?? '';
         if (mb_strlen($styledText) > 255) {
             $styledText = mb_substr($styledText, 0, 252) . '...';
         }

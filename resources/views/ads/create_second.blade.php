@@ -119,7 +119,7 @@
 
         <div class="mb-4"></div>
 
-        <div class="location-field" id="locationField" style="margin-bottom: 16px;">
+        <div class="location-field" id="locationField" data-target="locationPopup" style="margin-bottom: 16px;">
             <div class="d-flex align-items-center" style="gap: 12px;">
                 <span class="icon">
                     <img src="{{ asset('icons/pin.svg') }}" alt="Pin svg icon">
@@ -149,9 +149,9 @@
     
 </div>
 <!-- Location pop up -->
-<div class="lh-popup" id="locationPopup">
+<div class="lh-popup" id="locationPopup" data-modal>
     <div class="lh-popup-header">
-        <button id="closePopupLocation">
+        <button id="closePopupLocation" data-close>
             <img src="{{ asset('icons/close.svg') }}" alt="Close button" />
         </button>
     </div>
@@ -174,100 +174,15 @@
 @endsection
 @section('script')
 <script>
-const selections = {
-  height: "Average height",
-  hair: "Black hair",
-  eyes: "Brown eyes",
-  behavior: "Kind",
-  seeking: "Friends",
-  hobby: "Reading"
-};
 const locationField = document.getElementById("locationField");
-const locationPopup = document.getElementById("locationPopup");
-const closePopup = document.getElementById("closePopupLocation");
 const searchInput = document.getElementById("searchInput");
-const locationList = document.getElementById("locationList");
 const selectedLocation = document.getElementById("selectedLocation");
-const locationId = document.getElementById("location");
 
-// Show popup
-locationField.addEventListener("click", () => {
-    locationPopup.classList.add("active");
-    renderLocations(locations);
+document.addEventListener("DOMContentLoaded", () => {
+    updateDescription();
+    locations.shift();
+    renderLocations(locations, "locationList", "location");
 });
-
-// Close popup
-closePopup.addEventListener("click", () => {
-    locationPopup.classList.remove("active");
-});
-
-const locations = [
-  "London",
-  "Birmingham",
-  "Manchester",
-  "Leeds",
-  "Sheffield",
-  "Liverpool",
-  "Bristol",
-  "Newcastle upon Tyne",
-  "Sunderland",
-  "Leicester",
-  "Coventry",
-  "Kingston upon Hull",
-  "Bradford",
-  "Stoke-on-Trent",
-  "Wolverhampton",
-  "Nottingham",
-  "Derby",
-  "Southampton",
-  "Portsmouth",
-  "Plymouth",
-  "Brighton",
-  "Reading",
-  "Northampton",
-  "Luton",
-  "Swindon",
-  "Milton Keynes",
-  "Oxford",
-  "Cambridge",
-  "York",
-  "Blackpool",
-  "Middlesbrough",
-  "Bolton",
-  "Stockport",
-  "Warrington",
-  "Huddersfield",
-  "Preston",
-  "Norwich",
-  "Peterborough",
-  "Exeter",
-  "Chelmsford",
-  "Gloucester",
-  "Bath",
-  "Colchester",
-  "Ipswich",
-  "Chester",
-  "Dundee",
-  "Edinburgh",
-  "Glasgow",
-  "Aberdeen",
-  "Belfast"
-];
-
-// Render list dynamically
-function renderLocations(list) {
-    locationList.innerHTML = "";
-    list.forEach((loc) => {
-        const li = document.createElement("li");
-        li.textContent = loc;
-        li.addEventListener("click", () => {
-            selectedLocation.textContent = loc;
-            locationId.value = loc;
-            locationPopup.classList.remove("active");
-        });
-        locationList.appendChild(li);
-    });
-}
 
 // Search filter
 searchInput.addEventListener("input", () => {
@@ -275,7 +190,7 @@ searchInput.addEventListener("input", () => {
     const filtered = locations.filter((loc) =>
         loc.toLowerCase().includes(query)
     );
-    renderLocations(filtered);
+    renderLocations(filtered, "locationList", "location");
 });
 
 // Attach event to ALL current-location buttons
@@ -371,32 +286,5 @@ document.addEventListener("click", function (e) {
     });
   }
 });
-
-document.addEventListener("DOMContentLoaded", (e) => {
-    updateDescription();
-});
-
-function updateDescription() {
-  const textarea = document.getElementById("description");
-
-  const height = selections.height || "";
-  const hair = selections.hair ? ` with ${selections.hair}` : "";
-  const eyes = selections.eyes ? `, ${selections.eyes.toLowerCase()} eyes` : "";
-  const behavior = selections.behavior ? `, who is ${selections.behavior.toLowerCase()}` : "";
-  const seeking = selections.seeking ? `, seeking ${selections.seeking}` : "";
-  const hobby = selections.hobby ? `, into ${selections.hobby}` : "";
-
-  // Build sentence dynamically
-  let sentence = "";
-  if (height) sentence += `I'm ${height}`;
-  sentence += hair;
-  sentence += eyes;
-  sentence += behavior;
-  sentence += seeking;
-  sentence += hobby;
-  if (sentence) sentence += "."; // add period at the end
-
-  textarea.value = sentence;
-}
 </script>
 @endsection

@@ -1,4 +1,4 @@
-const locations = [
+let locations = [
   "All Locations",
   "London",
   "Birmingham",
@@ -51,6 +51,38 @@ const locations = [
   "Aberdeen",
   "Belfast"
 ];
+
+const selections = {
+  height: "Average height",
+  hair: "Black hair",
+  eyes: "Brown eyes",
+  behavior: "Kind",
+  seeking: "Friends",
+  hobby: "Reading"
+};
+
+function updateDescription() {
+  const textarea = document.getElementById("description");
+
+  const height = selections.height || "";
+  const hair = selections.hair ? ` with ${selections.hair}` : "";
+  const eyes = selections.eyes ? `, ${selections.eyes.toLowerCase()} eyes` : "";
+  const behavior = selections.behavior ? `, who is ${selections.behavior.toLowerCase()}` : "";
+  const seeking = selections.seeking ? `, seeking ${selections.seeking}` : "";
+  const hobby = selections.hobby ? `, into ${selections.hobby}` : "";
+
+  // Build sentence dynamically
+  let sentence = "";
+  if (height) sentence += `I'm ${height}`;
+  sentence += hair;
+  sentence += eyes;
+  sentence += behavior;
+  sentence += seeking;
+  sentence += hobby;
+  if (sentence) sentence += "."; // add period at the end
+
+  textarea.value = sentence;
+}
 
 // Render location function
 // Render list dynamically

@@ -175,6 +175,7 @@
     const screenOne = getIdElement("screenOne");
 
     document.addEventListener("DOMContentLoaded", () => {
+        locations.shift();
         renderLocations(locations, "locationList", "location");
     });
 
@@ -213,10 +214,6 @@
             const textarea = document.getElementById("lh-textarea");
             const text = textarea.value;
 
-            if (!text) {
-                alert("Please write something first.");
-                return;
-            }
             if (!selectedStyle) {
                 alert("Please select a style first.");
                 return;
@@ -235,21 +232,21 @@
                 },
                 body: JSON.stringify({ text: text, style: selectedStyle })
             })
-                .then(res => res.json())
-                .then(data => {
-                    textarea.value = data.styled_text;
-                    document.getElementById("helpMePopup").classList.remove("active");
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Something went wrong!");
-                })
-                .finally(() => {
-                    // Reset button
-                    btn.disabled = false;
-                    spinner.classList.add("d-none");
-                    btnText.textContent = "Apply Style";
-                });
+            .then(res => res.json())
+            .then(data => {
+                textarea.value = data.styled_text;
+                document.getElementById("helpMePopup").classList.remove("active");
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Something went wrong!");
+            })
+            .finally(() => {
+                // Reset button
+                btn.disabled = false;
+                spinner.classList.add("d-none");
+                btnText.textContent = "Apply Style";
+            });
         });
 
     });

@@ -148,11 +148,7 @@
             const btnText = btn.querySelector(".btn-text");
             const textarea = document.getElementById("lh-textarea");
             const text = textarea.value;
-
-            if (!text) {
-                alert("Please write something first.");
-                return;
-            }
+            
             if (!selectedStyle) {
                 alert("Please select a style first.");
                 return;
