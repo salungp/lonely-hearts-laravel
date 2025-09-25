@@ -21,24 +21,12 @@ $profile = session('profile')
 
     <form action="{{ route('login_or_register') }}" method="POST">
         @csrf
-        <!-- <div class="lh-input-group mb-3">
-            <label for="name">Name</label>
-            <input
-            type="text"
-            class="lh-input"
-            placeholder="Enter your name"
-            name="name"
-            />
-            @error('name')
-                <div class="text-uppercase text-danger">{{ $message }}</div>
-            @enderror
-        </div> -->
 
         <div class="lh-input-group mb-3 position-relative">
             <label for="name">Phone number</label>
             <div class="position-relative">
                 <div id="countrySelector" class="lh-country-display">
-                    +62 🇮🇩
+                    +62
                 </div>
                 <input type="hidden" id="country_code" name="country_code" value="+62">
                 <input
@@ -72,20 +60,16 @@ $profile = session('profile')
 @endsection
 @section('script')
 <script>
-    const countries = [
-        { name: "United States", code: "+1", flag: "🇺🇸" },
-        { name: "United Kingdom", code: "+44", flag: "🇬🇧" },
-        { name: "Indonesia", code: "+62", flag: "🇮🇩" },
-        { name: "India", code: "+91", flag: "🇮🇳" },
-        { name: "Japan", code: "+81", flag: "🇯🇵" },
-        // ... add more countries
-      ];
+    const selector = new CountrySelector({
+        trigger: "#countrySelector",
+        popup: "#countryPopup",
+        input: "country_code",
+        apiUrl: "https://restcountries.com/v3.1/all?fields=name,cca2,idd,flags",
+    });
 
-      new CountrySelector({
-        trigger: "#countrySelector", // the element to open popup
-        popup: "#countryPopup", // popup container
-        countries: countries, // data
-        input: "country_code"
-      });
+    // Auto set default from backend (Laravel variable)
+    if (window.defaultCountryCode) {
+        selector.setDefault(window.defaultCountryCode);
+    }
 </script>
 @endsection

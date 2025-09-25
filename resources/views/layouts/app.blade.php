@@ -3,7 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="@yield('meta_description', 'Find and connect with people on Lonely Hearts')" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta property="og:title" content="@yield('og_title', 'Lonely Hearts')" />
+    <meta property="og:description" content="@yield('og_description', 'Find and connect with people on Lonely Hearts')" />
+    <meta property="og:image" content="@yield('og_image', asset('default-og-image.jpg'))" />
+    <meta property="og:url" content="{{ url()->current() }}" />
+    <meta property="og:type" content="@yield('og_type', 'website')" />
+    <meta property="og:site_name" content="Lonely Hearts" />
+
+    <!-- Twitter card (optional but recommended) -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@yield('og_title', 'Lonely Hearts')" />
+    <meta name="twitter:description" content="@yield('og_description', 'Find and connect with people on Lonely Hearts')" />
+    <meta name="twitter:image" content="@yield('og_image', asset('default-og-image.jpg'))" />
     @yield('meta')
     <title>@yield('title', 'Lonely hearts')</title>
     <!-- bootstrap css -->

@@ -11,6 +11,25 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\PaymentIntentController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Mail;
+use Spatie\Sitemap\Sitemap;
+use Spatie\Sitemap\Tags\Url;
+use App\Models\Ad;
+
+Route::get('/sitemap.xml', function () {
+    $sitemap = Sitemap::create()
+        ->add(Url::create('/')->setPriority(1.0));
+
+    $ads = Ad::all();
+    foreach ($ads as $ad) {
+        $sitemap->add(
+            Url::create("/ads/{$ad->id}")
+                ->setLastModificationDate($ad->updated_at)
+        );
+    }
+
+    return $sitemap->toResponse(request());
+});
+
 
 // Home
 Route::get('/', [Home::class, 'show'])->name('home');
@@ -113,7 +132,6 @@ Route::post('/packages/{id}/buy', [PackageController::class, 'buy'])->name('pack
 // Checkout
 Route::post('/checkout/{id}', [CheckoutController::class, 'checkout'])->name('checkout.start');
 Route::get('/checkout/success/{packageId}', [CheckoutController::class, 'success'])->name('checkout.success');
-
 
 Route::post('/create-payment-intent/{package}', [PaymentIntentController::class, 'create'])
     ->name('payment.intent.create');

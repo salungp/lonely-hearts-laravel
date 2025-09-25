@@ -490,18 +490,48 @@ class BootstrapPinInput {
       this.searchEl = this.popupEl.querySelector("input");
       this.inputHidden = document.getElementById(options.input);
       this.listEl = this.popupEl.querySelector("ul");
-      this.countries = options.countries || [];
-      this.init();
+      this.countries = [];
+  
+      this.init(options.apiUrl);
     }
   
-    init() {
+    async init(apiUrl) {
+      // 1. Fetch countries
+      this.countries = await this.fetchCountries(apiUrl);
+  
+      // 2. Render
       this.renderCountries(this.countries);
   
+      // 3. Setup events
+      this.setupEvents();
+    }
+  
+    async fetchCountries(apiUrl) {
+      try {
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+  
+        return data
+          .filter(c => c.idd?.root) // skip countries without phone code
+          .map(c => ({
+            name: c.name.common,
+            code: c.idd.root + (c.idd.suffixes?.[0] || ""),
+            flag: c.flags?.emoji || "",
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name));
+      } catch (e) {
+        console.error("Failed to fetch countries:", e);
+        return [];
+      }
+    }
+  
+    setupEvents() {
       // Open popup
       this.triggerEl.addEventListener("click", () => {
         this.popupEl.classList.remove("hidden");
         this.searchEl.value = "";
         this.renderCountries(this.countries);
+        this.searchEl.focus();
       });
   
       // Close popup when clicking outside
@@ -511,22 +541,30 @@ class BootstrapPinInput {
         }
       });
   
-      // Search
+      // Search countries
       this.searchEl.addEventListener("input", (e) => {
         const query = e.target.value.toLowerCase();
         const filtered = this.countries.filter(
-          (c) => c.name.toLowerCase().includes(query) || c.code.includes(query)
+          (c) =>
+            c.name.toLowerCase().includes(query) ||
+            c.code.includes(query) ||
+            c.flag.includes(query)
         );
         this.renderCountries(filtered);
       });
   
-      // Select
+      // Select country
       this.listEl.addEventListener("click", (e) => {
-        if (e.target.tagName === "LI") {
-          const selectedCountry = this.countries[e.target.dataset.code - 1];
-          const countryWrite = `${selectedCountry.code} ${selectedCountry.flag}`;
-          this.triggerEl.textContent = countryWrite;
-          this.inputHidden.value = selectedCountry.code;
+        const li = e.target.closest("li");
+        if (!li) return;
+  
+        const code = li.dataset.code;
+        const selected = this.countries.find((c) => c.code === code);
+  
+        if (selected) {
+          const display = `${selected.code} ${selected.flag}`;
+          this.triggerEl.textContent = display;
+          this.inputHidden.value = selected.code;
           this.popupEl.classList.add("hidden");
         }
       });
@@ -534,12 +572,20 @@ class BootstrapPinInput {
   
     renderCountries(list) {
       this.listEl.innerHTML = "";
-      list.forEach((c, index) => {
+      list.forEach((c) => {
         const li = document.createElement("li");
         li.textContent = `${c.flag} ${c.name} (${c.code})`;
-        li.dataset.code = index + 1;
+        li.dataset.code = c.code;
         this.listEl.appendChild(li);
       });
+    }
+  
+    setDefault(code) {
+      const country = this.countries.find((c) => c.code === code);
+      if (country) {
+        this.triggerEl.textContent = `${country.code} ${country.flag}`;
+        this.inputHidden.value = country.code;
+      }
     }
   }
   

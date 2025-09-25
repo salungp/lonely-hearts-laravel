@@ -1,5 +1,12 @@
 @extends('layouts.app')
+
+@section('og_title', 'Home page of lonely hearts')
+@section('og_description', 'Find and connect with people on Lonely Hearts')
+@section('og_type', 'article')
+
+@section('meta_description', 'Find and connect with people on Lonely Hearts')
 @section('title', 'Home Page')
+
 @section('content')
 <div class="container-sm">
     <div class="d-flex justify-content-center">
