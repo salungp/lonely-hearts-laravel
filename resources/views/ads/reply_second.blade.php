@@ -172,15 +172,36 @@
                     <span id="lh-textarea-info">0</span>/300
                 </div>
 
-                <button
-                    class="d-flex lh-box-no position-absolute"
-                    style="bottom: 6px; left: 16px; z-index: 99"
-                    id="showPopup">
-                Help me write
+                <button data-target="helpMePopup" type="button" class="d-flex textarea-button position-absolute" id="showPopup">
+                    Help me write
                 </button>
             </div>
             <button class="lh-button" type="submit">Send reply</button>
         </form>
+    </div>
+</div>
+<div data-modal id="helpMePopup" class="lh-popup" style="height: 90vh">
+    <div class="lh-popup-header">
+        <button data-close>
+            <img src="{{ asset('icons/close.svg') }}" alt="Close button" />
+        </button>
+    </div>
+    <div class="lh-popup-body">
+        <!-- Screen one secenario -->
+        <div id="screenOne">
+            <h2 class="lh-title mb-3" style="text-align: left">Reword it</h2>
+            <div id="tags-container" class="tags-container">
+                @foreach ($prompts as $style)
+                    <button class="lh-tag" data-style="{{ $style }}">{{ $style }}</button>
+                @endforeach
+            </div>
+
+            <button id="applyStyle" class="lh-button">
+                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                <span class="btn-text">Apply Style</span>
+            </button>
+        </div>
+    <!-- End scenario -->
     </div>
 </div>
 @endsection
@@ -204,59 +225,6 @@ function openConfirmPopup() {
 function closeConfirmPopup() {
     confirmPopup.classList.remove("active");
 }
-
-const locations = [
-  "London",
-  "Birmingham",
-  "Manchester",
-  "Leeds",
-  "Sheffield",
-  "Liverpool",
-  "Bristol",
-  "Newcastle upon Tyne",
-  "Sunderland",
-  "Leicester",
-  "Coventry",
-  "Kingston upon Hull",
-  "Bradford",
-  "Stoke-on-Trent",
-  "Wolverhampton",
-  "Nottingham",
-  "Derby",
-  "Southampton",
-  "Portsmouth",
-  "Plymouth",
-  "Brighton",
-  "Reading",
-  "Northampton",
-  "Luton",
-  "Swindon",
-  "Milton Keynes",
-  "Oxford",
-  "Cambridge",
-  "York",
-  "Blackpool",
-  "Middlesbrough",
-  "Bolton",
-  "Stockport",
-  "Warrington",
-  "Huddersfield",
-  "Preston",
-  "Norwich",
-  "Peterborough",
-  "Exeter",
-  "Chelmsford",
-  "Gloucester",
-  "Bath",
-  "Colchester",
-  "Ipswich",
-  "Chester",
-  "Dundee",
-  "Edinburgh",
-  "Glasgow",
-  "Aberdeen",
-  "Belfast"
-];
 
 // Toggle dropdown
 document.querySelectorAll(".lh-dropdown-button").forEach((btn) => {
@@ -288,6 +256,69 @@ document.querySelectorAll(".lh-option").forEach((option) => {
     // Update textarea with readable sentence
     updateDescription();
   });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    let selectedStyle = null;
+
+    // Handle style button clicks
+    document.querySelectorAll("#tags-container button").forEach(btn => {
+        btn.addEventListener("click", () => {
+            selectedStyle = btn.dataset.style;
+
+            // highlight active button
+            document.querySelectorAll("#tags-container button").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+        });
+    });
+
+    // Handle Apply Style
+    document.getElementById("applyStyle").addEventListener("click", () => {
+        const btn = document.getElementById("applyStyle");
+        const spinner = btn.querySelector(".spinner-border");
+        const btnText = btn.querySelector(".btn-text");
+        const textarea = document.getElementById("lh-textarea");
+        const text = textarea.value;
+
+        if (!text) {
+            alert("Please write something first.");
+            return;
+        }
+        if (!selectedStyle) {
+            alert("Please select a style first.");
+            return;
+        }
+
+        // Show loading spinner
+        btn.disabled = true;
+        spinner.classList.remove("d-none");
+        btnText.textContent = "Generating...";
+
+        fetch("/ad/apply-style", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+            },
+            body: JSON.stringify({ text: text, style: selectedStyle })
+        })
+            .then(res => res.json())
+            .then(data => {
+                textarea.value = data.styled_text;
+                document.getElementById("helpMePopup").classList.remove("active");
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Something went wrong!");
+            })
+            .finally(() => {
+                // Reset button
+                btn.disabled = false;
+                spinner.classList.add("d-none");
+                btnText.textContent = "Apply Style";
+            });
+    });
+
 });
 
 // Close dropdown when clicking outside

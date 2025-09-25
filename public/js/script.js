@@ -1,3 +1,135 @@
+const locations = [
+  "All Locations",
+  "London",
+  "Birmingham",
+  "Manchester",
+  "Leeds",
+  "Sheffield",
+  "Liverpool",
+  "Bristol",
+  "Newcastle upon Tyne",
+  "Sunderland",
+  "Leicester",
+  "Coventry",
+  "Kingston upon Hull",
+  "Bradford",
+  "Stoke-on-Trent",
+  "Wolverhampton",
+  "Nottingham",
+  "Derby",
+  "Southampton",
+  "Portsmouth",
+  "Plymouth",
+  "Brighton",
+  "Reading",
+  "Northampton",
+  "Luton",
+  "Swindon",
+  "Milton Keynes",
+  "Oxford",
+  "Cambridge",
+  "York",
+  "Blackpool",
+  "Middlesbrough",
+  "Bolton",
+  "Stockport",
+  "Warrington",
+  "Huddersfield",
+  "Preston",
+  "Norwich",
+  "Peterborough",
+  "Exeter",
+  "Chelmsford",
+  "Gloucester",
+  "Bath",
+  "Colchester",
+  "Ipswich",
+  "Chester",
+  "Dundee",
+  "Edinburgh",
+  "Glasgow",
+  "Aberdeen",
+  "Belfast"
+];
+
+// Render location function
+// Render list dynamically
+function renderLocations(list, listId, location) {
+  const locationList = document.getElementById(listId);
+  const locationId = document.getElementById(location);
+
+  locationList.innerHTML = "";
+  list.forEach((loc) => {
+      const li = document.createElement("li");
+      li.textContent = loc;
+      li.addEventListener("click", () => {
+          selectedLocation.textContent = loc;
+          locationId.value = loc;
+          locationPopup.classList.remove("active");
+      });
+      locationList.appendChild(li);
+  });
+}
+
+// Get the current location via button
+document.addEventListener("DOMContentLoaded", () => {
+  const locationButtons = document.querySelectorAll(".current-location-btn");
+
+  if (!locationButtons.length) {
+    // Tidak ada tombol di halaman ini → langsung keluar
+    return;
+  }
+
+  locationButtons.forEach((btn) => {
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+
+      if (!navigator.geolocation) {
+        alert("Geolocation not supported by your browser.");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+            );
+            const data = await response.json();
+
+            if (data && data.address) {
+              const city =
+                data.address.city ||
+                data.address.town ||
+                data.address.village ||
+                data.address.county;
+
+              if (city) {
+                selectedLocation.textContent = city;
+                locationId.value = city;
+              } else {
+                selectedLocation.textContent = "Unknown location";
+              }
+            } else {
+              selectedLocation.textContent = `Lat: ${lat.toFixed(3)}, Lon: ${lon.toFixed(3)}`;
+            }
+          } catch (error) {
+            alert("Could not get address from coordinates.");
+            selectedLocation.textContent = `Lat: ${lat.toFixed(3)}, Lon: ${lon.toFixed(3)}`;
+          }
+
+          locationPopup.classList.remove("active");
+        },
+        (error) => alert("Permission denied or unavailable")
+      );
+    });
+  });
+});
+
+
 class BootstrapPinInput {
     constructor(options) {
       this.inputs = document.querySelectorAll(".pin-input-field");
@@ -406,6 +538,42 @@ class BootstrapPinInput {
         window.location.href = page;
     });
   }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Open popup
+    document.querySelectorAll("[data-target]").forEach(trigger => {
+      trigger.addEventListener("click", () => {
+        const modalId = trigger.getAttribute("data-target");
+        const modal = document.querySelector(`.lh-popup#${modalId}`);
+        if (modal) modal.classList.add("active");
+      });
+    });
+  
+    // Close popup
+    document.querySelectorAll(".lh-popup[data-modal]").forEach(modal => {
+      modal.querySelectorAll("[data-close]").forEach(closeBtn => {
+        closeBtn.addEventListener("click", () => {
+          modal.classList.remove("active");
+        });
+      });
+  
+      // Optional: close if click outside
+      modal.addEventListener("click", e => {
+        if (e.target === modal) {
+          modal.classList.remove("active");
+        }
+      });
+    });
+  
+    // Optional: close with ESC
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") {
+        document.querySelectorAll(".lh-popup.is-active")
+          .forEach(modal => modal.classList.remove("active"));
+      }
+    });
+  });
+    
   
     
   

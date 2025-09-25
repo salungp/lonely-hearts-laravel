@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use App\Models\Ad;
+use OpenAI\Laravel\Facades\OpenAI;
 
 class Ads extends Controller
 {
@@ -62,6 +63,49 @@ class Ads extends Controller
         return redirect()->back()->with('success', 'Ad deleted successfully');
     }
 
+    public function apply_style(Request $request)
+    {
+        $text = $request->input('text');
+        $style = $request->input('style'); // e.g. "funny"
+
+        $stylePrompts = [
+            'funny' => 'Rewrite the text with humor, witty jokes, and light sarcasm.',
+            'romantic' => 'Rewrite the text in a sweet, affectionate, and heartwarming way.',
+            'casual' => 'Rewrite the text in a relaxed, everyday tone, like chatting with a friend.',
+            'formal' => 'Rewrite the text in a professional, polite, and respectful style.',
+            'literature' => 'Rewrite the text in a poetic, elegant, and descriptive way, like classic literature.',
+            'adventurous' => 'Rewrite with excitement, boldness, and energy. Emphasize discovery and thrill.',
+            'mysterious' => 'Rewrite in a cryptic, intriguing, and slightly dramatic style.',
+            'rom-com' => 'Rewrite like a lighthearted romantic comedy scene, playful and charming.',
+            'philosophical' => 'Rewrite with deep reflections, thoughtful insights, and metaphorical language.',
+            'trendy' => 'Rewrite in a modern, stylish, pop-culture-influenced tone.',
+            'storytelling' => 'Rewrite as if narrating a short story about the text.',
+            'cinematic' => 'Rewrite with vivid, movie-like descriptions, dramatic imagery, and action.',
+        ];
+    
+        $instruction = ($stylePrompts[$style] ?? "Rewrite the text in a clear, natural style.") . " Keep the rewritten version under 255 characters.";
+    
+        $response = OpenAI::chat()->create([
+            'model' => 'gpt-4o-mini',
+            'messages' => [
+                ['role' => 'system', 'content' => 'You are a text stylist. Always rewrite text in the given tone, and never exceed 255 characters.'],
+                ['role' => 'user', 'content' => $instruction . "\n\nOriginal text (max 300 chars): " . $text],
+            ],
+        ]);
+    
+        $styledText = $response['choices'][0]['message']['content'];
+
+        if (mb_strlen($styledText) > 255) {
+            $styledText = mb_substr($styledText, 0, 252) . '...';
+        }
+
+        return response()->json([
+            'original' => $text,
+            'style' => $style,
+            'styled_text' => $styledText
+        ]);
+    }
+
 
     public function filter_location(Request $request)
     {
@@ -80,22 +124,52 @@ class Ads extends Controller
     public function reply_first($box): View
     {
         $ad = DB::table('ads')->where('box_number', $box)->first();
+        $stylePrompts = [
+            'funny',
+            'romantic',
+            'casual',
+            'formal',
+            'literature',
+            'adventurous',
+            'mysterious',
+            'rom-com',
+            'philosophical',
+            'trendy',
+            'storytelling',
+            'cinematic',
+        ];
         if (!$ad) {
             abort(404);
         }
         return view('ads.reply_first', [
-            'ad' => $ad
+            'ad' => $ad,
+            'prompts' => $stylePrompts,
         ]);
     }
 
     public function reply_second($box): View
     {
         $ad = DB::table('ads')->where('box_number', $box)->first();
+        $stylePrompts = [
+            'funny',
+            'romantic',
+            'casual',
+            'formal',
+            'literature',
+            'adventurous',
+            'mysterious',
+            'rom-com',
+            'philosophical',
+            'trendy',
+            'storytelling',
+            'cinematic',
+        ];
         if (!$ad) {
             abort(404);
         }
         return view('ads.reply_second', [
-            'ad' => $ad
+            'ad' => $ad,
+            'prompts' => $stylePrompts,
         ]);
     }
 
@@ -120,7 +194,21 @@ class Ads extends Controller
 
     public function create_first(): View
     {
-        return view('ads.create_first');
+        $stylePrompts = [
+            'funny',
+            'romantic',
+            'casual',
+            'formal',
+            'literature',
+            'adventurous',
+            'mysterious',
+            'rom-com',
+            'philosophical',
+            'trendy',
+            'storytelling',
+            'cinematic',
+        ];
+        return view('ads.create_first', ['prompts' => $stylePrompts]);
     }
 
     public function create_second(): View

@@ -153,3 +153,13 @@
     width: 100%;
     text-align: left;
   }
+
+  .textarea-button {
+    text-transform: uppercase;
+    padding: 6px 20px;
+    background: var(--color-bg);
+    left: 10px;
+    bottom: 14px;
+    z-index: 99;
+    border-radius: 4px;
+  }

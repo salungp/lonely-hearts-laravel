@@ -26,11 +26,8 @@
                 <span id="lh-textarea-info">0</span>/300
             </div>
 
-            <button
-                class="d-flex lh-box-no position-absolute"
-                style="bottom: 6px; left: 16px; z-index: 99"
-                id="showPopup">
-            Help me write
+            <button data-target="helpMePopup" type="button" class="d-flex textarea-button position-absolute" id="showPopup">
+                Help me write
             </button>
         </div>
 
@@ -38,7 +35,7 @@
             <div class="text-uppercase text-danger mb-3">{{ $message }}</div>
         @enderror
 
-        <div class="location-field" id="locationField" style="margin-bottom: 16px;">
+        <div class="location-field" id="locationField" data-target="locationPopup" style="margin-bottom: 16px;">
             <div class="d-flex align-items-center" style="gap: 12px;">
                 <span class="icon">
                     <img src="{{ asset('icons/pin.svg') }}" alt="Pin svg icon">
@@ -63,7 +60,7 @@
         </div>
 
         <button
-            class="lh-button-secondary mb-3"
+            class="lh-button-secondary mb-2 mt-2"
             data-bs-toggle="modal"
             data-bs-target="#staySafeModal"
             type="button"
@@ -72,13 +69,14 @@
         </button>
 
         <button class="lh-button" type="submit">Continue</button>
+        <div id="result" class="mt-3" style="white-space: pre-wrap;"></div>
     </form>
 </div>
 
 <!-- Location pop up -->
-<div class="lh-popup" id="locationPopup">
+<div class="lh-popup" id="locationPopup" data-modal>
     <div class="lh-popup-header">
-        <button id="closePopupLocation">
+        <button data-close>
             <img src="{{ asset('icons/close.svg') }}" alt="Close button" />
         </button>
     </div>
@@ -99,141 +97,90 @@
     </div>
 </div>
 
+<div data-modal id="helpMePopup" class="lh-popup" style="height: 90vh">
+    <div class="lh-popup-header">
+        <button data-close>
+            <img src="{{ asset('icons/close.svg') }}" alt="Close button" />
+        </button>
+    </div>
+    <div class="lh-popup-body">
+        <!-- Screen one secenario -->
+        <div id="screenOne">
+            <h2 class="lh-title mb-3" style="text-align: left">Reword it</h2>
+            <div id="tags-container" class="tags-container">
+                @foreach ($prompts as $style)
+                    <button class="lh-tag" data-style="{{ $style }}">{{ $style }}</button>
+                @endforeach
+            </div>
+
+            <button id="applyStyle" class="lh-button">
+                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                <span class="btn-text">Apply Style</span>
+            </button>
+        </div>
+    <!-- End scenario -->
+    </div>
+</div>
+
 <!-- Modal -->
-<div
-    class="modal lh-modal fade"
+<div class="modal lh-modal fade"
     id="staySafeModal"
     tabindex="-1"
     aria-labelledby="exampleModalLabel"
-    aria-hidden="true"
->
+    aria-hidden="true">
     <div class="modal-dialog lh-modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-        <div class="modal-header lh-modal-header">
-        <h1
-            class="modal-title lh-modal-title fs-5"
-            id="exampleModalLabel"
-        >
-            Stay Safe
-        </h1>
-        <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-        ></button>
-        </div>
-        <div class="modal-body">
-        <div class="d-flex justify-content-center mb-4">
-            <img
-            style="width: 88px"
-            src="{{ asset('images/stay-safe.png') }}"
-            alt="Stay safe warning icon"
-            />
-        </div>
+        <div class="modal-content">
+            <div class="modal-header lh-modal-header">
+            <h1
+                class="modal-title lh-modal-title fs-5"
+                id="exampleModalLabel"
+            >
+                Stay Safe
+            </h1>
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+            ></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-center mb-4">
+                    <img
+                    style="width: 88px"
+                    src="{{ asset('images/stay-safe.png') }}"
+                    alt="Stay safe warning icon"
+                    />
+                </div>
 
-        <h3 style="text-transform: uppercase; text-align: center">
-            Stay safe while connecting with the new people. not to share
-            personal data, don't send money to strangers.
-        </h3>
+                <h3 style="text-transform: uppercase; text-align: center">
+                    Stay safe while connecting with the new people. not to share
+                    personal data, don't send money to strangers.
+                </h3>
+            </div>
+            <div class="modal-footer">
+                <button class="lh-button" data-bs-dismiss="modal">
+                    got it
+                </button>
+            </div>
         </div>
-        <div class="modal-footer">
-        <button class="lh-button" data-bs-dismiss="modal">
-            got it
-        </button>
-        </div>
-    </div>
     </div>
 </div>
 @endsection
 @section('script')
 <script>
     const locationField = document.getElementById("locationField");
-    const locationPopup = document.getElementById("locationPopup");
-    const closePopup = document.getElementById("closePopupLocation");
     const searchInput = document.getElementById("searchInput");
-    const locationList = document.getElementById("locationList");
     const selectedLocation = document.getElementById("selectedLocation");
-    const locationId = document.getElementById("location");
+    const screenOne = getIdElement("screenOne");
 
-    // Show popup
-    locationField.addEventListener("click", () => {
-        locationPopup.classList.add("active");
-        renderLocations(locations);
+    document.addEventListener("DOMContentLoaded", () => {
+        renderLocations(locations, "locationList", "location");
     });
 
-    // Close popup
-    closePopup.addEventListener("click", () => {
-        locationPopup.classList.remove("active");
+    clickAction(".lh-tag", (el) => {
+        el.classList.toggle("active");
     });
-
-    const locations = [
-      "London",
-      "Birmingham",
-      "Manchester",
-      "Leeds",
-      "Sheffield",
-      "Liverpool",
-      "Bristol",
-      "Newcastle upon Tyne",
-      "Sunderland",
-      "Leicester",
-      "Coventry",
-      "Kingston upon Hull",
-      "Bradford",
-      "Stoke-on-Trent",
-      "Wolverhampton",
-      "Nottingham",
-      "Derby",
-      "Southampton",
-      "Portsmouth",
-      "Plymouth",
-      "Brighton",
-      "Reading",
-      "Northampton",
-      "Luton",
-      "Swindon",
-      "Milton Keynes",
-      "Oxford",
-      "Cambridge",
-      "York",
-      "Blackpool",
-      "Middlesbrough",
-      "Bolton",
-      "Stockport",
-      "Warrington",
-      "Huddersfield",
-      "Preston",
-      "Norwich",
-      "Peterborough",
-      "Exeter",
-      "Chelmsford",
-      "Gloucester",
-      "Bath",
-      "Colchester",
-      "Ipswich",
-      "Chester",
-      "Dundee",
-      "Edinburgh",
-      "Glasgow",
-      "Aberdeen",
-      "Belfast"
-    ];
-
-    // Render list dynamically
-    function renderLocations(list) {
-        locationList.innerHTML = "";
-        list.forEach((loc) => {
-            const li = document.createElement("li");
-            li.textContent = loc;
-            li.addEventListener("click", () => {
-                selectedLocation.textContent = loc;
-                locationId.value = loc;
-                locationPopup.classList.remove("active");
-            });
-            locationList.appendChild(li);
-        });
-    }
 
     // Search filter
     searchInput.addEventListener("input", () => {
@@ -241,61 +188,70 @@
         const filtered = locations.filter((loc) =>
             loc.toLowerCase().includes(query)
         );
-        renderLocations(filtered);
+        renderLocations(filtered, "locationList", "location");
     });
 
-    // Attach event to ALL current-location buttons
-    document.querySelectorAll(".current-location-btn").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
+    document.addEventListener("DOMContentLoaded", () => {
+        let selectedStyle = null;
 
-                try {
-                    // Call OpenStreetMap Nominatim API
-                    const response = await fetch(
-                    `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
-                    );
-                    const data = await response.json();
+        // Handle style button clicks
+        document.querySelectorAll("#tags-container button").forEach(btn => {
+            btn.addEventListener("click", () => {
+                selectedStyle = btn.dataset.style;
 
-                    if (data && data.address) {
-                    // Try to extract the most relevant city name
-                    const city =
-                        data.address.city ||
-                        data.address.town ||
-                        data.address.village ||
-                        data.address.county; // fallback if city is not available
-
-                    if (city) {
-                        selectedLocation.textContent = city;
-                        locationId.value = city;
-                    } else {
-                        selectedLocation.textContent = "Unknown location";
-                    }
-                    } else {
-                        selectedLocation.textContent = `Lat: ${lat.toFixed(
-                        3
-                    )}, Lon: ${lon.toFixed(3)}`;
-                    }
-                } catch (error) {
-                    alert("Could not get address from coordinates.");
-                    selectedLocation.textContent = `Lat: ${lat.toFixed(
-                    3
-                    )}, Lon: ${lon.toFixed(3)}`;
-                }
-
-                locationPopup.classList.remove("active");
-                },
-                (error) => alert("Permission denied or unavailable")
-            );
-            } else {
-                alert("Geolocation not supported by your browser.");
-            }
+                // highlight active button
+                document.querySelectorAll("#tags-container button").forEach(b => b.classList.remove("active"));
+                    btn.classList.add("active");
+            });
         });
-    });
 
+        // Handle Apply Style
+        document.getElementById("applyStyle").addEventListener("click", () => {
+            const btn = document.getElementById("applyStyle");
+            const spinner = btn.querySelector(".spinner-border");
+            const btnText = btn.querySelector(".btn-text");
+            const textarea = document.getElementById("lh-textarea");
+            const text = textarea.value;
+
+            if (!text) {
+                alert("Please write something first.");
+                return;
+            }
+            if (!selectedStyle) {
+                alert("Please select a style first.");
+                return;
+            }
+
+            // Show loading spinner
+            btn.disabled = true;
+            spinner.classList.remove("d-none");
+            btnText.textContent = "Generating...";
+
+            fetch("/ad/apply-style", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                },
+                body: JSON.stringify({ text: text, style: selectedStyle })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    textarea.value = data.styled_text;
+                    document.getElementById("helpMePopup").classList.remove("active");
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Something went wrong!");
+                })
+                .finally(() => {
+                    // Reset button
+                    btn.disabled = false;
+                    spinner.classList.add("d-none");
+                    btnText.textContent = "Apply Style";
+                });
+        });
+
+    });
 </script>
 @endsection

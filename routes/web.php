@@ -4,9 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Home;
 use App\Http\Controllers\Ads;
 use App\Http\Controllers\Profiles;
-use App\Http\Controllers\Package;
+use App\Http\Controllers\PackageController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\PaymentIntentController;
 use Illuminate\Support\Facades\Mail;
 
 // Home
@@ -46,6 +48,7 @@ Route::delete('/ad/delete/{id}', [Ads::class, 'destroy'])->name('ads.destroy');
 Route::post('/ad/{ad}/toggle-like', [Ads::class, 'toggleLike'])
      ->middleware('auth')
      ->name('ad.toggleLike');
+Route::post('/ad/apply-style', [Ads::class, 'apply_style']);
 Route::get('/ad/{box}', [Home::class, 'detail']);
 
 // Test mail
@@ -97,7 +100,16 @@ Route::post('/account/verify-email-code', [Profiles::class, 'verify_email_code']
 Route::post('/account/email_update', [AuthController::class, 'update_email'])->name('profile.email_update');
 
 // Package
-Route::get('/offer', [Package::class, 'offer'])->name('offer');
+Route::get('/offer', [PackageController::class, 'offer'])->name('offer');
+Route::post('/packages/{id}/buy', [PackageController::class, 'buy'])->name('packages.buy');
+
+// Checkout
+Route::post('/checkout/{id}', [CheckoutController::class, 'checkout'])->name('checkout.start');
+Route::get('/checkout/success/{packageId}', [CheckoutController::class, 'success'])->name('checkout.success');
+
+
+Route::post('/create-payment-intent/{package}', [PaymentIntentController::class, 'create'])
+    ->name('payment.intent.create');
 
 // Set up for 404 page
 Route::fallback(function () {

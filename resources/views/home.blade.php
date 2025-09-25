@@ -112,9 +112,9 @@
 
 </div>
 <!-- Location pop up -->
-<div class="lh-popup" id="locationPopup">
+<div class="lh-popup" id="locationPopup" data-modal>
   <div class="lh-popup-header">
-    <button id="closePopupLocation">
+    <button id="closePopupLocation" data-close>
       <img src="{{ asset('icons/close.svg') }}" alt="Close button" />
     </button>
   </div>
@@ -135,60 +135,6 @@
     const locationList = document.getElementById("locationList");
     const alert = document.getElementById("alert");
     const ctaLocation = document.getElementById("ctaLocation");
-
-    const locations = [
-      "All Locations",
-      "London",
-      "Birmingham",
-      "Manchester",
-      "Leeds",
-      "Sheffield",
-      "Liverpool",
-      "Bristol",
-      "Newcastle upon Tyne",
-      "Sunderland",
-      "Leicester",
-      "Coventry",
-      "Kingston upon Hull",
-      "Bradford",
-      "Stoke-on-Trent",
-      "Wolverhampton",
-      "Nottingham",
-      "Derby",
-      "Southampton",
-      "Portsmouth",
-      "Plymouth",
-      "Brighton",
-      "Reading",
-      "Northampton",
-      "Luton",
-      "Swindon",
-      "Milton Keynes",
-      "Oxford",
-      "Cambridge",
-      "York",
-      "Blackpool",
-      "Middlesbrough",
-      "Bolton",
-      "Stockport",
-      "Warrington",
-      "Huddersfield",
-      "Preston",
-      "Norwich",
-      "Peterborough",
-      "Exeter",
-      "Chelmsford",
-      "Gloucester",
-      "Bath",
-      "Colchester",
-      "Ipswich",
-      "Chester",
-      "Dundee",
-      "Edinburgh",
-      "Glasgow",
-      "Aberdeen",
-      "Belfast"
-    ];
 
     function renderLocations(list) {
         locationList.innerHTML = "";
@@ -220,15 +166,6 @@
         });
     }
 
-    clickAction(".lh-location", (el) => {
-        locationPopup.classList.add("active");
-        renderLocations(locations);
-    });
-
-    clickAction("#closePopupLocation", (el) => {
-        locationPopup.classList.remove("active");
-    });
-
     clickAction(".lh-alert-close", (e) => {
         alert.style.display = "none";
     });
@@ -237,6 +174,7 @@
     document.addEventListener("DOMContentLoaded", () => {
         ctaLocation.style.textDecoration = "underline";
         new BootstrapPinInput();
+        renderLocations(locations);
     });
 </script>
 @endsection
