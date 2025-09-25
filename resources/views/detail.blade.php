@@ -74,7 +74,7 @@
             <span class="lh-link-icon">
                 <img src="{{ asset('icons/link.svg') }}" alt="Chain icon" />
             </span>
-            <a href="#">lonelyhearts.me/box/{{ $ad->box_number }}</a>
+            <a href="#" id="copyAdUrl" data-url="{{ url($ad->slug.'.html') }}">lonelyhearts.me/box/{{ $ad->box_number }}</a>
         </div>
     </div>
 
@@ -95,6 +95,16 @@
             </div>
         </div>
     </div>
+</div>
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+  <div id="copyToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        ✅ Ad URL copied to clipboard!
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
 </div>
 @endsection
 @section('script')
@@ -122,6 +132,32 @@ document.getElementById('shareBtn').addEventListener('click', async () => {
             alert("Link copied to clipboard!");
         });
     }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    // initialize
+    likeIcon.style.backgroundSize = "cover";
+    const copyBtn = document.getElementById("copyAdUrl");
+    const toastEl = document.getElementById("copyToast");
+    const toast = new bootstrap.Toast(toastEl);
+
+    let tooltipTriggerList = [].slice.call(
+        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    );
+    let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    copyBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        const url = this.getAttribute("data-url");
+
+        navigator.clipboard.writeText(url).then(() => {
+            toast.show();
+        }).catch(err => {
+            console.error("Failed to copy: ", err);
+        });
+    });
 });
 
 // Get initial state from DB (true = not liked, false = liked)
@@ -168,19 +204,6 @@ like.addEventListener("click", () => {
         likeState = !likeState;
         setLike(likeState);
         alert("Failed to update like status.");
-    });
-});
-
-// set the tooltip
-document.addEventListener("DOMContentLoaded", () => {
-    // initialize
-    likeIcon.style.backgroundSize = "cover";
-
-    let tooltipTriggerList = [].slice.call(
-        document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    );
-    let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 });
 </script>
