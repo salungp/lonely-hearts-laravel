@@ -9,6 +9,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\PaymentIntentController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Mail;
 
 // Home
@@ -71,6 +72,9 @@ Route::get('/account/ads/edit/{id}', [Ads::class, 'ad_edit'])->name('profile.ad_
 Route::post('/account/store', [Profiles::class, 'store'])->name('profile.store');
 Route::post('/account/update', [Profiles::class, 'update'])->name('profile.update')->middleware('auth');
 
+// Payment
+Route::get('/account/payment', [PaymentController::class, 'show'])->name('profile.payment');
+
 // Message
 Route::get('/message', [MessageController::class, 'show'])->name('message')->middleware('auth');
 Route::get('/message/sent', [MessageController::class, 'sent'])->name('message.sent')->middleware('auth');
@@ -92,6 +96,9 @@ Route::get('/privacy-policy', function() {
 Route::get('/how-it-works', function() {
     return view('links.how_it_works');
 })->name('how_it_works');
+Route::get('/help', function() {
+    return view('links.help');
+})->name('help');
 
 // Profile email
 Route::get('/account/verify-email', [Profiles::class, 'verify_email'])->name('profile.verify_email')->middleware('auth');

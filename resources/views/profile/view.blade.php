@@ -37,14 +37,14 @@
         <span class="lh-link-icon">
         <img src="{{ asset('icons/dollar.svg') }}" alt="Chain icon" />
         </span>
-        <a href="#">Payments</a>
+        <a href="{{ route('profile.payment') }}">Payments</a>
     </div>
 
     <div class="d-flex lh-link-list mb-3">
         <span class="lh-link-icon">
         <img src="{{ asset('icons/help.svg') }}" alt="Chain icon" />
         </span>
-        <a href="#">Help</a>
+        <a href="{{ route('help') }}">Help</a>
     </div>
 
     <div class="d-flex lh-link-list mb-3">
