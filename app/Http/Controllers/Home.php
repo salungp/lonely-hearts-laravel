@@ -6,6 +6,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use App\Services\LocationService;
 
 class Home extends Controller
 {
@@ -52,8 +53,9 @@ class Home extends Controller
         ]);
     }
 
-    public function detail_slug($slug): View
+    public function detail_slug($slug, LocationService $locationService): View
     {
+        $city = $locationService->detect();
         $ad = DB::table('ads')->where('slug', $slug)->first();
 
         if (!$ad) {
@@ -72,7 +74,8 @@ class Home extends Controller
 
         return view('detail', [
             'conversation' => 2,
-            'ad' => $ad
+            'ad' => $ad,
+            'city' => $city
         ]);
     }
 

@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Services\LocationService;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -16,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensure.auth' => \App\Http\Middleware\EnsureUserAuthenticated::class,
         ]);
     })
+    ->withSingletons([
+        LocationService::class => fn () => new LocationService(),
+    ])
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();

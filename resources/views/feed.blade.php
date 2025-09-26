@@ -10,10 +10,10 @@
   <a href="{{ route('create_ad') }}" class="lh-link mb-2">Looking for ♥️</a>
     @foreach($ads as $ad)
     <!-- Feed list -->
-    <a href="{{ url('/ad/'.$ad->box_number) }}" class="lh-feed-card text-decoration-none text-dark" >
+    <a href="{{ url($ad->slug.'.html') }}" class="lh-feed-card text-decoration-none text-dark" >
       <div>
         <h2>
-          <b class="text-uppercase">{{ $ad->snapshot_name }}, {{ $ad->snapshot_age }}, {{ $ad->snapshot_gender }}, {{ $ad->location }}, {{ $ad->snapshot_status }} .</b> {{ substr($ad->description, 0, 50) . '...' }}
+          <b class="text-uppercase">{{ $ad->title }} .</b> {{ substr($ad->description, 0, 50) . '...' }}
         </h2>
 
         <div class="d-flex justify-content-between align-items-center mt-2">
@@ -55,7 +55,6 @@
             <p style="color: #FFF5DF; background-color: rgba(255, 255, 255, 0);">Find love the old fashioned way. No swiping, just words from the hearth (and soul) Exchange love letters from the heart.</p>
         </div>
     </a>
-
 </div>
 <!-- Location pop up -->
 <div class="lh-popup" id="locationPopup">
@@ -79,22 +78,7 @@
 @section('script')
 <script>
     const locationList = document.getElementById("locationList");
-    const alert = document.getElementById("alert");
     const ctaLocation = document.getElementById("ctaLocation");
-    // Sample locations
-    const locations = [
-    "All Locations", // ✅ Add this at the top
-    "London",
-    "Manchester",
-    "Leicester",
-    "Birmingham",
-    "Bristol",
-    "Plymouth",
-    "Leeds",
-    "Bradford",
-    "Coventry",
-    "Sheffield"
-    ];
 
     function renderLocations(list) {
         locationList.innerHTML = "";

@@ -166,13 +166,72 @@
         </div>
     </div>
 </div>
+<!-- Location pop up -->
+<div class="lh-popup" id="writingPopup" data-modal>
+    <div class="lh-popup-header"></div>
+    <div class="lh-popup-body">
+        <div class="container-sm">
+            <div id="writing" class="d-flex justify-content-center align-items-center w-100" style="flex-direction: column !important; min-height: 50vh" >
+                <img
+                src="{{ asset('images/loading-icon.png') }}"
+                alt="Loading icon"
+                style="width: 180px; margin-bottom: 20px" />
+                <h1 class="lh-title" id="loading-text">Writing ad...</h1>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 @section('script')
+<script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script>
 <script>
     const locationField = document.getElementById("locationField");
     const searchInput = document.getElementById("searchInput");
     const selectedLocation = document.getElementById("selectedLocation");
     const screenOne = getIdElement("screenOne");
+    const loadingText = document.getElementById("loading-text");
+    const writing = document.getElementById("writing");
+    let dotCount = 0;
+
+    const interval = setInterval(() => {
+        dotCount = (dotCount + 1) % 4;
+        loadingText.textContent = "WRITING AD" + ".".repeat(dotCount);
+    }, 500);
+
+    document.addEventListener("DOMContentLoaded", () => {
+    
+        updateDescription("description");
+        locations.shift();
+        renderLocations(locations, "locationList", "location");
+    });
+
+    $(document).ready(function () {
+        $("form").on("submit", function (e) {
+            e.preventDefault();
+
+            $("#writingPopup").addClass("active");
+
+            $.ajax({
+                url: $(this).attr("action"),
+                method: "POST",
+                data: new FormData(this),
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success) {
+                        window.location.href = "/ad/confirmation/" + response.data.box_number;
+                    } else {
+                        alert(response.message || "Something went wrong");
+                        $("#writingPopup").removeClass("active");
+                    }
+                },
+                error: function (xhr) {
+                    alert("Error: " + xhr.responseText);
+                    $("#writingPopup").removeClass("active");
+                }
+            });
+        });
+    });
 
     document.addEventListener("DOMContentLoaded", () => {
         locations.shift();

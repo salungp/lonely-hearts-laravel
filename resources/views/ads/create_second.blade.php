@@ -7,7 +7,6 @@
 @endsection
 @section('content')
 <div class="container-sm">
-
     <!-- Form start line -->
     <form action="{{ route('create.store') }}" method="POST">
         @csrf
@@ -158,120 +157,148 @@
         </div>
     </div>
 </div>
+<!-- Location pop up -->
+<div class="lh-popup" id="writingPopup" data-modal>
+    <div class="lh-popup-header"></div>
+    <div class="lh-popup-body">
+        <div class="container-sm">
+            <div id="writing" class="d-flex justify-content-center align-items-center w-100" style="flex-direction: column !important; min-height: 50vh" >
+                <img
+                src="{{ asset('images/loading-icon.png') }}"
+                alt="Loading icon"
+                style="width: 180px; margin-bottom: 20px" />
+                <h1 class="lh-title" id="loading-text">Writing ad...</h1>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 @section('script')
+<script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script>
 <script>
-const locationField = document.getElementById("locationField");
-const searchInput = document.getElementById("searchInput");
-const selectedLocation = document.getElementById("selectedLocation");
+$(document).ready(function () {
+    const $searchInput = $("#searchInput");
+    const $selectedLocation = $("#selectedLocation");
+    const $loadingText = $("#loading-text");
+    const $writingPopup = $("#writingPopup");
 
-document.addEventListener("DOMContentLoaded", () => {
+    // Animate "WRITING AD..."
+    let dotCount = 0;
+    setInterval(() => {
+        dotCount = (dotCount + 1) % 4;
+        $loadingText.text("WRITING AD" + ".".repeat(dotCount));
+    }, 500);
+
+    // Initial setup
     updateDescription("description");
     locations.shift();
     renderLocations(locations, "locationList", "location");
-});
 
-// Search filter
-searchInput.addEventListener("input", () => {
-    const query = searchInput.value.toLowerCase();
-    const filtered = locations.filter((loc) =>
-        loc.toLowerCase().includes(query)
-    );
-    renderLocations(filtered, "locationList", "location");
-});
+    // Handle form submit with AJAX
+    $("form").on("submit", function (e) {
+        e.preventDefault();
+        $writingPopup.addClass("active");
 
-// Attach event to ALL current-location buttons
-document.querySelectorAll(".current-location-btn").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
+        $.ajax({
+            url: $(this).attr("action"),
+            method: "POST",
+            data: new FormData(this),
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    window.location.href = "/ad/confirmation/" + response.data.box_number;
+                } else {
+                    alert(response.message || "Something went wrong");
+                    $writingPopup.removeClass("active");
+                }
+            },
+            error: function (xhr) {
+                alert("Error: " + xhr.responseJSON.message);
+                $writingPopup.removeClass("active");
+            }
+        });
+    });
+
+    // Search filter
+    $searchInput.on("input", function () {
+        const query = $(this).val().toLowerCase();
+        const filtered = locations.filter(loc => loc.toLowerCase().includes(query));
+        renderLocations(filtered, "locationList", "location");
+    });
+
+    // Handle current location button
+    $(".current-location-btn").on("click", function (e) {
         e.stopPropagation();
-        if (navigator.geolocation) {
+
+        if (!navigator.geolocation) {
+            return alert("Geolocation not supported by your browser.");
+        }
+
         navigator.geolocation.getCurrentPosition(
             async (position) => {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
 
-            try {
-                // Call OpenStreetMap Nominatim API
-                const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
-                );
-                const data = await response.json();
+                try {
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+                    );
+                    const data = await response.json();
 
-                if (data && data.address) {
-                // Try to extract the most relevant city name
-                const city =
-                    data.address.city ||
-                    data.address.town ||
-                    data.address.village ||
-                    data.address.county; // fallback if city is not available
+                    if (data && data.address) {
+                        const city =
+                            data.address.city ||
+                            data.address.town ||
+                            data.address.village ||
+                            data.address.county;
 
-                if (city) {
-                    selectedLocation.textContent = city;
-                    locationId.value = city;
-                } else {
-                    selectedLocation.textContent = "Unknown location";
+                        if (city) {
+                            $selectedLocation.text(city);
+                            $("#location").val(city);
+                        } else {
+                            $selectedLocation.text("Unknown location");
+                        }
+                    } else {
+                        $selectedLocation.text(`Lat: ${lat.toFixed(3)}, Lon: ${lon.toFixed(3)}`);
+                    }
+                } catch (error) {
+                    alert("Could not get address from coordinates.");
+                    $selectedLocation.text(`Lat: ${lat.toFixed(3)}, Lon: ${lon.toFixed(3)}`);
                 }
-                } else {
-                    selectedLocation.textContent = `Lat: ${lat.toFixed(
-                    3
-                )}, Lon: ${lon.toFixed(3)}`;
-                }
-            } catch (error) {
-                alert("Could not get address from coordinates.");
-                selectedLocation.textContent = `Lat: ${lat.toFixed(
-                3
-                )}, Lon: ${lon.toFixed(3)}`;
-            }
 
-            locationPopup.classList.remove("active");
+                $("#locationPopup").removeClass("active");
             },
-            (error) => alert("Permission denied or unavailable")
+            () => alert("Permission denied or unavailable")
         );
-        } else {
-            alert("Geolocation not supported by your browser.");
+    });
+
+    // Toggle dropdowns
+    $(".lh-dropdown-button").on("click", function () {
+        const $wrap = $(this).parent();
+        $(".lh-dropdown-wrap").not($wrap).removeClass("open");
+        $wrap.toggleClass("open");
+    });
+
+    // Select option
+    $(".lh-option").on("click", function () {
+        const $wrap = $(this).closest(".lh-dropdown-wrap");
+        const $btn = $wrap.find(".lh-dropdown-button");
+        const field = $wrap.data("field");
+
+        selections[field] = $(this).text(); // save selection
+        $btn.text($(this).text()); // update button
+        $wrap.removeClass("open");
+
+        updateDescription("description");
+    });
+
+    // Close dropdowns when clicking outside
+    $(document).on("click", function (e) {
+        if (!$(e.target).closest(".lh-dropdown-wrap").length) {
+            $(".lh-dropdown-wrap").removeClass("open");
         }
     });
-});
-
-// Toggle dropdown
-document.querySelectorAll(".lh-dropdown-button").forEach((btn) => {
-  btn.addEventListener("click", function () {
-    const wrap = this.parentElement;
-    document.querySelectorAll(".lh-dropdown-wrap").forEach((el) => {
-      if (el !== wrap) el.classList.remove("open");
-    });
-    wrap.classList.toggle("open");
-  });
-});
-
-// Select option
-document.querySelectorAll(".lh-option").forEach((option) => {
-  option.addEventListener("click", function () {
-    const wrap = this.closest(".lh-dropdown-wrap");
-    const btn = wrap.querySelector(".lh-dropdown-button");
-    const field = wrap.dataset.field;
-
-    // Save selection
-    selections[field] = this.textContent;
-
-    // Update button text
-    btn.textContent = this.textContent;
-
-    // Close dropdown
-    wrap.classList.remove("open");
-
-    // Update textarea with readable sentence
-    updateDescription("description");
-  });
-});
-
-// Close dropdown when clicking outside
-document.addEventListener("click", function (e) {
-  if (!e.target.closest(".lh-dropdown-wrap")) {
-    document.querySelectorAll(".lh-dropdown-wrap").forEach((el) => {
-      el.classList.remove("open");
-    });
-  }
 });
 </script>
 @endsection

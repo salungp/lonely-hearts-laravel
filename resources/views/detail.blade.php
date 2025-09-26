@@ -16,7 +16,7 @@
 <div class="container-sm">
     <div class="ad-content" style="margin-bottom: 150px">
         <h2 class="ad-title text-uppercase mb-2">
-            {{ $ad->snapshot_name }}, {{ $ad->snapshot_age }}, {{ $ad->snapshot_gender }}, {{ strtoupper($ad->location) }}, {{ $ad->snapshot_status }}
+            {{ $ad->title }}
         </h2>
 
         @if ($conversation >= 3)
@@ -58,7 +58,6 @@
 
         <p style="text-align: justify">
             {{ $ad->description }}
-            <span class="lh-text-special" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="GSOH means Good Sense of Humour (means they are funny :)" >GSOH</span> BOX No. {{ $ad->box_number }}.
         </p>
 
         <!-- Box no -->

@@ -48,13 +48,15 @@ $profile = session('profile')
 </div>
 <!-- Country Selector Popup -->
 <div id="countryPopup" class="popup hidden">
-    <div class="popup-content">
-    <input
-        type="text"
-        id="countrySearch"
-        placeholder="Search country..."
-    />
-    <ul id="countryList"></ul>
+    <div class="container-sm">
+        <div class="popup-content">
+            <input
+                type="text"
+                id="countrySearch"
+                placeholder="Search country..."
+            />
+            <ul id="countryList"></ul>
+        </div>
     </div>
 </div>
 @endsection

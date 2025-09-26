@@ -407,32 +407,82 @@ class Ads extends Controller
             ]);
 
             return redirect()->route('offer');
-        } else {
-            $user_id = Auth::id();
-            $profile = DB::table('table_profiles')->where('user_id', $user_id)->first();
-            $box = rand(100000, 999999);
-            $slug = Str::slug($profile->location.' '.$profile->display_name.' '.$profile->occupation.' '.$profile->status.' '.$box);
-
-            if ($profile) {
-                DB::table('ads')->insert([
-                    'user_id'               => $user_id,
-                    'description'           => $validated['description'],
-                    'slug'                  => $slug,
-                    'snapshot_name'         => $profile->display_name,
-                    'snapshot_occupation'   => $profile->occupation,
-                    'snapshot_age'          => $profile->age,
-                    'snapshot_status'       => $profile->status,
-                    'snapshot_gender'       => $profile->gender,
-                    'location'              => $profile->location,
-                    'views'                 => 0,
-                    'box_number'            => $box,
-                    'created_at'            => now(),
-                    'updated_at'            => now(),
-                ]);
-
-                return redirect()->route('ad.writing', ['box' => $box]);
-            }
         }
+
+        $user_id = Auth::id();
+        $profile = DB::table('table_profiles')->where('user_id', $user_id)->first();
+        $box = rand(100000, 999999);
+
+        if ($profile) {
+            $prompt = "
+            You are writing humorous and quirky personal ad titles, like in the book 'They Call Me Naughty Lola'.
+            Examples:
+            - Tonight, female readers to 90, I am the hunter and you are my quarry.
+            - If we share a bath together I have to insist on wearing verruca socks.
+            - I’ll see you at the singles night.
+        
+            Rules:
+            - Output only ONE short title (max 8 words).
+            - Do not use quotation marks or exclamation marks.
+            - No explanations.
+            Profile:
+            Name: {$profile->display_name}
+            Age: {$profile->age}
+            Gender: {$profile->gender}
+            Location: {$profile->location}
+            Status: {$profile->status}
+            Occupation: {$profile->occupation}
+            Description: {$validated['description']}
+            ";
+        
+            $response = OpenAI::chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are a witty personal ad writer.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+            ]);
+        
+            $title = trim($response['choices'][0]['message']['content'] ?? 'Seeking someone special');
+            $title = preg_replace('/^["“]|["”]$/u', '', $title); 
+            $title = str_replace('!', '', $title);
+            $title = trim($title);
+        
+            $slug = Str::slug($title);
+        
+            $adId = DB::table('ads')->insertGetId([
+                'user_id'             => $user_id,
+                'description'         => $validated['description'],
+                'title'               => $title,
+                'slug'                => $slug,
+                'snapshot_name'       => $profile->display_name,
+                'snapshot_occupation' => $profile->occupation,
+                'snapshot_age'        => $profile->age,
+                'snapshot_status'     => $profile->status,
+                'snapshot_gender'     => $profile->gender,
+                'location'            => $profile->location,
+                'views'               => 0,
+                'box_number'          => $box,
+                'created_at'          => now(),
+                'updated_at'          => now(),
+            ]);
+        
+            return response()->json([
+                'success' => true,
+                'message' => 'Ad created successfully',
+                'data' => [
+                    'id'          => $adId,
+                    'title'       => $title,
+                    'slug'        => $slug,
+                    'box_number'  => $box,
+                ]
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong!',
+            ], 500);
+        }        
     }
 
     public function toggleLike($adId)
