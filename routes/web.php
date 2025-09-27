@@ -35,6 +35,7 @@ Route::get('/sitemap.xml', function () {
 Route::get('/', [Home::class, 'show'])->name('home');
 Route::get('/feed', [Home::class, 'feed'])->name('feed');
 Route::post('/set-location', [Ads::class, 'filter_location'])->name('location.set');
+Route::get('/my-location', [Home::class, 'show_location']);
 
 // Check when create/reply ad
 Route::middleware(['profile.or.create'])->group(function () {

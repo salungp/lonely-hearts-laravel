@@ -6,10 +6,54 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
-use App\Services\LocationService;
+use Illuminate\Support\Facades\Http;
 
 class Home extends Controller
 {
+    public function show_location(Request $request)
+    {
+        $ip = $request->ip();
+
+        // Localhost fallback
+        if ($ip === '127.0.0.1' || $ip === '::1') {
+            $ip = '1.1.1.1'; // Cloudflare public IP
+        }
+
+        $response = Http::get("https://ipapi.co/{$ip}/json/");
+
+        if ($response->failed()) {
+            return [
+                'ip'      => $ip,
+                'country' => 'United Kingdom',
+                'city'    => 'London',
+                'lat'     => 51.5072,
+                'lon'     => -0.1276,
+            ];
+        }
+
+        $data = $response->json();
+
+        // If city/country missing, fallback
+        if (empty($data['city']) || empty($data['country_name'])) {
+            return [
+                'ip'      => $ip,
+                'country' => 'United Kingdom',
+                'city'    => 'London',
+                'lat'     => 51.5072,
+                'lon'     => -0.1276,
+            ];
+        }
+
+        return [
+            'ip'      => $ip,
+            'country' => $data['country_name'],
+            'city'    => $data['city'],
+            'lat'     => $data['latitude'] ?? null,
+            'lon'     => $data['longitude'] ?? null,
+        ];
+    }
+
+    
     public function show(): View
     {
         $query = DB::table('ads')
@@ -53,9 +97,8 @@ class Home extends Controller
         ]);
     }
 
-    public function detail_slug($slug, LocationService $locationService): View
+    public function detail_slug($slug): View
     {
-        $city = $locationService->detect();
         $ad = DB::table('ads')->where('slug', $slug)->first();
 
         if (!$ad) {
@@ -75,7 +118,6 @@ class Home extends Controller
         return view('detail', [
             'conversation' => 2,
             'ad' => $ad,
-            'city' => $city
         ]);
     }
 

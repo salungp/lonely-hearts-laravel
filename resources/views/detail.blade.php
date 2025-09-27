@@ -16,7 +16,7 @@
 <div class="container-sm">
     <div class="ad-content" style="margin-bottom: 150px">
         <h2 class="ad-title text-uppercase mb-2">
-            {{ $ad->title }}
+            {{ $ad->snapshot_name }} {{ $ad->location }} {{ $ad->title }}
         </h2>
 
         @if ($conversation >= 3)

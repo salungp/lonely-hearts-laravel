@@ -172,3 +172,17 @@
     margin-top: 24vh;
     background: transparent !important;
   }
+
+  .lh-feed-card {
+    box-sizing: border-box;
+  }
+
+  .lh-feed-card div {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .lh-feed-card div div {
+    flex-direction: row;
+  }

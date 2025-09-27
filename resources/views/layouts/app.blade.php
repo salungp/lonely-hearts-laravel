@@ -70,7 +70,7 @@
             <div class="lh-sub-header d-flex mt-3 justify-content-between">
               <h3 id="current-date">FRI 6th Jun 2025</h3>
               <a href="#" class="lh-location" id="ctaLocation" data-target="locationPopup"
-                >{{ session('selected_location') ?? 'All Locations' }}</a
+                ></a
               >
             </div>
         </div>
@@ -96,6 +96,23 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"
     ></script>
     <script src="{{ asset('js/script.js') }}"></script>
+    <script>
+      async function getLocation() {
+        try {
+            const res = await fetch("{{ url('/my-location') }}");
+            const data = await res.json();
+            return data;
+        } catch (err) {
+            console.error("Error:", err);
+            return null;
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", async () => {
+          const location = await getLocation(); // waits for fetch
+          document.getElementById("ctaLocation").textContent = location.city || location.cityName || "Unknown";
+      });
+    </script>
     @yield('script')
 </body>
 </html>
