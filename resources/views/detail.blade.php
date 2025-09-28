@@ -202,7 +202,7 @@ like.addEventListener("click", () => {
         // If request failed, revert state
         likeState = !likeState;
         setLike(likeState);
-        alert("Failed to update like status.");
+        alert("You need to login or create account first!");
     });
 });
 </script>

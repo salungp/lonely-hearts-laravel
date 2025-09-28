@@ -45,7 +45,7 @@
             <nav>
                 @yield('back')
 
-                <a href="#">
+                <a href="{{ route('home') }}">
                     <img
                     src="{{ asset('images/logo-new-white.svg') }}"
                     alt="Lonely hearts logo heart pixelated"

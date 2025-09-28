@@ -69,9 +69,25 @@ $profile = session('profile')
         apiUrl: "https://restcountries.com/v3.1/all?fields=name,cca2,idd,flags",
     });
 
-    // Auto set default from backend (Laravel variable)
-    if (window.defaultCountryCode) {
-        selector.setDefault(window.defaultCountryCode);
+    async function getLocation() {
+    try {
+        const res = await fetch("{{ url('/my-location') }}");
+        const data = await res.json();
+        return data;
+    } catch (err) {
+        console.error("Error:", err);
+        return null;
     }
+    }
+
+    window.phoneCodes = @json(config('phonecodes'));
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const location = await getLocation(); // waits for fetch
+        document.getElementById("ctaLocation").textContent =
+            location.city || location.cityName || "Unknown";
+
+        selector.setDefault(window.phoneCodes[location.country]);
+    });
 </script>
 @endsection

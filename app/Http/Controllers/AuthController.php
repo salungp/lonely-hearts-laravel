@@ -18,18 +18,12 @@ class AuthController extends Controller
     public function login(): View
     {
         $user = '';
-        $ip = request()->ip();
-        $response = Http::get("http://ip-api.com/json/{$ip}");
-        $data = $response->json();
-
-        $countryCode = $data['countryCode'] ?? 'US';
         if (session()->has('profile')) {
             $user = session('profile')['display_name'];
         } 
 
         return view('auth.login', [
-            'user' => $user,
-            'country_code' => $countryCode
+            'user' => $user
         ]);
     }
 

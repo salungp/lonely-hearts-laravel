@@ -30,7 +30,7 @@ class PhoneVerificationController extends Controller
         // TODO: integrate SMS gateway here
         // SmsService::send($request->phone, "Your code is $otp");
 
-        return response()->json(['message' => 'OTP sent']);
+        return redirect()->route('auth.verify')->with('success', 'Your otp code is has been sent!');
     }
 
     // Step 2: Verify OTP

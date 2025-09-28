@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
 use App\Models\Ad;
+use App\Http\Controllers\PhoneVerificationController;
 
 Route::get('/sitemap.xml', function () {
     $sitemap = Sitemap::create()
@@ -29,7 +30,6 @@ Route::get('/sitemap.xml', function () {
 
     return $sitemap->toResponse(request());
 });
-
 
 // Home
 Route::get('/', [Home::class, 'show'])->name('home');
@@ -51,6 +51,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::post('/login_or_register', [AuthController::class, 'LoginOrRegister'])->name('login_or_register');
 Route::get('/verify', [AuthController::class, 'verify_code'])->name('auth.verify');
 Route::post('/verify_code', [AuthController::class, 'verifyOtp'])->name('auth.verify_code');
+Route::post('/otp/request', [PhoneVerificationController::class, 'requestOtp'])->name('otp.request');
+Route::post('/otp/verify', [PhoneVerificationController::class, 'verifyOtp'])->name('otp.verify');
 
 Route::middleware(['web', 'ensure.auth'])->group(function () {
     Route::get('/ad/writing/{box}', [Ads::class, 'writing'])->name('ad.writing');
@@ -73,15 +75,14 @@ Route::post('/ad/apply-style', [Ads::class, 'apply_style']);
 Route::get('/ad/{box}', [Home::class, 'detail']);
 
 // Test mail
-Route::get('/test-mail', function () {
-    Mail::send('mail.verify-code-2', ['code' => 34580], function ($message) {
-        $message->to('salung@22-22.co')
-                ->subject('Test Email');
-    });
+// Route::get('/test-mail', function () {
+//     Mail::send('mail.verify-code-2', ['code' => 34580], function ($message) {
+//         $message->to('salung@22-22.co')
+//                 ->subject('Test Email');
+//     });
 
-    return 'Test email sent!';
-});
-
+//     return 'Test email sent!';
+// });
 
 // Profile
 Route::get('/account', [Profiles::class, 'profile'])->name('profile.view')->middleware('auth');

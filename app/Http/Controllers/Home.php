@@ -19,38 +19,11 @@ class Home extends Controller
             $ip = '1.1.1.1'; // Cloudflare public IP
         }
 
-        $response = Http::get("https://ipapi.co/{$ip}/json/");
-
-        if ($response->failed()) {
-            return [
-                'ip'      => $ip,
-                'country' => 'United Kingdom',
-                'city'    => 'London',
-                'lat'     => 51.5072,
-                'lon'     => -0.1276,
-            ];
-        }
+        $response = Http::get("https://ipinfo.io/{$ip}/json");
 
         $data = $response->json();
 
-        // If city/country missing, fallback
-        if (empty($data['city']) || empty($data['country_name'])) {
-            return [
-                'ip'      => $ip,
-                'country' => 'United Kingdom',
-                'city'    => 'London',
-                'lat'     => 51.5072,
-                'lon'     => -0.1276,
-            ];
-        }
-
-        return [
-            'ip'      => $ip,
-            'country' => $data['country_name'],
-            'city'    => $data['city'],
-            'lat'     => $data['latitude'] ?? null,
-            'lon'     => $data['longitude'] ?? null,
-        ];
+        return $data;
     }
 
     
