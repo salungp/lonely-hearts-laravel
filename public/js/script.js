@@ -516,7 +516,7 @@ class BootstrapPinInput {
           .map(c => ({
             name: c.name.common,
             code: c.idd.root + (c.idd.suffixes?.[0] || ""),
-            flag: c.flags?.emoji || "",
+            flag: c.flags.svg
           }))
           .sort((a, b) => a.name.localeCompare(b.name));
       } catch (e) {
@@ -562,8 +562,8 @@ class BootstrapPinInput {
         const selected = this.countries.find((c) => c.code === code);
   
         if (selected) {
-          const display = `${selected.code} ${selected.flag}`;
-          this.triggerEl.textContent = display;
+          const display = `<img style="width:20px" src='${selected.flag}' alt='Flag image icon' /> ${selected.code}`;
+          this.triggerEl.innerHTML = display;
           this.inputHidden.value = selected.code;
           this.popupEl.classList.add("hidden");
         }
@@ -574,7 +574,7 @@ class BootstrapPinInput {
       this.listEl.innerHTML = "";
       list.forEach((c) => {
         const li = document.createElement("li");
-        li.textContent = `${c.flag} ${c.name} (${c.code})`;
+        li.innerHTML = `<img style="width:20px" src='${c.flag}' alt='Flag image icon' /> ${c.name} (${c.code})`;
         li.dataset.code = c.code;
         this.listEl.appendChild(li);
       });
@@ -583,7 +583,7 @@ class BootstrapPinInput {
     setDefault(code) {
       const country = this.countries.find((c) => c.code === code);
       if (country) {
-        this.triggerEl.textContent = `${country.code} ${country.flag}`;
+        this.triggerEl.innerHTML = `<img style="width:20px" src='${country.flag}' alt='Flag image icon' /> ${country.code}`;
         this.inputHidden.value = country.code;
       }
     }

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -34,6 +35,20 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    public $incrementing = false;   // no auto increment
+    protected $keyType = 'string';  // UUID is string
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = (string) Str::uuid();
+            }
+        });
+    }
 
     /**
      * Get the attributes that should be cast.
