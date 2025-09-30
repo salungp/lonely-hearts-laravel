@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class PhoneVerification extends Model
+class EmailVerification extends Model
 {
     public $incrementing = false;
     protected $keyType = 'string';
 
     protected $fillable = [
         'user_id',
-        'phone',
-        'otp',
+        'email',
+        'code',
         'attempts',
         'expires_at',
         'verified'
@@ -39,7 +39,6 @@ class PhoneVerification extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Helpers
     public function isExpired(): bool
     {
         return $this->expires_at?->isPast() ?? true;
@@ -50,4 +49,3 @@ class PhoneVerification extends Model
         return $this->attempts < $max;
     }
 }
-

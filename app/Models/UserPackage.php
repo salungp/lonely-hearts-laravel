@@ -3,19 +3,38 @@
 // app/Models/UserPackage.php
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class UserPackage extends Model
 {
-    use HasFactory;
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
-        'user_id', 'package_id', 'start_date', 'end_date', 'status',
+        'user_id',
+        'package_id',
+        'start_date',
+        'end_date',
+        'status'
     ];
 
-    protected $dates = ['start_date', 'end_date'];
+    protected $casts = [
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+    ];
 
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = (string) Str::uuid();
+            }
+        });
+    }
+
+    // Relations
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -24,5 +43,10 @@ class UserPackage extends Model
     public function package()
     {
         return $this->belongsTo(Package::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }

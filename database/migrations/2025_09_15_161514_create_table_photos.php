@@ -11,14 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('table_photos', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('ad_id')->constrained()->cascadeOnDelete();
+        Schema::create('photos', function (Blueprint $table) {
+            $table->uuid('id')->primary();   // UUID PK
+            $table->uuid('ad_id');           // FK to ads.id
+        
             $table->string('file_path');
             $table->unsignedTinyInteger('sort_order')->default(0);
             $table->boolean('is_primary')->default(false);
+        
             $table->timestamps();
-        });
+        
+            // foreign key constraint
+            $table->foreign('ad_id')
+                  ->references('id')->on('ads')
+                  ->cascadeOnDelete();
+        });        
     }
 
     /**

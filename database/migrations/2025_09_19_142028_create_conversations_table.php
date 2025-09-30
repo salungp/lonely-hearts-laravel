@@ -9,15 +9,19 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('conversations', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('ad_id')->constrained('ads')->cascadeOnDelete();
-            $table->foreignId('author_id')->constrained('users')->cascadeOnDelete();   // ad owner
-            $table->foreignId('replier_id')->constrained('users')->cascadeOnDelete();  // person replying
+            $table->uuid('id')->primary();
+            $table->uuid('ad_id');
+            $table->uuid('author_id');
+            $table->uuid('replier_id');
             $table->enum('progress', ['0%', '25%', '50%', '75%', '100%'])->default('0%');
             $table->boolean('unlocked_photo')->default(false);
             $table->timestamps();
-
-            $table->unique(['ad_id', 'author_id', 'replier_id']); // prevent duplicate conversations per ad
+        
+            $table->unique(['ad_id', 'author_id', 'replier_id']);
+        
+            $table->foreign('ad_id')->references('id')->on('ads')->cascadeOnDelete();
+            $table->foreign('author_id')->references('id')->on('users')->cascadeOnDelete();
+            $table->foreign('replier_id')->references('id')->on('users')->cascadeOnDelete();
         });
     }
 

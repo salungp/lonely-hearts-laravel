@@ -5,24 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class PhoneVerification extends Model
+class Like extends Model
 {
     public $incrementing = false;
     protected $keyType = 'string';
-
-    protected $fillable = [
-        'user_id',
-        'phone',
-        'otp',
-        'attempts',
-        'expires_at',
-        'verified'
-    ];
-
-    protected $casts = [
-        'expires_at' => 'datetime',
-        'verified'   => 'boolean',
-    ];
+    protected $fillable = ['user_id', 'ad_id'];
 
     protected static function boot()
     {
@@ -34,20 +21,14 @@ class PhoneVerification extends Model
         });
     }
 
+    // Relations
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Helpers
-    public function isExpired(): bool
+    public function ad()
     {
-        return $this->expires_at?->isPast() ?? true;
-    }
-
-    public function hasAttemptsLeft(int $max = 5): bool
-    {
-        return $this->attempts < $max;
+        return $this->belongsTo(Ad::class);
     }
 }
-

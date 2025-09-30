@@ -6,20 +6,33 @@ use App\Models\PhoneVerification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Twilio\Rest\Client;
+use Illuminate\Support\Facades\Auth;
 
 class PhoneVerificationController extends Controller
 {
-    // Step 1: Request OTP
     public function requestOtp(Request $request)
     {
         $request->validate([
-            'phone' => 'required|string|min:10|max:20',
+            'phone_number' => 'required|string|min:10|max:20',
         ]);
 
-        $otp = rand(100000, 999999);
+        $phone_number = $request->country_code . preg_replace('/\D+/', '', $request->phone_number);
+        $user = User::where('phone_number', $phone_number)->first();
+        $profile = session('profile');
+        $otp = rand(10000, 99999);
+        session(['otp_code' => $otp, 'otp_expire' => now()->addMinutes(5)]);
+
+        session([
+            'otp' => [
+                'otp'     => $otp,
+                'user_id' => $user->id,
+                'phone'   => $phone_number
+            ],
+        ]);
 
         PhoneVerification::updateOrCreate(
-            ['phone' => $request->phone],
+            ['phone' => $phone_number],
             [
                 'otp' => Hash::make($otp),
                 'expires_at' => now()->addMinutes(5),
@@ -27,8 +40,18 @@ class PhoneVerificationController extends Controller
             ]
         );
 
-        // TODO: integrate SMS gateway here
-        // SmsService::send($request->phone, "Your code is $otp");
+        // $sid    = env('TWILIO_SID');
+        // $token  = env('TWILIO_TOKEN');
+        // $service_id = "VA9ee664a3c3fff2a63cd16974bb4ecb6a";
+        // $twilio = new Client($sid, $token);
+
+        // $verification_check = $twilio->verify->v2->services($service_id)
+        //                            ->verificationChecks
+        //                            ->create([
+        //                                         "to" => $phone_number,
+        //                                         "code" => $otp
+        //                                     ]
+        //                             );
 
         return redirect()->route('auth.verify')->with('success', 'Your otp code is has been sent!');
     }
@@ -36,10 +59,13 @@ class PhoneVerificationController extends Controller
     // Step 2: Verify OTP
     public function verifyOtp(Request $request)
     {
-        $request->validate([
-            'phone' => 'required|string',
-            'otp' => 'required|numeric',
-        ]);
+        $otp = session('otp');
+        $otp_input_1 = $request->box_1;
+        $otp_input_2 = $request->box_2;
+        $otp_input_3 = $request->box_3;
+        $otp_input_4 = $request->box_4;
+        $otp_input_5 = $request->box_5;
+        $otp_input = $otp_input_1.$otp_input_2.$otp_input_3.$otp_input_4.$otp_input_5;
 
         $verification = PhoneVerification::where('phone', $request->phone)->first();
 
@@ -66,7 +92,8 @@ class PhoneVerificationController extends Controller
         ]);
 
         $verification->delete(); // cleanup
+        $request->session()->forget('otp');
 
-        return response()->json(['message' => 'Phone verified successfully']);
+        return redirect()->route('home');
     }
 }

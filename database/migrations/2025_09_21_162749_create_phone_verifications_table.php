@@ -12,13 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('phone_verifications', function (Blueprint $table) {
-            $table->id();
-            $table->string('phone')->unique();
-            $table->string('otp'); // hashed OTP
-            $table->unsignedInteger('attempts')->default(0);
+            $table->uuid('id')->primary();
+        
+            $table->uuid('user_id')->nullable();  // optional link to users.id
+            $table->string('phone')->index();     // not unique, so multiple attempts allowed
+            $table->string('otp');                // hashed OTP
+            $table->unsignedTinyInteger('attempts')->default(0);
             $table->timestamp('expires_at');
+            $table->boolean('verified')->default(false);
+        
             $table->timestamps();
-        });
+        
+            $table->foreign('user_id')
+                  ->references('id')->on('users')
+                  ->cascadeOnDelete();
+        });        
     }
 
     /**

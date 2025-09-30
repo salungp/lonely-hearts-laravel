@@ -11,12 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('like', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('ad_id')->constrained()->cascadeOnDelete();
-            $table->unique(['user_id', 'ad_id']);
+        Schema::create('likes', function (Blueprint $table) {
+            $table->uuid('id')->primary(); // optional, can also skip if you want composite PK
+            $table->uuid('user_id');
+            $table->uuid('ad_id');
             $table->timestamps();
+        
+            // prevent duplicate likes
+            $table->unique(['user_id', 'ad_id']);
+        
+            // foreign keys
+            $table->foreign('user_id')
+                  ->references('id')->on('users')
+                  ->cascadeOnDelete();
+        
+            $table->foreign('ad_id')
+                  ->references('id')->on('ads')
+                  ->cascadeOnDelete();
         });
     }
 

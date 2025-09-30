@@ -5,19 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class Profile extends Model
+class Photo extends Model
 {
     public $incrementing = false;
     protected $keyType = 'string';
+
     protected $fillable = [
-        'user_id',
-        'display_name',
-        'location',
-        'age',
-        'occupation',
-        'status',
-        'gender',
-        'bio'
+        'ad_id',
+        'file_path',
+        'sort_order',
+        'is_primary',
     ];
 
     protected static function boot()
@@ -30,10 +27,9 @@ class Profile extends Model
         });
     }
 
-    // Relation to User
-    public function user()
+    // relation to Ad
+    public function ad()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Ad::class);
     }
 }
-

@@ -40,6 +40,15 @@
           </div>
         @endif
 
+        @if (session('success'))
+          <div class="lh-alert mb-3 lh-alert-success" id="alert">
+            {{ session('success') }}
+            <button class="lh-alert-close" type="button">
+              <img src="{{ asset('icons/close.svg') }}" alt="Close button icon">
+            </button>
+          </div>
+        @endif
+
         <button class="lh-button" id="submitBtn" type="submit">Continue</button>
 
     </form>

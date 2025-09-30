@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
+use App\Models\PhoneVerification;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -142,6 +144,11 @@ class AuthController extends Controller
         $otp_input_4 = $request->box_4;
         $otp_input_5 = $request->box_5;
         $otp_input = $otp_input_1.$otp_input_2.$otp_input_3.$otp_input_4.$otp_input_5;
+        // $verification = DB::table('phone_verifications')->where('phone', session('otp')['phone'])->first();
+
+        // if (!$verification) {
+        //     return redirect()->back()->with('error', 'No OTP found');
+        // }
 
         if ($otp['otp'] == $otp_input) {
             $ads = session('ads');
@@ -262,7 +269,22 @@ class AuthController extends Controller
                 $request->session()->forget('otp');
 
                 return redirect()->route('reply_confirmation');
-            } else {
+            } else {        
+                // Verified phone, login without create ad or reply ad
+                $user = User::where('id', session('otp')['user_id'])->first();
+                
+                User::where('id', session('otp')['user_id'])->update([
+                    'phone_verified_at' => now(),
+                ]);
+
+                if (! $user) {
+                    return back()->withErrors(['Could not create or find user']);
+                }
+
+                Auth::login($user);
+        
+                // DB::table('phone_verifications')->where('phone', session('otp')['phone'])->delete();
+                $request->session()->forget('otp');
                 return redirect()->route('home');
             }
 

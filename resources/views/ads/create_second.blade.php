@@ -207,7 +207,7 @@ $(document).ready(function () {
             contentType: false,
             success: function (response) {
                 if (response.success) {
-                    window.location.href = "/ad/confirmation/" + response.data.box_number;
+                    window.location.href = response.redirect;
                 } else {
                     alert(response.message || "Something went wrong");
                     $writingPopup.removeClass("active");

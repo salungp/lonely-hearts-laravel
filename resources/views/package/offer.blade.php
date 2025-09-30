@@ -60,7 +60,7 @@
         </button>
     </form>
 
-    <a href="{{ url($link) }}" class="lh-link">No, thank you</a>
+    <a href="{{ route($link) }}" class="lh-link">No, thank you</a>
 </div>
 <div id="payment-request-button"></div>
 @endsection

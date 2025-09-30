@@ -66,7 +66,7 @@
           <a href="{{ url($ad->slug.'.html') }}" class="lh-feed-card text-decoration-none text-dark h-100 w-100" >
             <div class="w-100">
               <h2>
-                <b class="text-uppercase">{{ $ad->snapshot_name }} {{ $ad->location }} {{ $ad->title }} .</b> {{ substr($ad->description, 0, 50) . '...' }}
+                <b class="text-uppercase">{{ $ad->title }} .</b> {{ substr($ad->description, 0, 50) . '...' }}
               </h2>
 
               <div class="d-flex justify-content-between align-items-center mt-2">

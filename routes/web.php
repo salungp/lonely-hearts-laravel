@@ -27,7 +27,6 @@ Route::get('/sitemap.xml', function () {
                 ->setLastModificationDate($ad->updated_at)
         );
     }
-
     return $sitemap->toResponse(request());
 });
 

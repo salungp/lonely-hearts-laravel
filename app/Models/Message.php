@@ -2,45 +2,40 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class Message extends Model
 {
-    use HasFactory;
-
+    public $incrementing = false;
+    protected $keyType = 'string';
     protected $fillable = [
         'conversation_id',
         'sender_id',
         'content',
-        'to_id',
-        'has_attachment',
-        'status',
-        'read_at',
+        'attachment',
+        'read_at'
     ];
 
-    public function receiver()
+    protected static function boot()
     {
-        return $this->belongsTo(\App\Models\User::class, 'receiver_id');
+        parent::boot();
+        static::creating(function ($model) {
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = (string) Str::uuid();
+            }
+        });
     }
 
-
-    // 🔗 Each message belongs to a conversation
+    // 🔹 Relations
     public function conversation()
     {
         return $this->belongsTo(Conversation::class);
     }
 
-    // 🔗 Sender of the message
     public function sender()
     {
         return $this->belongsTo(User::class, 'sender_id');
-        
-    }
-
-    public function ad(): BelongsTo
-    {
-        return $this->belongsTo(\App\Models\Ad::class, 'ad_id');
     }
 }
+

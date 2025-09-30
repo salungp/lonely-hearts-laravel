@@ -3,28 +3,35 @@
 // app/Models/Package.php
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Package extends Model
 {
-    use HasFactory;
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
-        'name', 'description', 'price', 'duration_days', 'benefits',
+        'name',
+        'description',
+        'price',
+        'duration_days',
+        'benefits',
     ];
 
     protected $casts = [
-        'benefits' => 'array',
+        'benefits' => 'array', // auto-cast JSON to array
+        'price' => 'decimal:2',
     ];
 
-    public function userPackages()
+    protected static function boot()
     {
-        return $this->hasMany(UserPackage::class);
-    }
-
-    public function payments()
-    {
-        return $this->hasMany(Payment::class);
+        parent::boot();
+        static::creating(function ($model) {
+            if (empty($model->{$model->getKeyName()})) {
+                $model->{$model->getKeyName()} = (string) Str::uuid();
+            }
+        });
     }
 }
+

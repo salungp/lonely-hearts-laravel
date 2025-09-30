@@ -9,14 +9,16 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('messages', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('conversation_id')->constrained('conversations')->cascadeOnDelete();
-            $table->foreignId('sender_id')->constrained('users')->cascadeOnDelete();
-            $table->text('content');
-            $table->boolean('has_attachment')->default(false);
-            $table->enum('status', ['sent', 'delivered', 'read'])->default('sent');
+            $table->uuid('id')->primary();
+            $table->uuid('conversation_id');
+            $table->uuid('sender_id');
+            $table->text('content')->nullable();
+            $table->string('attachment')->nullable();
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
+        
+            $table->foreign('conversation_id')->references('id')->on('conversations')->cascadeOnDelete();
+            $table->foreign('sender_id')->references('id')->on('users')->cascadeOnDelete();
         });
     }
 

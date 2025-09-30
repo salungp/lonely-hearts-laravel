@@ -12,15 +12,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('payments', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('package_id')->constrained()->onDelete('cascade');
-            $table->decimal('amount', 10, 2);
-            $table->enum('status', ['pending', 'completed', 'failed'])->default('pending');
-            $table->string('payment_method', 50)->nullable(); // Stripe, Paypal, Xendit, etc.
-            $table->string('transaction_id')->nullable(); // from payment gateway
+            $table->uuid('id')->primary();
+            $table->uuid('user_id');            // who paid
+            $table->uuid('user_package_id');    // which subscription/package this payment is for
+            $table->decimal('amount', 12, 2);
+            $table->string('status')->default('pending'); // e.g. pending, completed, failed
+            $table->string('method')->nullable();         // e.g. stripe, paypal, bank
+            $table->string('transaction_ref')->nullable(); // gateway transaction ID
             $table->timestamps();
-        });
+        
+            // Foreign keys
+            $table->foreign('user_id')
+                  ->references('id')->on('users')
+                  ->cascadeOnDelete();
+        
+            $table->foreign('user_package_id')
+                  ->references('id')->on('user_packages')
+                  ->cascadeOnDelete();
+        });        
     }
 
     /**

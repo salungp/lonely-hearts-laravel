@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('table_profiles', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+        Schema::create('profiles', function (Blueprint $table) {
+            $table->uuid('id')->primary(); // UUID PK
+            $table->uuid('user_id');       // FK to users.id
+        
             $table->string('display_name');
             $table->string('location');
             $table->unsignedTinyInteger('age');
@@ -21,8 +22,15 @@ return new class extends Migration
             $table->string('status')->nullable();
             $table->enum('gender', ['male', 'female', 'other']);
             $table->text('bio')->nullable();
+        
             $table->timestamps();
+        
+            // Foreign key constraint
+            $table->foreign('user_id')
+                  ->references('id')->on('users')
+                  ->cascadeOnDelete();
         });
+        
     }
 
     /**

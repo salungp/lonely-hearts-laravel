@@ -12,12 +12,23 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('email_verifications', function (Blueprint $table) {
-            $table->id();
-            $table->string('email')->index();
-            $table->string('code');
+            $table->uuid('id')->primary();
+        
+            // either FK or raw email
+            $table->uuid('user_id')->nullable(); // if linked to existing user
+            $table->string('email')->index();    // fallback if no user yet
+        
+            $table->string('code');              // verification code
+            $table->unsignedTinyInteger('attempts')->default(0); // retry count
             $table->timestamp('expires_at');
+            $table->boolean('verified')->default(false);
+        
             $table->timestamps();
-        });
+        
+            $table->foreign('user_id')
+                  ->references('id')->on('users')
+                  ->cascadeOnDelete();
+        });        
     }
 
     /**

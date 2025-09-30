@@ -406,7 +406,11 @@ class Ads extends Controller
                 ],
             ]);
 
-            return redirect()->route('offer');
+            return response()->json([
+                'success' => true,
+                'message' => 'Ad created successfully',
+                'redirect' => url('/offer')
+            ]);
         }
 
         $user_id = Auth::id();
@@ -446,7 +450,7 @@ class Ads extends Controller
             $title = trim($response['choices'][0]['message']['content'] ?? 'Seeking someone special');
             $title = preg_replace('/^["“]|["”]$/u', '', $title); 
             $title = str_replace('!', '', $title);
-            $title = trim($title);
+            $title = trim($profile->display_name.' '.$profile->location.' '.$title);
         
             $slug = Str::slug($title);
         
@@ -475,7 +479,8 @@ class Ads extends Controller
                     'title'       => $title,
                     'slug'        => $slug,
                     'box_number'  => $box,
-                ]
+                ],
+                'redirect' => url('/ad/confirmation/'.$box)
             ]);
         } else {
             return response()->json([

@@ -12,14 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('packages', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary(); // UUID PK
             $table->string('name');
             $table->text('description')->nullable();
-            $table->decimal('price', 10, 2);
-            $table->integer('duration_days');
-            $table->json('benefits')->nullable(); // store flexible benefits
+            $table->decimal('price', 10, 2); // price with 2 decimals
+            $table->unsignedInteger('duration_days'); // enforce unsigned (no negative)
+            $table->json('benefits')->nullable(); // flexible benefits (array/object)
             $table->timestamps();
-        });
+        });        
     }
 
     /**
