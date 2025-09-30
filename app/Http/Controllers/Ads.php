@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use App\Models\Ad;
 use OpenAI\Laravel\Facades\OpenAI;
+use App\Models\Profile;
+use App\Models\Like;
 
 class Ads extends Controller
 {
@@ -397,124 +399,141 @@ class Ads extends Controller
             'location'    => 'required|string|max:255',
         ]);
 
+        // --- Case 1: User not logged in yet ---
         if (!Auth::check()) {
-            // Save to session
             session([
                 'ads' => [
-                    'description'  => $validated['description'],
-                    'location'     => $request->location
+                    'description' => $validated['description'],
+                    'location'    => $validated['location'],
                 ],
             ]);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Ad created successfully',
-                'redirect' => url('/offer')
+                'success'  => true,
+                'message'  => 'Ad stored in session, please log in first.',
+                'redirect' => route('offer'),
             ]);
         }
 
-        $user_id = Auth::id();
-        $profile = DB::table('table_profiles')->where('user_id', $user_id)->first();
+        // --- Case 2: Logged in but no profile ---
+        $user = Auth::user();
+        $profile = Profile::where('user_id', $user->id)->first();
+
+        if (!$profile) {
+            // Force them to create a profile before posting an ad
+            return response()->json([
+                'success'  => false,
+                'message'  => 'Please create your profile before posting an ad.',
+                'redirect' => route('profile.create'),
+            ], 403);
+        }
+
+        // --- Generate witty title ---
+        $prompt = $this->generateAdPrompt($profile, $validated['description']);
+        $response = OpenAI::chat()->create([
+            'model' => 'gpt-4o-mini',
+            'messages' => [
+                ['role' => 'system', 'content' => 'You are a witty personal ad writer.'],
+                ['role' => 'user', 'content' => $prompt],
+            ],
+        ]);
+
+        $title = trim($response['choices'][0]['message']['content'] ?? 'Seeking someone special');
+        $title = preg_replace('/^["“]|["”]$/u', '', $title);
+        $title = str_replace('!', '', $title);
+        $title = trim($profile->display_name.' '.$profile->location.' '.$title);
+
+        // Ensure slug is unique
+        $slug = Str::slug($title);
+        $originalSlug = $slug;
+        $count = 1;
+        while (Ad::where('slug', $slug)->exists()) {
+            $slug = $originalSlug.'-'.$count++;
+        }
+
+        // Generate box number
         $box = rand(100000, 999999);
 
-        if ($profile) {
-            $prompt = "
-            You are writing humorous and quirky personal ad titles, like in the book 'They Call Me Naughty Lola'.
-            Examples:
-            - Tonight, female readers to 90, I am the hunter and you are my quarry.
-            - If we share a bath together I have to insist on wearing verruca socks.
-            - I’ll see you at the singles night.
-        
-            Rules:
-            - Output only ONE short title (max 8 words).
-            - Do not use quotation marks or exclamation marks.
-            - No explanations.
-            Profile:
-            Name: {$profile->display_name}
-            Age: {$profile->age}
-            Gender: {$profile->gender}
-            Location: {$profile->location}
-            Status: {$profile->status}
-            Occupation: {$profile->occupation}
-            Description: {$validated['description']}
-            ";
-        
-            $response = OpenAI::chat()->create([
-                'model' => 'gpt-4o-mini',
-                'messages' => [
-                    ['role' => 'system', 'content' => 'You are a witty personal ad writer.'],
-                    ['role' => 'user', 'content' => $prompt],
-                ],
-            ]);
-        
-            $title = trim($response['choices'][0]['message']['content'] ?? 'Seeking someone special');
-            $title = preg_replace('/^["“]|["”]$/u', '', $title); 
-            $title = str_replace('!', '', $title);
-            $title = trim($profile->display_name.' '.$profile->location.' '.$title);
-        
-            $slug = Str::slug($title);
-        
-            $adId = DB::table('ads')->insertGetId([
-                'user_id'             => $user_id,
-                'description'         => $validated['description'],
-                'title'               => $title,
-                'slug'                => $slug,
-                'snapshot_name'       => $profile->display_name,
-                'snapshot_occupation' => $profile->occupation,
-                'snapshot_age'        => $profile->age,
-                'snapshot_status'     => $profile->status,
-                'snapshot_gender'     => $profile->gender,
-                'location'            => $profile->location,
-                'views'               => 0,
-                'box_number'          => $box,
-                'created_at'          => now(),
-                'updated_at'          => now(),
-            ]);
-        
-            return response()->json([
-                'success' => true,
-                'message' => 'Ad created successfully',
-                'data' => [
-                    'id'          => $adId,
-                    'title'       => $title,
-                    'slug'        => $slug,
-                    'box_number'  => $box,
-                ],
-                'redirect' => url('/ad/confirmation/'.$box)
-            ]);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Something went wrong!',
-            ], 500);
-        }        
-    }
-
-    public function toggleLike($adId)
-    {
-        $userId = Auth::id();
-
-        $liked = DB::table('like')
-                   ->where('ad_id', $adId)
-                   ->where('user_id', $userId)
-                   ->exists();
-
-        if ($liked) {
-            DB::table('like')
-              ->where('ad_id', $adId)
-              ->where('user_id', $userId)
-              ->delete();
-        } else {
-            DB::table('like')->insert([
-                'ad_id' => $adId,
-                'user_id' => $userId,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-        }
+        // --- Save Ad ---
+        $ad = Ad::create([
+            'user_id'             => $user->id,
+            'description'         => $validated['description'],
+            'title'               => $title,
+            'slug'                => $slug,
+            'snapshot_name'       => $profile->display_name,
+            'snapshot_occupation' => $profile->occupation,
+            'snapshot_age'        => $profile->age,
+            'snapshot_status'     => $profile->status,
+            'snapshot_gender'     => $profile->gender,
+            'location'            => $profile->location,
+            'views'               => 0,
+            'box_number'          => $box,
+        ]);
 
         return response()->json([
-            'liked' => !$liked,
+            'success' => true,
+            'message' => 'Ad created successfully',
+            'data' => [
+                'id'         => $ad->id,
+                'title'      => $title,
+                'slug'       => $slug,
+                'box_number' => $box,
+            ],
+            'redirect' => route('ad.confirmation', ['box' => $box]),
+        ]);
+    }
+
+    /**
+     * Build the GPT prompt for ad title generation
+     */
+    protected function generateAdPrompt(Profile $profile, string $description): string
+    {
+        return "
+        You are writing humorous and quirky personal ad titles, like in the book 'They Call Me Naughty Lola'.
+        Examples:
+        - Tonight, female readers to 90, I am the hunter and you are my quarry.
+        - If we share a bath together I have to insist on wearing verruca socks.
+        - I’ll see you at the singles night.
+
+        Rules:
+        - Output only ONE short title (max 8 words).
+        - Do not use quotation marks or exclamation marks.
+        - No explanations.
+
+        Profile:
+        Name: {$profile->display_name}
+        Age: {$profile->age}
+        Gender: {$profile->gender}
+        Location: {$profile->location}
+        Status: {$profile->status}
+        Occupation: {$profile->occupation}
+        Description: {$description}
+        ";
+    }
+
+    
+    public function toggleLike(Ad $ad)
+    {
+        $userId = Auth::id();
+        if (!$userId) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $existing = Like::where('ad_id', $ad->id)->where('user_id', $userId)->first();
+
+        if ($existing) {
+            $existing->delete();
+            $liked = false;
+        } else {
+            Like::create(['ad_id' => $ad->id, 'user_id' => $userId]); // UUID set by model
+            $liked = true;
+        }
+
+        $count = Like::where('ad_id', $ad->id)->count();
+
+        return response()->json([
+            'liked' => $liked,
+            'count' => $count,
         ]);
     }
 }

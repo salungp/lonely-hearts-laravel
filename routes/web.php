@@ -55,7 +55,7 @@ Route::post('/otp/verify', [PhoneVerificationController::class, 'verifyOtp'])->n
 
 Route::middleware(['web', 'ensure.auth'])->group(function () {
     Route::get('/ad/writing/{box}', [Ads::class, 'writing'])->name('ad.writing');
-    Route::get('/ad/confirmation/{box}', [Ads::class, 'confirmation'])->name('confirmation');
+    Route::get('/ad/confirmation/{box}', [Ads::class, 'confirmation'])->name('ad.confirmation');
 });
 
 // Ad routes
@@ -70,6 +70,8 @@ Route::delete('/ad/delete/{id}', [Ads::class, 'destroy'])->name('ads.destroy');
 Route::post('/ad/{ad}/toggle-like', [Ads::class, 'toggleLike'])
      ->middleware('auth')
      ->name('ad.toggleLike');
+Route::post('/ad/{ad}/toggle-like', [Ads::class, 'toggleLike'])
+    ->name('ad.toggle-like');
 Route::post('/ad/apply-style', [Ads::class, 'apply_style']);
 Route::get('/ad/{box}', [Home::class, 'detail']);
 

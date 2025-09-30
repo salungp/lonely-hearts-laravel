@@ -81,19 +81,21 @@
         </button>
     </div>
     <div class="lh-popup-body">
-        <h2 class="lh-title mb-3" style="text-align: left">Address</h2>
-        <div class="location-field">
-            <input
-            type="text"
-            id="searchInput"
-            placeholder="Search location..."
-            class="input-none"
-            />
-            <button class="current-location-btn">
-            <img src="{{ asset('icons/location.svg') }}" alt="Pin svg icon">
-            </button>
+        <div class="container-sm">
+            <h2 class="lh-title mb-3" style="text-align: left">Address</h2>
+            <div class="location-field">
+                <input
+                type="text"
+                id="searchInput"
+                placeholder="Search location..."
+                class="input-none"
+                />
+                <button class="current-location-btn">
+                <img src="{{ asset('icons/location.svg') }}" alt="Pin svg icon">
+                </button>
+            </div>
+            <ul id="locationList"></ul>
         </div>
-        <ul id="locationList"></ul>
     </div>
 </div>
 
@@ -105,7 +107,7 @@
     </div>
     <div class="lh-popup-body">
         <!-- Screen one secenario -->
-        <div id="screenOne">
+        <div id="screenOne" class="container-sm">
             <h2 class="lh-title mb-3" style="text-align: left">Reword it</h2>
             <div id="tags-container" class="tags-container">
                 @foreach ($prompts as $style)

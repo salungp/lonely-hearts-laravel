@@ -62,7 +62,7 @@
       <div class="row">
         @foreach($ads as $ad)
         <!-- Feed list -->
-        <div class="col-md-6 d-flex mb-4">
+        <div class="col-md-6 d-flex mb-3">
           <a href="{{ url($ad->slug.'.html') }}" class="lh-feed-card text-decoration-none text-dark h-100 w-100" >
             <div class="w-100">
               <h2>

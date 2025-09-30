@@ -7,7 +7,7 @@
 @endsection
 @php
     $userId = auth()->id();
-    $liked = DB::table('like')
+    $liked = DB::table('likes')
                ->where('ad_id', $ad->id)
                ->where('user_id', $userId)
                ->exists();
@@ -80,8 +80,10 @@
     <div class="bottom">
         <div class="container-sm">
             <div class="d-flex" style="gap: 16px">
-                <button class="lh-button-icon" data-id="{{ $ad->id }}" id="like" style="background-color: #dd775a; border-color: #a34d41" >
-                    <div id="likeIcon" class="lh-custom-icon"></div>
+                <button class="lh-button-icon like-btn" 
+                        data-id="{{ $ad->id }}" 
+                        style="background-color: #dd775a; border-color: #a34d41">
+                    <div class="like-icon lh-custom-icon"></div>
                 </button>
 
                 <a href="{{ url('ad/reply/'.$ad->box_number) }}" class="lh-button d-flex justify-content-center align-items-center">
@@ -108,102 +110,58 @@
 @endsection
 @section('script')
 <script>
-const likeIcon = document.getElementById("likeIcon");
-const like = document.getElementById("like");
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".like-btn").forEach(button => {
+            const adId = button.dataset.id;
+            const icon = button.querySelector(".like-icon");
 
-document.getElementById('shareBtn').addEventListener('click', async () => {
-    const shareData = {
-        title: "{{ $ad->location }}",
-        text: "{{ Str::limit($ad->description, 100) }}",
-        url: "{{ route('ad.show', ['slug' => $ad->slug]) }}"
-    };
+            // Get initial state from backend
+            let likeState = @json(
+                DB::table('likes')
+                    ->where('ad_id', $ad->id)
+                    ->where('user_id', auth()->id())
+                    ->exists()
+            );
 
-    if (navigator.share) {
-        try {
-            await navigator.share(shareData);
-            console.log('✅ Post shared successfully');
-        } catch (err) {
-            console.warn('❌ Share cancelled or failed:', err);
-        }
-    } else {
-        // Fallback: Copy link if native share not supported
-        navigator.clipboard.writeText(shareData.url).then(() => {
-            alert("Link copied to clipboard!");
+            function setLike(state) {
+                icon.style.background = state
+                    ? "url({{ asset('icons/heart-fill.svg') }})"
+                    : "url({{ asset('icons/heart.svg') }})";
+                icon.style.backgroundSize = "cover";
+            }
+
+            // Init
+            setLike(likeState);
+
+            // Toggle
+            button.addEventListener("click", () => {
+                likeState = !likeState;
+                setLike(likeState);
+
+                fetch(`/ad/${adId}/toggle-like`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) {
+                        alert("You need to login or create account first!");
+                        return;
+                    }
+                    likeState = data.liked;
+                    setLike(likeState);
+                })
+                .catch(err => {
+                    console.error("❌ Fetch error:", err);
+                    likeState = !likeState; // revert
+                    setLike(likeState);
+                });
+            });
         });
-    }
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-    // initialize
-    likeIcon.style.backgroundSize = "cover";
-    const copyBtn = document.getElementById("copyAdUrl");
-    const toastEl = document.getElementById("copyToast");
-    const toast = new bootstrap.Toast(toastEl);
-
-    let tooltipTriggerList = [].slice.call(
-        document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    );
-    let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
     });
-
-    copyBtn.addEventListener("click", function (e) {
-        e.preventDefault();
-        const url = this.getAttribute("data-url");
-
-        navigator.clipboard.writeText(url).then(() => {
-            toast.show();
-        }).catch(err => {
-            console.error("Failed to copy: ", err);
-        });
-    });
-});
-
-// Get initial state from DB (true = not liked, false = liked)
-let likeState = @json(!DB::table('like')
-    ->where('ad_id', $ad->id)
-    ->where('user_id', auth()->id())
-    ->exists());
-
-function setLike(state) {
-    if (state) {
-        likeIcon.style.background = "url({{ asset('icons/heart.svg') }})";
-    } else {
-        likeIcon.style.background = "url({{ asset('icons/heart-fill.svg') }})";
-    }
-    likeIcon.style.backgroundSize = "cover";
-}
-
-// Show initial state
-setLike(likeState);
-
-like.addEventListener("click", () => {
-    // Optimistic UI update (instant feedback)
-    likeState = !likeState;
-    setLike(likeState);
-
-    // Send to server
-    fetch(`/ad/${like.dataset.id}/toggle-like`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-        },
-        body: JSON.stringify({})
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Server returns the real state (liked = true/false)
-        // Just in case our optimistic update was wrong
-        likeState = !data.liked;
-        setLike(likeState);
-    })
-    .catch(() => {
-        // If request failed, revert state
-        likeState = !likeState;
-        setLike(likeState);
-        alert("You need to login or create account first!");
-    });
-});
-</script>
+</script>    
 @endsection

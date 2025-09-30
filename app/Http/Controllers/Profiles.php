@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use App\Models\Ad;
+use App\Models\User;
+use App\Models\Profile;
 
 class Profiles extends Controller
 {
@@ -20,7 +22,7 @@ class Profiles extends Controller
     public function profile(): View
     {
         $id = Auth::id();
-        $user = DB::table('table_profiles')->where('user_id', $id)->first();
+        $user = Profile::where('user_id', $id)->first();
 
         return view('profile.view', [
             'user' => $user
@@ -129,46 +131,48 @@ class Profiles extends Controller
             'gender'     => 'required|string|max:10',
         ]);
 
-        // Check if the user come from create ad or login
-        if (session()->has('current_url')) {
-            // user come from login
-            $user_id = session('otp')['user_id'];
+        // --- CASE 1: User came from forced login (must create profile) ---
+        if (session()->has('must_create_profile')) {
+            $user = Auth::user(); // ✅ safe now
+        
+            $userId = Auth::id();
+            if (!$userId) {
+                return back()->withErrors(['User not found, please login again.']);
+            }
 
-            DB::table('users')->where('id', $user_id)->update(['name' => $validated['person_name']]);
-
-            $user = DB::table('users')->where('id', $user_id)->first();
-
-            DB::table('table_profiles')->insert([
-                'user_id'      => session('otp')['user_id'],
+            $user = User::findOrFail($userId);
+            $user->update(['name' => $request->person_name]);
+        
+            Profile::create([
+                'user_id'      => $user->id,
                 'display_name' => $validated['person_name'],
                 'occupation'   => $validated['occupation'],
                 'age'          => $validated['age'],
                 'status'       => $validated['status'],
                 'gender'       => $validated['gender'],
-                'location'     => 'London',
+                'location'     => session('ads')['location'] ?? 'Unknown',
                 'bio'          => '',
-                'created_at'   => now(),
-                'updated_at'   => now(),
             ]);
-
-            $request->session()->forget('current_url');
-            return redirect()->route('auth.verify');
-        } else {
-            // Save to session
-            session([
-                'profile' => [
-                    'display_name' => $validated['person_name'],
-                    'occupation'   => $validated['occupation'],
-                    'age'          => $validated['age'],
-                    'status'       => $validated['status'],
-                    'gender'       => $validated['gender'],
-                ],
-            ]);
-
-            // Retrieve intended URL or fallback
-            $redirectTo = session()->pull('intended_url', route('home'));
         
-            return redirect($redirectTo);
-        }
+            $request->session()->forget('must_create_profile');
+        
+            return redirect()->route('auth.verify');
+        }        
+
+        // --- CASE 2: User hasn’t registered yet (profile saved in session before creating user) ---
+        session([
+            'profile' => [
+                'display_name' => $validated['person_name'],
+                'occupation'   => $validated['occupation'],
+                'age'          => $validated['age'],
+                'status'       => $validated['status'],
+                'gender'       => $validated['gender'],
+            ],
+        ]);
+
+        // Redirect back to intended flow (ad creation, reply, or home)
+        $redirectTo = session()->pull('intended_url', route('home'));
+
+        return redirect($redirectTo);
     }
 }

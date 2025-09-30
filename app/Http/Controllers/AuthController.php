@@ -14,6 +14,11 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use App\Models\PhoneVerification;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Profile;
+use Illuminate\Support\Facades\Log;
+use App\Models\Ad;
+use App\Models\Conversation;
+use App\Models\Message;
 
 class AuthController extends Controller
 {
@@ -50,37 +55,34 @@ class AuthController extends Controller
             'phone_number' => 'required|string|max:20',
         ]);
 
+        // Normalize phone number
         $phone_number = $request->country_code . preg_replace('/\D+/', '', $request->phone_number);
-        $profile = session('profile');
-        $user = User::where('phone_number', $phone_number)->first();
+        $profileData = session('profile');
 
         // One-time OTP (for both new or existing users)
         $otp = rand(10000, 99999);
 
-        if ($profile) {
-            // Always create new user if profile session exists
-            $user = User::create([
-                'name'         => $profile['display_name'] ?? '',
-                'phone_number' => $phone_number,
-                'email'        => null,
-            ]);
-
-            if ($user) {
-                // Insert profile
-                DB::table('table_profiles')->insert([
-                    'user_id'      => $user->id,
-                    'display_name' => $profile['display_name'] ?? '',
-                    'occupation'   => strtolower($profile['occupation'] ?? ''),
-                    'age'          => $profile['age'] ?? '',
-                    'status'       => strtolower($profile['status'] ?? ''),
-                    'gender'       => $profile['gender'] ?? '',
-                    'location'     => session('ads')['location'] ?? '',
-                    'bio'          => '',
-                    'created_at'   => now(),
-                    'updated_at'   => now(),
+        // --- CASE 1: User came from profile creation flow ---
+        if ($profileData) {
+            try {
+                $user = User::create([
+                    'name'         => $profileData['display_name'] ?? '',
+                    'phone_number' => $phone_number,
+                    'email'        => null,
                 ]);
 
-                // Store OTP session
+                Profile::create([
+                    'user_id'      => $user->id,
+                    'display_name' => $profileData['display_name'] ?? '',
+                    'occupation'   => strtolower($profileData['occupation'] ?? ''),
+                    'age'          => $profileData['age'] ?? 0,
+                    'status'       => strtolower($profileData['status'] ?? ''),
+                    'gender'       => $profileData['gender'] ?? '',
+                    'location'     => session('ads')['location'] ?? '',
+                    'bio'          => '',
+                ]);
+
+                // Store OTP in session (⚠️ temporary — better to use phone_verifications table)
                 session([
                     'otp' => [
                         'otp'     => $otp,
@@ -88,42 +90,22 @@ class AuthController extends Controller
                     ],
                 ]);
 
-                // Clear profile session to avoid duplicates
-                $request->session()->forget('profile');
+                $request->session()->forget('profile'); // prevent duplicate users
 
-                Auth::login($user);
                 return redirect()->route('auth.verify');
+            } catch (\Exception $e) {
+                Log::error("Failed to create user from profile session", ['error' => $e->getMessage()]);
+                return back()->withErrors(['msg' => 'Unable to create account. Try again.']);
             }
-
-            logger()->error("Failed to create user from profile session");
-            return back()->withErrors(['msg' => 'Unable to create account. Try again.']);
         }
 
-        // No profile session = normal login/register
-        if (!$user) {
-            $user = User::create([
-                'name'         => '',
-                'phone_number' => $phone_number,
-                'email'        => null,
-            ]);
+        // --- CASE 2: Normal login/register flow ---
+        $user = User::firstOrCreate(
+            ['phone_number' => $phone_number],
+            ['name' => '', 'email' => null]
+        );
 
-            // Existing user -> login
-            Auth::login($user);
-
-            session([
-                'otp' => [
-                    'otp'     => $otp,
-                    'user_id' => $user->id,
-                ],
-                'current_url' => $phone_number, // mark that we must create profile
-            ]);
-
-            return redirect()->route('profile.create');
-        }
-
-        // Existing user -> login
-        Auth::login($user);
-
+        // Store OTP in session
         session([
             'otp' => [
                 'otp'     => $otp,
@@ -131,166 +113,130 @@ class AuthController extends Controller
             ],
         ]);
 
+        // If this was a brand new user → force profile creation
+        // If this was a brand new user → force profile creation
+        if ($user->wasRecentlyCreated) {
+            session(['must_create_profile' => true]);
+
+            // 🔹 FIX: log them in now
+            Auth::login($user);
+
+            return redirect()->route('profile.create');
+        }
+
+        // Existing user → verify OTP
         return redirect()->route('auth.verify');
     }
 
 
     public function verifyOtp(Request $request)
     {
-        $otp = session('otp');
-        $otp_input_1 = $request->box_1;
-        $otp_input_2 = $request->box_2;
-        $otp_input_3 = $request->box_3;
-        $otp_input_4 = $request->box_4;
-        $otp_input_5 = $request->box_5;
-        $otp_input = $otp_input_1.$otp_input_2.$otp_input_3.$otp_input_4.$otp_input_5;
-        // $verification = DB::table('phone_verifications')->where('phone', session('otp')['phone'])->first();
+        $otpData = session('otp');
 
-        // if (!$verification) {
-        //     return redirect()->back()->with('error', 'No OTP found');
-        // }
+        $inputOtp = collect(range(1,5))
+            ->map(fn($i) => trim((string)$request->input("box_$i", '')))
+            ->implode('');
 
-        if ($otp['otp'] == $otp_input) {
-            $ads = session('ads');
+        if (!$otpData || (string)$otpData['otp'] !== $inputOtp) {
+            return redirect()->route('auth.verify')->with('error', 'Your OTP is not correct');
+        }
 
-            // Check if this verify is part of create ad
-            if ($ads) {
-                $user = DB::table('table_profiles')->where('user_id', $otp['user_id'])->first();
 
-                $box = rand(100000, 999999);
-                $slug = Str::slug($user->location.' '.$user->display_name.' '.$user->occupation.' '.$user->status.' '.$box);
-                
-                // insert ads data
-                DB::table('ads')->insert([
-                    'user_id'               => $otp['user_id'],
-                    'description'           => $ads['description'],
-                    'slug'                  => $slug,
-                    'snapshot_name'         => $user->display_name,
-                    'snapshot_occupation'   => $user->occupation,
-                    'snapshot_age'          => $user->age,
-                    'snapshot_status'       => $user->status,
-                    'snapshot_gender'       => $user->gender,
-                    'location'              => $user->location,
-                    'views'                 => 0,
-                    'box_number'            => $box,
-                    'created_at'            => now(),
-                    'updated_at'            => now(),
-                ]);
+        $user = User::find($otpData['user_id']);
+        if (!$user) {
+            return back()->withErrors(['Could not find user']);
+        }
 
-                $request->session()->forget('ads');
-                $request->session()->forget('otp');
-
-                return redirect()->route('ad.writing', ['box' => $box]);
-            } else if(session()->has('reply')) {
-                $ad_session = session('reply');
-                $userId = Auth::id();
-                $ad     = DB::table('ads')->where('id', $ad_session['ad_id'])->first();
-                $author = DB::table('users')->where('id', $ad->user_id)->first();
-
-                if (!$ad) {
-                    return back()->withErrors(['Ad not found.']);
-                }
-
-                // Find or create conversation
-                $conversation = DB::table('conversations')
-                ->where('ad_id', $ad->id)
-                ->where('author_id', $ad->user_id)
-                ->where('replier_id', $userId)
-                ->first();
-
-                if (!$conversation) {
-                    $conversationId = DB::table('conversations')->insertGetId([
-                        'ad_id'          => $ad->id,
-                        'author_id'      => $ad->user_id,
-                        'replier_id'     => $userId,
-                        'progress'       => '0%',
-                        'unlocked_photo' => false,
-                        'created_at'     => now(),
-                        'updated_at'     => now(),
-                    ]);
-                } else {
-                    $conversationId = $conversation->id;
-                }
-
-                // ✅ Insert message
-                DB::table('messages')->insert([
-                    'conversation_id' => $conversationId,
-                    'sender_id'       => $userId,
-                    'content'         => $ad_session['content'],
-                    'status'          => 'sent',
-                    'created_at'      => now(),
-                    'updated_at'      => now(),
-                ]);
-
-                // ✅ Count messages to update progress
-                $messageCount = DB::table('messages')
-                    ->where('conversation_id', $conversationId)
-                    ->count();
-
-                $progress = '0%';
-                if ($messageCount >= 8) {
-                    $progress = '100%';
-                } elseif ($messageCount >= 6) {
-                    $progress = '75%';
-                } elseif ($messageCount >= 4) {
-                    $progress = '50%';
-                } elseif ($messageCount >= 2) {
-                    $progress = '25%';
-                }
-
-                $unlockedPhoto = $messageCount >= 3;
-
-                DB::table('conversations')
-                    ->where('id', $conversationId)
-                    ->update([
-                        'progress'       => $progress,
-                        'unlocked_photo' => $unlockedPhoto,
-                        'updated_at'     => now(),
-                    ]);
-
-                // ✅ (Optional) trigger email notification to ad author
-                // Mail::to($ad->email)->send(new NewReplyMail($validated['content']));
-
-                $email = $author->email;
-                $content = $ad_session['content'];
-
-                // Send email using Blade template
-                if ($email != null) {
-                    Mail::send('mail.reply', [
-                        'name' => $author->name,
-                        'content' => $content
-                    ], function ($content) use ($email) {
-                        $content->to($email)
-                                ->subject('You just got a reply!');
-                    });
-                }
-
-                $request->session()->forget('reply');
-                $request->session()->forget('otp');
-
-                return redirect()->route('reply_confirmation');
-            } else {        
-                // Verified phone, login without create ad or reply ad
-                $user = User::where('id', session('otp')['user_id'])->first();
-                
-                User::where('id', session('otp')['user_id'])->update([
-                    'phone_verified_at' => now(),
-                ]);
-
-                if (! $user) {
-                    return back()->withErrors(['Could not create or find user']);
-                }
-
-                Auth::login($user);
-        
-                // DB::table('phone_verifications')->where('phone', session('otp')['phone'])->delete();
-                $request->session()->forget('otp');
-                return redirect()->route('home');
+        // ✅ Case 1: User is creating an ad
+        if ($ads = session('ads')) {
+            $profile = Profile::where('user_id', $user->id)->first();
+            if (!$profile) {
+                return back()->withErrors(['Profile not found']);
             }
 
-        } else {
-            return redirect()->route('auth.verify')->with('error', 'Your otp is not correct');
+            $box  = rand(100000, 999999);
+            $slug = Str::slug($profile->location.' '.$profile->display_name.' '.$profile->occupation.' '.$profile->status.' '.$box);
+
+            Ad::create([
+                'user_id'             => $user->id,
+                'description'         => $ads['description'],
+                'slug'                => $slug,
+                'snapshot_name'       => $profile->display_name,
+                'snapshot_occupation' => $profile->occupation,
+                'snapshot_age'        => $profile->age,
+                'snapshot_status'     => $profile->status,
+                'snapshot_gender'     => $profile->gender,
+                'location'            => $profile->location,
+                'views'               => 0,
+                'box_number'          => $box,
+            ]);
+
+            $request->session()->forget(['ads', 'otp']);
+            return redirect()->route('ad.writing', ['box' => $box]);
         }
+
+        // ✅ Case 2: User is replying to an ad
+        if ($reply = session('reply')) {
+            $ad = Ad::find($reply['ad_id']);
+            if (!$ad) {
+                return back()->withErrors(['Ad not found']);
+            }
+
+            $author = $ad->user;
+
+            $conversation = Conversation::firstOrCreate(
+                [
+                    'ad_id'      => $ad->id,
+                    'author_id'  => $ad->user_id,
+                    'replier_id' => $user->id,
+                ],
+                [
+                    'progress'       => '0%',
+                    'unlocked_photo' => false,
+                ]
+            );
+
+            // Create new message
+            Message::create([
+                'conversation_id' => $conversation->id,
+                'sender_id'       => $user->id,
+                'content'         => $reply['content'],
+            ]);
+
+            // Update conversation progress
+            $messageCount = $conversation->messages()->count();
+            $progress     = match (true) {
+                $messageCount >= 8 => '100%',
+                $messageCount >= 6 => '75%',
+                $messageCount >= 4 => '50%',
+                $messageCount >= 2 => '25%',
+                default            => '0%',
+            };
+            $conversation->update([
+                'progress'       => $progress,
+                'unlocked_photo' => $messageCount >= 3,
+            ]);
+
+            // Send email notification
+            if ($author->email) {
+                Mail::send('mail.reply', [
+                    'name'    => $author->name,
+                    'content' => $reply['content'],
+                ], function ($message) use ($author) {
+                    $message->to($author->email)->subject('You just got a reply!');
+                });
+            }
+
+            $request->session()->forget(['reply', 'otp']);
+            return redirect()->route('reply_confirmation');
+        }
+
+        // ✅ Case 3: Plain login after OTP verification
+        $user->update(['phone_verified_at' => now()]);
+        Auth::login($user);
+
+        $request->session()->forget('otp');
+        return redirect()->route('home');
     }
 
     public function sendVerification(Request $request)

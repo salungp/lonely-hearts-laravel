@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use App\Models\Ad;
 
 class Home extends Controller
 {
@@ -29,20 +30,19 @@ class Home extends Controller
     
     public function show(): View
     {
-        $query = DB::table('ads')
-            ->leftJoin('like', 'ads.id', '=', 'like.ad_id') // ✅ make sure table is correct
-            ->select('ads.*', DB::raw('COUNT(like.id) as likes_count'))
-            ->groupBy('ads.id');
+        $query = Ad::withCount('likes'); // ✅ uses relationship instead of manual join
 
         // Filter by selected location (if exists)
         if (session()->has('selected_location')) {
-            $query->where('ads.location', session('selected_location'));
+            $query->where('location', session('selected_location'));
         }
 
         // Clear session if user came from create flow
         session()->forget(['profile', 'ads']);
 
-        $ads = $query->limit(6)->orderBy('ads.created_at', 'desc')->get();
+        $ads = $query->latest() // shorthand for orderBy('created_at', 'desc')
+            ->limit(6)
+            ->get();
 
         // Cache ads feed (optionally include location in cache key)
         $cacheKey = 'ads_feed_' . (session('selected_location') ?? 'all');
@@ -50,29 +50,37 @@ class Home extends Controller
 
         return view('home', [
             'ads' => $ads,
-            'selectedLocation' => session('selected_location'), // so you can show it in view
+            'selectedLocation' => session('selected_location'), // for view
         ]);
     }
 
     public function feed(): View
     {
-        $ads = DB::table('ads')
-                    ->leftJoin('like', 'ads.id', '=', 'like.ad_id')
-                    ->select('ads.*', DB::raw('COUNT(like.id) as likes_count'))
-                    ->orderBy('ads.created_at', 'desc')
-                    ->groupBy('ads.id')
-                    ->get();
+        $query = Ad::withCount('likes'); // ✅ uses relationship instead of manual join
+
+        // Filter by selected location (if exists)
+        if (session()->has('selected_location')) {
+            $query->where('location', session('selected_location'));
+        }
+
+        // Clear session if user came from create flow
+        session()->forget(['profile', 'ads']);
+
+        $ads = $query->latest() // shorthand for orderBy('created_at', 'desc')
+            ->limit(6)
+            ->get();
     
         Cache::put('ads_feed', $ads, now()->addSeconds(10));
 
         return view('feed', [
-            'ads' => $ads
+            'ads' => $ads,
+            'selectedLocation' => session('selected_location'), // for view
         ]);
     }
 
     public function detail_slug($slug): View
     {
-        $ad = DB::table('ads')->where('slug', $slug)->first();
+        $ad = Ad::where('slug', $slug)->first();
 
         if (!$ad) {
             abort(404);

@@ -8,45 +8,49 @@
 @section('content')
 <div class="container-sm">
   <a href="{{ route('create_ad') }}" class="lh-link mb-2">Looking for ♥️</a>
+  <div class="row">
     @foreach($ads as $ad)
     <!-- Feed list -->
-    <a href="{{ url($ad->slug.'.html') }}" class="lh-feed-card text-decoration-none text-dark" >
-      <div>
-        <h2>
-          <b class="text-uppercase">{{ $ad->snapshot_name }} {{ $ad->location }} {{ $ad->title }} .</b> {{ substr($ad->description, 0, 50) . '...' }}
-        </h2>
+    <div class="col-md-6 d-flex mb-3">
+      <a href="{{ url($ad->slug.'.html') }}" class="lh-feed-card text-decoration-none text-dark h-100 w-100" >
+        <div class="w-100">
+          <h2>
+            <b class="text-uppercase">{{ $ad->title }} .</b> {{ substr($ad->description, 0, 50) . '...' }}
+          </h2>
 
-        <div class="d-flex justify-content-between align-items-center mt-2">
-          <div class="d-flex align-items-center">
-            <img
-              src="{{ asset('images/logo.svg') }}"
-              class="lh-small-icon me-2"
-              alt="Love lonely heart symbol"
-            />
-            <span>{{ $ad->likes_count }}</span>
-          </div>
+          <div class="d-flex justify-content-between align-items-center mt-2">
+            <div class="d-flex align-items-center">
+              <img
+                src="{{ asset('images/logo.svg') }}"
+                class="lh-small-icon me-2"
+                alt="Love lonely heart symbol"
+              />
+              <span>{{ $ad->likes_count }}</span>
+            </div>
 
-          <div class="d-flex align-items-center">
-            <img
-              src="{{ asset('icons/eye-icon.svg') }}"
-              class="lh-small-icon me-2"
-              alt="View icon"
-            />
-            <span>{{ $ad->views }}</span>
-          </div>
+            <div class="d-flex align-items-center">
+              <img
+                src="{{ asset('icons/eye-icon.svg') }}"
+                class="lh-small-icon me-2"
+                alt="View icon"
+              />
+              <span>{{ $ad->views }}</span>
+            </div>
 
-          <!-- Use a <button> or <div> styled to look like a share icon -->
-          <div onclick="sharePost()" role="button">
-            <img
-              src="{{ asset('icons/share.svg') }}"
-              class="lh-small-icon"
-              alt="Share icon"
-            />
+            <!-- Use a <button> or <div> styled to look like a share icon -->
+            <div onclick="sharePost()" role="button">
+              <img
+                src="{{ asset('icons/share.svg') }}"
+                class="lh-small-icon"
+                alt="Share icon"
+              />
+            </div>
           </div>
         </div>
-      </div>
-    </a>
+      </a>
+    </div>
     @endforeach
+  </div>
 
     <a href="{{ route('create_ad') }}" class="lh-feed-card lh-cta-card" style="background-color: #A34D41; border-color: #384B49; display: block !important;">
         <img src="{{ asset('images/red-bg-heart.svg') }}" alt="Heart icon logo symbol" style="width: 42px;">
