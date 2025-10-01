@@ -40,9 +40,10 @@ class Home extends Controller
         // Clear session if user came from create flow
         session()->forget(['profile', 'ads']);
 
-        $ads = $query->latest() // shorthand for orderBy('created_at', 'desc')
-            ->limit(6)
-            ->get();
+        $ads = $query->orderByDesc('is_featured') // ✅ featured first
+             ->orderByDesc('created_at')  // ✅ newest next
+             ->limit(6)
+             ->get();
 
         // Cache ads feed (optionally include location in cache key)
         $cacheKey = 'ads_feed_' . (session('selected_location') ?? 'all');

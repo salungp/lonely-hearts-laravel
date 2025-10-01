@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Home Page')
+@section('title', 'Create ad | Ill write it')
 @section('back')
 <a href="{{ url('/ad/create/') }}" class="lh-nav-button">
     <img src="{{ asset('/icons/arrow-left-bold.svg') }}" alt="Icon back button" />
@@ -193,7 +193,6 @@
     document.addEventListener("DOMContentLoaded", () => {
     
         // updateDescription("lh-textarea");
-        locations.shift();
         renderLocations(locations, "locationList", "location");
     });
 

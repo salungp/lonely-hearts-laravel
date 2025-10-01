@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
@@ -17,6 +16,7 @@ use App\Models\User;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\Package;
+use App\Models\UserPackage;
 
 class Ads extends Controller
 {
@@ -399,6 +399,10 @@ class Ads extends Controller
         // --- Case 2: Logged in but no profile ---
         $user = Auth::user();
         $profile = Profile::where('user_id', $user->id)->first();
+        $isFeatured = UserPackage::where('user_id', Auth::id())
+            ->where('status', 'active')
+            ->where('end_date', '>=', now())
+            ->exists();
 
         if (!$profile) {
             // Force them to create a profile before posting an ad
@@ -449,6 +453,7 @@ class Ads extends Controller
             'location'            => $validated['location'],
             'views'               => 0,
             'box_number'          => $box,
+            'is_featured'         => $isFeatured,
         ]);
 
         return response()->json([

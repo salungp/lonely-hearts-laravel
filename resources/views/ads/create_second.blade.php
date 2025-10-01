@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Home Page')
+@section('title', 'Create ad | Help me write it')
 @section('back')
 <a href="{{ url('/ad/create') }}" class="lh-nav-button">
     <img src="{{ asset('/icons/arrow-left-bold.svg') }}" alt="Icon back button" />
@@ -242,6 +242,7 @@ $(document).ready(function () {
 
     // Initial setup
     updateDescription("description");
+    locations.shift();
     renderLocations(locations, "locationList", "location");
 
     // Handle form submit with AJAX

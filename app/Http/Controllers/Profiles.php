@@ -11,6 +11,8 @@ use Carbon\Carbon;
 use App\Models\Ad;
 use App\Models\User;
 use App\Models\Profile;
+use App\Models\Package;
+use App\Models\UserPackage;
 
 class Profiles extends Controller
 {
@@ -23,9 +25,14 @@ class Profiles extends Controller
     {
         $id = Auth::id();
         $user = Profile::where('user_id', $id)->first();
+        $isFeatured = UserPackage::where('user_id', $id)
+            ->where('status', 'active')
+            ->where('end_date', '>=', now())
+            ->exists();
 
         return view('profile.view', [
-            'user' => $user
+            'user' => $user,
+            'is_featured' => $isFeatured
         ]);
     }
 

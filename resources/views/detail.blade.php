@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Home Page')
+@section('title', $ad->title)
 @section('back')
 <a href="{{ route('home') }}" class="lh-nav-button">
     <img src="{{ asset('/icons/arrow-left-bold.svg') }}" alt="Icon back button" />
@@ -15,6 +15,11 @@
 @section('content')
 <div class="container-sm">
     <div class="ad-content" style="margin-bottom: 150px">
+        @if ($ad->is_featured == 1)
+            <div class="d-flex justify-content-center">
+                <span style="margin-bottom: 12px;background: var(--red); border-radius: 6px;border: 2px solid var(--red-dark)" class="badge badge-success">Featured</span>
+            </div>
+        @endif
         <h2 class="ad-title text-uppercase mb-2">
             {{ $ad->title }}
         </h2>

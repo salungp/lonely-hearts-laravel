@@ -5,7 +5,7 @@
 @section('og_type', 'article')
 
 @section('meta_description', 'Find and connect with people on Lonely Hearts')
-@section('title', 'Home Page')
+@section('title', 'Ads | Lonely Hearts')
 
 @section('content')
 <div class="container-sm">
@@ -61,10 +61,21 @@
     
       <div class="row">
         @foreach($ads as $ad)
+        @php
+          $featured = '';
+          if ($ad->is_featured == 1) {
+            $featured = 'lh-feed-featured';
+          }
+        @endphp
         <!-- Feed list -->
         <div class="col-md-6 d-flex mb-3">
-          <a href="{{ url($ad->slug.'.html') }}" class="lh-feed-card text-decoration-none text-dark h-100 w-100" >
+          <a href="{{ url($ad->slug.'.html') }}" class="lh-feed-card text-decoration-none text-dark h-100 w-100 {{ $featured }}" >
             <div class="w-100">
+              @if ($ad->is_featured == 1)
+                  <div class="d-flex">
+                      <span style="margin-bottom: 6px;background: var(--red); border-radius: 6px;border: 2px solid var(--red-dark)" class="badge badge-success">Featured</span>
+                  </div>
+              @endif
               <h2>
                 <b class="text-uppercase">{{ $ad->title }} .</b> {{ substr($ad->description, 0, 50) . '...' }}
               </h2>

@@ -16,7 +16,7 @@ class Ad extends Model
     protected $fillable = [
         'user_id', 'title', 'slug', 'description', 'location',
         'box_number', 'views', 'snapshot_age', 'snapshot_name',
-        'snapshot_occupation', 'snapshot_status', 'snapshot_gender'
+        'snapshot_occupation', 'snapshot_status', 'snapshot_gender', 'is_featured'
     ];
 
     protected static function boot()

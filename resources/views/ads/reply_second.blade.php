@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Home Page')
+@section('title', 'Reply ad | Help me write it')
 @section('back')
 <a href="{{ url('/ad/reply/'.$ad->box_number) }}" class="lh-nav-button">
     <img src="{{ asset('/icons/arrow-left-bold.svg') }}" alt="Icon back button" />
