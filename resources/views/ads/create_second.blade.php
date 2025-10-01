@@ -269,6 +269,7 @@ $(document).ready(function () {
             },
             error: function (xhr) {
                 alert("Error: " + xhr.responseJSON.message);
+                console.log(xhr)
                 $writingPopup.removeClass("active");
             }
         });

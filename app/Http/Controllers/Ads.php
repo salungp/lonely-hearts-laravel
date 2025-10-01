@@ -233,6 +233,10 @@ class Ads extends Controller
     public function confirmation($box): View
     {
         $ad = Ad::where('box_number', $box)->first();
+
+        if (!$ad) {
+            abort(404);
+        }
         
         return view('ads.create_confirmation', [
             'ad' => $ad
@@ -253,7 +257,7 @@ class Ads extends Controller
     {
         $stylePrompts = $this->stylePrompts;
         $package = Package::get();
-        $package_id = Package::where('id', 1)->first();
+        $package_id = Package::where('id', 'cff06bcb-339f-427e-865a-7169074b2d0c')->first();
         return view('ads.create_first', [
             'prompts' => $stylePrompts,
             'package' => $package,
@@ -276,6 +280,12 @@ class Ads extends Controller
     {
         if (Auth::check()) {
             return redirect()->route('ad.confirmation', ['box'=>$box]);
+        }
+
+        $ad = Ad::where('box_number', $box)->first();
+
+        if (!$ad) {
+            abort(404);
         }
 
         return view('ads.writing', [
@@ -379,6 +389,9 @@ class Ads extends Controller
             'description' => 'required|string|max:255',
             'location'    => 'required|string|max:255',
         ]);
+        
+        // Generate box number
+        $box = rand(100000, 999999);
 
         // --- Case 1: User not logged in yet ---
         if (!Auth::check()) {
@@ -391,7 +404,10 @@ class Ads extends Controller
 
             return response()->json([
                 'success'  => true,
-                'message'  => 'Ad stored in session, please log in first.',
+                'message'  => 'Create ad stored in session, please log in first.',
+                'data' => [
+                    'box_number' => $box
+                ],
                 'redirect' => route('offer'),
             ]);
         }
@@ -403,15 +419,6 @@ class Ads extends Controller
             ->where('status', 'active')
             ->where('end_date', '>=', now())
             ->exists();
-
-        if (!$profile) {
-            // Force them to create a profile before posting an ad
-            return response()->json([
-                'success'  => false,
-                'message'  => 'Please create your profile before posting an ad.',
-                'redirect' => route('profile.create'),
-            ], 403);
-        }
 
         // --- Generate witty title ---
         $prompt = $this->generateAdPrompt($profile, $validated['description']);
@@ -429,15 +436,24 @@ class Ads extends Controller
         $title = trim($profile->display_name.' '.$validated['location'].' '.$title);
 
         // Ensure slug is unique
-        $slug = Str::slug($title);
+        $slug = Str::slug($title).'-'.$box;
         $originalSlug = $slug;
         $count = 1;
         while (Ad::where('slug', $slug)->exists()) {
             $slug = $originalSlug.'-'.$count++;
         }
 
-        // Generate box number
-        $box = rand(100000, 999999);
+        if (!$profile) {
+            // Force them to create a profile before posting an ad
+            return response()->json([
+                'success'  => false,
+                'message'  => 'Please create your profile before posting an ad.',
+                'data' => [
+                    'box_number' => $box
+                ],
+                'redirect' => route('profile.create'),
+            ], 403);
+        }
 
         // --- Save Ad ---
         $ad = Ad::create([

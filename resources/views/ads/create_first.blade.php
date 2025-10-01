@@ -73,32 +73,6 @@
     </form>
 </div>
 
-<!-- Location pop up -->
-<div class="lh-popup" id="locationPopup" data-modal>
-    <div class="lh-popup-header">
-        <button data-close>
-            <img src="{{ asset('icons/close.svg') }}" alt="Close button" />
-        </button>
-    </div>
-    <div class="lh-popup-body">
-        <div class="container-sm">
-            <h2 class="lh-title mb-3" style="text-align: left">Address</h2>
-            <div class="location-field">
-                <input
-                    type="text"
-                    id="searchInput"
-                    placeholder="Search location..."
-                    class="input-none"
-                />
-                <button class="current-location-btn">
-                <img src="{{ asset('icons/location.svg') }}" alt="Pin svg icon">
-                </button>
-            </div>
-            <ul id="locationList"></ul>
-        </div>
-    </div>
-</div>
-
 <div data-modal id="helpMePopup" class="lh-popup" style="height: 90vh">
     <div class="lh-popup-header">
         <button data-close>
@@ -160,21 +134,13 @@
         </div>
     </div>
 </div>
-<!-- Location pop up -->
-<div class="lh-popup" id="writingPopup" data-modal>
-    <div class="lh-popup-header"></div>
-    <div class="lh-popup-body">
-        <div class="container-sm">
-            <div id="writing" class="d-flex justify-content-center align-items-center w-100" style="flex-direction: column !important; min-height: 50vh" >
-                <img
-                src="{{ asset('images/loading-icon.png') }}"
-                alt="Loading icon"
-                style="width: 180px; margin-bottom: 20px" />
-                <h1 class="lh-title" id="loading-text">Writing ad...</h1>
-            </div>
-        </div>
-    </div>
-</div>
+
+@include('components.location')
+
+@include('package.offer', ['package' => $package, 'package_id' => $package_id])
+
+@include('components.writing')
+
 @endsection
 @section('script')
 <script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script>
@@ -210,7 +176,10 @@
                 contentType: false,
                 success: function (response) {
                     if (response.success) {
-                        window.location.href = "/ad/confirmation/" + response.data.box_number;
+                        const writingUrl = "{{ route('ad.writing', ['box' => ':box']) }}";
+                        $("#cancel").attr("href", writingUrl.replace(':box', response.data.box_number));
+                        $("#writingPopup").removeClass("active");
+                        $("#offerPopup").addClass("active");
                     } else {
                         alert(response.message || response);
                         $("#writingPopup").removeClass("active");

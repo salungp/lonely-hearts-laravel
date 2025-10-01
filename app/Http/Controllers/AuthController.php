@@ -19,6 +19,9 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Ad;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\Package;
+use App\Models\UserPackage;
+use OpenAI\Laravel\Facades\OpenAI;
 
 class AuthController extends Controller
 {
@@ -154,11 +157,40 @@ class AuthController extends Controller
             }
 
             $box  = rand(100000, 999999);
-            $slug = Str::slug($profile->location.' '.$profile->display_name.' '.$profile->occupation.' '.$profile->status.' '.$box);
+
+            $profile = Profile::where('user_id', $user->id)->first();
+            $isFeatured = UserPackage::where('user_id', Auth::id())
+            ->where('status', 'active')
+            ->where('end_date', '>=', now())
+            ->exists();
+
+            // --- Generate witty title ---
+            $prompt = $this->generateAdPrompt($profile, $ads['description']);
+            $response = OpenAI::chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are a witty personal ad writer.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+            ]);
+
+            $title = trim($response['choices'][0]['message']['content'] ?? 'Seeking someone special');
+            $title = preg_replace('/^["“]|["”]$/u', '', $title);
+            $title = str_replace('!', '', $title);
+            $title = trim($profile->display_name.' '.$ads['location'].' '.$title);
+
+            // Ensure slug is unique
+            $slug = Str::slug($title).'-'.$box;
+            $originalSlug = $slug;
+            $count = 1;
+            while (Ad::where('slug', $slug)->exists()) {
+                $slug = $originalSlug.'-'.$count++;
+            }
 
             Ad::create([
                 'user_id'             => $user->id,
                 'description'         => $ads['description'],
+                'title'               => $title,
                 'slug'                => $slug,
                 'snapshot_name'       => $profile->display_name,
                 'snapshot_occupation' => $profile->occupation,
@@ -238,6 +270,31 @@ class AuthController extends Controller
 
         $request->session()->forget('otp');
         return redirect()->route('home');
+    }
+
+    protected function generateAdPrompt(Profile $profile, string $description): string
+    {
+        return "
+        You are writing humorous and quirky personal ad titles, like in the book 'They Call Me Naughty Lola'.
+        Examples:
+        - Tonight, female readers to 90, I am the hunter and you are my quarry.
+        - If we share a bath together I have to insist on wearing verruca socks.
+        - I’ll see you at the singles night.
+
+        Rules:
+        - Output only ONE short title (max 8 words).
+        - Do not use quotation marks or exclamation marks.
+        - No explanations.
+
+        Profile:
+        Name: {$profile->display_name}
+        Age: {$profile->age}
+        Gender: {$profile->gender}
+        Location: {$profile->location}
+        Status: {$profile->status}
+        Occupation: {$profile->occupation}
+        Description: {$description}
+        ";
     }
 
     public function sendVerification(Request $request)
