@@ -37,35 +37,21 @@ class MessageController extends Controller
 
     public function sent(): View
     {
-        $userId = Auth::id();  
-        
-        $sub = DB::table('messages as m1')
-            ->select('m1.conversation_id', DB::raw('MAX(m1.id) as last_message_id'))
-            ->where('m1.sender_id', $userId)
-            ->groupBy('m1.conversation_id');
+        $userId = Auth::id();
 
-        $sent = DB::table('messages as m')
-            ->joinSub($sub, 'last', function ($join) {
-                $join->on('m.id', '=', 'last.last_message_id');
+        $sent = Message::with([
+                'conversation.ad',
+                'conversation.author',
+                'conversation.replier'
+            ])
+            ->where('sender_id', $userId)
+            ->whereHas('conversation', function ($q) use ($userId) {
+                $q->where('replier_id', $userId); // only when I am the replier
             })
-            ->join('conversations as c', 'c.id', '=', 'm.conversation_id')
-            ->join('ads as a', 'a.id', '=', 'c.ad_id')
-            ->join('users as adOwner', 'adOwner.id', '=', 'a.user_id')
-            ->join('users as replier', 'replier.id', '=', 'c.replier_id')
-            ->select(
-                'm.id as message_id',
-                'm.content',
-                'm.is_read',
-                'm.created_at',
-                'c.id as conversation_id',
-                'c.progress as progress',
-                'a.slug as ad_slug',
-                'a.description as ad_description',
-                'adOwner.name as ad_owner_name',
-                'replier.name as replier_name',
-            )
-            ->orderBy('m.created_at', 'desc')
-            ->get();
+            ->orderBy('created_at', 'desc')
+            ->get()
+            // ✅ Keep only the latest message per ad
+            ->unique(fn($msg) => $msg->conversation->ad_id);
 
         return view('message.sent', ['messages' => $sent]);
     }
@@ -210,9 +196,8 @@ class MessageController extends Controller
 
         $messages = Message::with('conversation.replier')
             ->where('conversation_id', $receiverId)
-            ->where('sender_id', $userId)
+            ->orderBy('created_at', 'asc')
             ->get();
-
 
         return response()->json($messages);
     }

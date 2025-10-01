@@ -62,7 +62,7 @@
       // Redirect after 5 seconds
       setTimeout(() => {
         clearInterval(interval); // stop the animation
-        window.location.href = "{{ route('confirmation', ['box' => $box]) }}";
+        window.location.href = "{{ route('ad.confirmation', ['box' => $box]) }}";
       }, 5000);
     </script>
   </body>

@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Home Page')
+@section('title', 'Messages | Receive')
 @section('meta')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
@@ -64,7 +64,7 @@
             @endif
 
             <div class="text-content" style="flex-grow: 1">
-                <h4 class="lh-sub-title">{{ $message->sender->name }}</h4>
+                <h4 class="lh-sub-title" style="margin-bottom: 6px !important">{{ $message->sender->name }}</h4>
                 <p class="lh-text-small">{{ substr($message->content, 0, 50) . '...' }}</p>
             </div>
 
@@ -92,73 +92,19 @@
     </div>
 
     <!-- Lh popup body -->
-    <div
-        class="lh-popup-body"
-        style="height: 100%; overflow-y: scroll; padding-bottom: 100px"
-    >
-    <div class="message-lists" id="messageLists">
-        <div class="container-sm" id="popupBody">
-            @foreach ($messages as $message)
-            <!-- Message body -->
-            <div class="lh-message-card">
-                <div class="lh-message-header">
-                    <div class="left">
-                        <p class="lh-text-small">From</p>
-                        <h4 class="lh-sub-title">{{ $message->sender->name }}</h4>
-                    </div>
-                    <div class="right">
-                        <p class="lh-text-small">12, June 2025</p>
-                        <img
-                            style="width: 24px"
-                            src="{{ asset('images/heart-fill-25.svg') }}"
-                            alt="Heart fill progress"
-                        />
-                    </div>
-                </div>
-                <div class="lh-message-body">
-                    <div class="d-flex">
-                    <h4>Patricia, 46, F semi-retired gold digger</h4>
+    <div class="lh-popup-body" style="height: 100%; overflow-y: scroll; padding-bottom: 150px">
+        <div class="message-lists" id="messageLists">
+            <div class="container-sm" id="popupBody"></div>
 
-                    <div class="lh-mini-dropdown-wrapper">
-                        <div role="button" class="lh-mini-dropdown-btn">
-                        <img
-                            src="{{ asset('icons/ellipsis.svg') }}"
-                            class="lh-small-icon"
-                            alt="Share icon"
-                        />
-                        </div>
-
-                        <div class="lh-mini-dropdown">
-                            <a href="#">
-                                <span style="color: var(--red);">Report message</span>
-                            </a>
-                            <a href="#">
-                                <span style="color: var(--red);">Block account</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    </div>
-                    <p class="lh-text-paragraph">
-                    {{ $message->content }}
-                    </p>
+            <div class="bottom">
+                <div class="container-sm">
+                    <button id="ctaButton1" class="lh-button mb-2">
+                    <img src="{{ asset('icons/envelope-border.svg') }}" alt="Envelope border icon"/>
+                    Write a reply
+                    </button>
                 </div>
             </div>
-            @endforeach
         </div>
-
-        <div class="bottom">
-            <div class="container-sm">
-                <button id="ctaButton1" class="lh-button mb-2">
-                <img
-                    src="{{ asset('icons/envelope-border.svg') }}"
-                    alt="Envelope border icon"
-                />
-                Write a reply
-                </button>
-            </div>
-        </div>
-    </div>
     </div>
 </div>
 <!-- end pop up -->
@@ -221,7 +167,6 @@
             </form>
         </div>
     </div>
-
 </div>
 
 <!-- Message pop up component -->
@@ -244,13 +189,15 @@
 
             <h2 id="messagePopupTitle" style="margin-bottom: 30px;"></h2>
 
-            <button class="lh-button" id="ctaMessagePopup">OK</button>
+            <a href="" class="lh-button" id="ctaMessagePopup">OK</a>
         </div>
     </div>
-
 </div>
 @endsection
 @section('script')
+<script>
+    const loggedInUserId = @json(auth()->id());
+</script>
 <script src="{{ asset('js/message.js') }}"></script>
 <script>
     const popup = document.getElementById("popup");
@@ -312,7 +259,17 @@
         const content = replyContent.value;
         if (!content.trim()) return;
 
+        const replyBtn = document.getElementById("ctaButton3");
+        const originalBtnText = replyBtn.innerHTML;
+
         try {
+            // 🔹 Set loading state
+            replyBtn.disabled = true;
+            replyBtn.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Sending...
+            `;
+
             const conversationId = globalMessages[0]?.conversation_id;
             if (!conversationId) {
                 alert("No conversation selected!");
@@ -337,22 +294,21 @@
             popupBody.innerHTML += `
             <div class="lh-message-card">
                 <div class="lh-message-header">
-                <div class="left">
-                    <p class="lh-text-small">From</p>
-                    <h4 class="lh-sub-title">${newMessage.sender_name}</h4>
-                </div>
-                <div class="right">
-                    <p class="lh-text-small">${new Date(newMessage.created_at).toLocaleString()}</p>
-                </div>
+                    <div class="left">
+                        <p class="lh-text-small">From</p>
+                        <h4 class="lh-sub-title">${newMessage.sender_name}</h4>
+                    </div>
+                    <div class="right">
+                        <p class="lh-text-small">${new Date(newMessage.created_at).toLocaleString()}</p>
+                    </div>
                 </div>
                 <div class="lh-message-body">
-                <p class="lh-text-paragraph">${newMessage.content}</p>
+                    <p class="lh-text-paragraph">${newMessage.content}</p>
                 </div>
             </div>
             `;
 
             popup3.classList.remove("active");
-
             showMessagePopup("success", "The message has been sent!");
 
             // Clear input
@@ -360,6 +316,11 @@
 
         } catch (err) {
             console.error("Failed to send reply:", err);
+            showMessagePopup("error", "Failed to send message!");
+        } finally {
+            // 🔹 Reset button state
+            replyBtn.disabled = false;
+            replyBtn.innerHTML = originalBtnText;
         }
     });
 

@@ -13,9 +13,77 @@ use App\Models\Ad;
 use OpenAI\Laravel\Facades\OpenAI;
 use App\Models\Profile;
 use App\Models\Like;
+use App\Models\User;
+use App\Models\Conversation;
+use App\Models\Message;
+use App\Models\Package;
 
 class Ads extends Controller
 {
+    public $stylePrompts = [
+        'funny',
+        'romantic',
+        'casual',
+        'formal',
+        'literature',
+        'adventurous',
+        'mysterious',
+        'rom-com',
+        'philosophical',
+        'trendy',
+        'storytelling',
+        'cinematic',
+    ];
+
+    public $options = [
+        "height" => [
+            "Tall",
+            "Kinda Tall",
+            "Perfectly average",
+            "Not too tall",
+            "Petite",
+            "Small"
+        ],
+        "hair" => [
+            "Blue hair",
+            "Highlights",
+            "Two-Tone",
+            "Rainbow Hair"
+        ],
+        "eyes" => [
+            "Red",
+            "Blue",
+            "Brown",
+            "Black"
+        ],
+        "behavior" => [
+            "Bubbly",
+            "Calm",
+            "Adventurous",
+            "Playful",
+            "Serious",
+            "Confident"
+        ],
+        "seeking" => [
+            "Sugar Daddy",
+            "Sugar Baby",
+            "Sugar Mommy",
+            "Mentor",
+            "Sponsor",
+            "Companion"
+        ],
+        "hobby" => [
+            "Reading",
+            "Traveling",
+            "Cooking",
+            "Gaming",
+            "Music",
+            "Sports",
+            "Drawing",
+            "Art"
+        ]
+    ];
+
     public function reply($box): View
     {
         return view('ads.reply', [
@@ -130,60 +198,42 @@ class Ads extends Controller
 
     public function reply_first($box): View
     {
-        $ad = DB::table('ads')->where('box_number', $box)->first();
-        $stylePrompts = [
-            'funny',
-            'romantic',
-            'casual',
-            'formal',
-            'literature',
-            'adventurous',
-            'mysterious',
-            'rom-com',
-            'philosophical',
-            'trendy',
-            'storytelling',
-            'cinematic',
-        ];
+        $ad = Ad::where('box_number', $box)->first();
+        $package = Package::get();
+        $package_id = Package::where('id', 'cff06bcb-339f-427e-865a-7169074b2d0c')->first();
+        $stylePrompts = $this->stylePrompts;
         if (!$ad) {
             abort(404);
         }
         return view('ads.reply_first', [
             'ad' => $ad,
             'prompts' => $stylePrompts,
+            'package' => $package,
+            'package_id' => $package_id
         ]);
     }
 
     public function reply_second($box): View
     {
-        $ad = DB::table('ads')->where('box_number', $box)->first();
-        $stylePrompts = [
-            'funny',
-            'romantic',
-            'casual',
-            'formal',
-            'literature',
-            'adventurous',
-            'mysterious',
-            'rom-com',
-            'philosophical',
-            'trendy',
-            'storytelling',
-            'cinematic',
-        ];
+        $ad = Ad::where('box_number', $box)->first();
+        $package = Package::get();
+        $package_id = Package::where('id', 'cff06bcb-339f-427e-865a-7169074b2d0c')->first();
+        $stylePrompts = $this->stylePrompts;
         if (!$ad) {
             abort(404);
         }
         return view('ads.reply_second', [
             'ad' => $ad,
             'prompts' => $stylePrompts,
+            'package' => $package,
+            'package_id' => $package_id
         ]);
     }
 
     public function confirmation($box): View
     {
-        $ad = DB::table('ads')->where('box_number', $box)->first();
-
+        $ad = Ad::where('box_number', $box)->first();
+        
         return view('ads.create_confirmation', [
             'ad' => $ad
         ]);
@@ -201,78 +251,33 @@ class Ads extends Controller
 
     public function create_first(): View
     {
-        $stylePrompts = [
-            'funny',
-            'romantic',
-            'casual',
-            'formal',
-            'literature',
-            'adventurous',
-            'mysterious',
-            'rom-com',
-            'philosophical',
-            'trendy',
-            'storytelling',
-            'cinematic',
-        ];
-        return view('ads.create_first', ['prompts' => $stylePrompts]);
+        $stylePrompts = $this->stylePrompts;
+        $package = Package::get();
+        $package_id = Package::where('id', 1)->first();
+        return view('ads.create_first', [
+            'prompts' => $stylePrompts,
+            'package' => $package,
+            'package_id' => $package_id
+        ]);
     }
 
     public function create_second(): View
     {
-        $options = [
-            "height" => [
-                "Tall",
-                "Kinda Tall",
-                "Perfectly average",
-                "Not too tall",
-                "Petite",
-                "Small"
-            ],
-            "hair" => [
-                "Blue hair",
-                "Highlights",
-                "Two-Tone",
-                "Rainbow Hair"
-            ],
-            "eyes" => [
-                "Red",
-                "Blue",
-                "Brown",
-                "Black"
-            ],
-            "behavior" => [
-                "Bubbly",
-                "Calm",
-                "Adventurous",
-                "Playful",
-                "Serious",
-                "Confident"
-            ],
-            "seeking" => [
-                "Sugar Daddy",
-                "Sugar Baby",
-                "Sugar Mommy",
-                "Mentor",
-                "Sponsor",
-                "Companion"
-            ],
-            "hobby" => [
-                "Reading",
-                "Traveling",
-                "Cooking",
-                "Gaming",
-                "Music",
-                "Sports",
-                "Drawing",
-                "Art"
-            ]
-        ];
-        return view('ads.create_second', ["options" => $options]);
+        $package = Package::get();
+        $package_id = Package::where('id', 'cff06bcb-339f-427e-865a-7169074b2d0c')->first();
+        return view('ads.create_second', [
+            "options" => $this->options,
+            'package' => $package,
+            'package_id' => $package_id
+        ]);
     }
 
-    public function writing($box): View
+    public function writing($box)
     {
+        if (Auth::check()) {
+            return redirect()->route('ad.confirmation', ['box'=>$box]);
+        }
+
         return view('ads.writing', [
             'redirectUrl' => route('home'), // or any route you want
             'delay' => 5000,
@@ -284,11 +289,13 @@ class Ads extends Controller
     {
         $validated = $request->validate([
             'content' => 'required|string|max:1000',
+            'ad_id'   => 'required|uuid|exists:ads,id',
         ]);
 
-        $adId = $request->input('ad_id');
+        $adId = $validated['ad_id'];
 
-        if (session()->has('profile')) {
+        // --- Case 1: Guest or no profile yet ---
+        if (session()->has('profile') || !Auth::check()) {
             session([
                 'reply' => [
                     'ad_id'   => $adId,
@@ -296,101 +303,75 @@ class Ads extends Controller
                 ],
             ]);
 
-            return redirect()->route('offer'); // or login
+            return response()->json([
+                'success'  => true,
+                'message'  => 'Ad stored in session, please log in first.',
+                'redirect' => route('offer'),
+            ]);
         }
 
-        // Logged in user
-        $userId = Auth::id();
-        $ad     = DB::table('ads')->where('id', $adId)->first();
-        $author = DB::table('users')->where('id', $ad->user_id)->first();
-        $replier = DB::table('users')->where('id', $userId)->first();
+        // --- Case 2: Logged-in user ---
+        $userId  = Auth::id();
+        $user    = Auth::user();
+        $ad      = Ad::with('user')->findOrFail($adId);
+        $author  = $ad->user;
 
-        if (!$ad) {
-            return back()->withErrors(['Ad not found.']);
-        }
-
-        if ($ad->user_id == $userId) {
+        if ($ad->user_id === $userId) {
             return back()->withErrors(['You cannot reply to your own ad.']);
         }
 
         // Find or create conversation
-        $conversation = DB::table('conversations')
-            ->where('ad_id', $ad->id)
-            ->where('author_id', $ad->user_id)
-            ->where('replier_id', $userId)
-            ->first();
-
-        if (!$conversation) {
-            $conversationId = DB::table('conversations')->insertGetId([
-                'ad_id'          => $ad->id,
-                'author_id'      => $ad->user_id,
-                'replier_id'     => $userId,
+        $conversation = Conversation::firstOrCreate(
+            [
+                'ad_id'      => $ad->id,
+                'author_id'  => $ad->user_id,
+                'replier_id' => $userId,
+            ],
+            [
                 'progress'       => '0%',
                 'unlocked_photo' => false,
-                'created_at'     => now(),
-                'updated_at'     => now(),
-            ]);
-        } else {
-            $conversationId = $conversation->id;
-        }
+            ]
+        );
 
-        // ✅ Insert message
-        DB::table('messages')->insert([
-            'conversation_id' => $conversationId,
+        // Insert message
+        Message::create([
+            'conversation_id' => $conversation->id,
             'sender_id'       => $userId,
             'content'         => $validated['content'],
             'status'          => 'sent',
-            'created_at'      => now(),
-            'updated_at'      => now(),
         ]);
 
-        // ✅ Count messages to update progress
-        $messageCount = DB::table('messages')
-            ->where('conversation_id', $conversationId)
-            ->count();
+        // Update progress
+        $messageCount = $conversation->messages()->count();
+        $progress     = match (true) {
+            $messageCount >= 8 => '100%',
+            $messageCount >= 6 => '75%',
+            $messageCount >= 4 => '50%',
+            $messageCount >= 2 => '25%',
+            default            => '0%',
+        };
+        $conversation->update([
+            'progress'       => $progress,
+            'unlocked_photo' => $messageCount >= 3,
+        ]);
 
-        $progress = '0%';
-        if ($messageCount >= 8) {
-            $progress = '100%';
-        } elseif ($messageCount >= 6) {
-            $progress = '75%';
-        } elseif ($messageCount >= 4) {
-            $progress = '50%';
-        } elseif ($messageCount >= 2) {
-            $progress = '25%';
-        }
-
-        $unlockedPhoto = $messageCount >= 3;
-
-        DB::table('conversations')
-            ->where('id', $conversationId)
-            ->update([
-                'progress'       => $progress,
-                'unlocked_photo' => $unlockedPhoto,
-                'updated_at'     => now(),
-            ]);
-
-        // ✅ (Optional) trigger email notification to ad author
-        // Mail::to($ad->email)->send(new NewReplyMail($validated['content']));
-
-        $email = $author->email;
-        $content = $validated['content'];
-
-        // Send email using Blade template
-        if ($email != null) {
+        // Notify ad author by email
+        if ($author?->email) {
             Mail::send('mail.reply', [
-                'name' => $replier->name,
-                'content' => $content
-            ], function ($content) use ($email) {
-                $content->to($email)
+                'name'    => $user->name,
+                'content' => $validated['content'],
+            ], function ($message) use ($author) {
+                $message->to($author->email)
                         ->subject('You just got a reply!');
             });
         }
 
-        return redirect()->route('reply_confirmation');
+        return response()->json([
+            'success'  => true,
+            'message'  => 'Ad stored in session, please log in first.',
+            'redirect' => route('offer'),
+        ]);
     }
-
-
 
     public function store(Request $request)
     {
@@ -441,7 +422,7 @@ class Ads extends Controller
         $title = trim($response['choices'][0]['message']['content'] ?? 'Seeking someone special');
         $title = preg_replace('/^["“]|["”]$/u', '', $title);
         $title = str_replace('!', '', $title);
-        $title = trim($profile->display_name.' '.$profile->location.' '.$title);
+        $title = trim($profile->display_name.' '.$validated['location'].' '.$title);
 
         // Ensure slug is unique
         $slug = Str::slug($title);
@@ -465,7 +446,7 @@ class Ads extends Controller
             'snapshot_age'        => $profile->age,
             'snapshot_status'     => $profile->status,
             'snapshot_gender'     => $profile->gender,
-            'location'            => $profile->location,
+            'location'            => $validated['location'],
             'views'               => 0,
             'box_number'          => $box,
         ]);

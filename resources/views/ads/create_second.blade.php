@@ -130,50 +130,101 @@
         <button class="lh-button" type="submit">Continue</button>
         
     </form>
-    
 </div>
-<!-- Location pop up -->
-<div class="lh-popup" id="locationPopup" data-modal>
-    <div class="lh-popup-header">
-        <button id="closePopupLocation" data-close>
-            <img src="{{ asset('icons/close.svg') }}" alt="Close button" />
-        </button>
-    </div>
-    <div class="lh-popup-body">
-        <div class="container-sm">
-            <h2 class="lh-title mb-3" style="text-align: left">Address</h2>
-            <div class="location-field">
-                <input
-                type="text"
-                id="searchInput"
-                placeholder="Search location..."
-                class="input-none"
-                />
-                <button class="current-location-btn">
-                <img src="{{ asset('icons/location.svg') }}" alt="Pin svg icon">
-                </button>
-            </div>
-            <ul id="locationList"></ul>
-        </div>
-    </div>
-</div>
-<!-- Location pop up -->
-<div class="lh-popup" id="writingPopup" data-modal>
-    <div class="lh-popup-header"></div>
-    <div class="lh-popup-body">
-        <div class="container-sm">
-            <div id="writing" class="d-flex justify-content-center align-items-center w-100" style="flex-direction: column !important; min-height: 50vh" >
-                <img
-                src="{{ asset('images/loading-icon.png') }}"
-                alt="Loading icon"
-                style="width: 180px; margin-bottom: 20px" />
-                <h1 class="lh-title" id="loading-text">Writing ad...</h1>
-            </div>
-        </div>
-    </div>
-</div>
+
+@include('components.location')
+@include('package.offer', ['package' => $package, 'package_id' => $package_id])
+@include('components.writing')
+
 @endsection
 @section('script')
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    const lhFeed = document.querySelectorAll(".lh-feed-card");
+    const priceDisplay = document.querySelector(".lh-offer-price");
+    const packageId = document.getElementById("package");
+    const cancel = document.getElementById("cancel");
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const stripe = Stripe("{{ config('services.stripe.key') }}"); // pk_test_xxx
+
+        // Create a payment request for the Featured package ($20)
+        const paymentRequest = stripe.paymentRequest({
+            country: 'US',
+            currency: 'usd',
+            total: {
+                label: 'Featured Package',
+                amount: 2000, // $20
+            },
+            requestPayerName: true,
+            requestPayerEmail: true,
+        });
+
+        const elements = stripe.elements();
+        const prButton = elements.create('paymentRequestButton', {
+            paymentRequest: paymentRequest,
+            style: {
+                paymentRequestButton: {
+                    type: 'default',
+                    theme: 'dark',
+                    height: '48px',
+                },
+            },
+        });
+
+        // Check if Apple Pay / Google Pay is available
+        paymentRequest.canMakePayment().then(function(result) {
+            if (result) {
+                prButton.mount('#payment-request-button');
+            } else {
+                document.getElementById('payment-request-button').style.display = 'none';
+            }
+        });
+
+        // Handle payment
+        paymentRequest.on('paymentmethod', async function(ev) {
+            // Create PaymentIntent on server
+            const response = await fetch("{{ route('payment.intent.create', $package_id->id) }}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+            });
+            const { clientSecret } = await response.json();
+
+            const {error, paymentIntent} = await stripe.confirmCardPayment(
+                clientSecret,
+                { payment_method: ev.paymentMethod.id },
+                { handleActions: false }
+            );
+
+            if (error) {
+                ev.complete('fail');
+                alert(error.message);
+            } else {
+                ev.complete('success');
+                if (paymentIntent.status === "requires_action") {
+                    await stripe.confirmCardPayment(clientSecret);
+                }
+                if (paymentIntent.status === "succeeded") {
+                    window.location.href = "{{ route('checkout.success', $package_id->id) }}";
+                }
+            }
+        });
+    });
+
+    lhFeed.forEach((card) => {
+    card.addEventListener("click", () => {
+        // remove active from all
+        lhFeed.forEach((c) => c.classList.remove("lh-active-feed"));
+            // add active to clicked one
+            card.classList.add("lh-active-feed");
+
+            // update price
+            const price = card.getAttribute("data-price");
+            priceDisplay.textContent = `$${price}`;
+            packageId.value = card.getAttribute("data-package");
+        });
+    });
+</script>
 <script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script>
 <script>
 $(document).ready(function () {
@@ -191,7 +242,6 @@ $(document).ready(function () {
 
     // Initial setup
     updateDescription("description");
-    locations.shift();
     renderLocations(locations, "locationList", "location");
 
     // Handle form submit with AJAX
@@ -207,7 +257,10 @@ $(document).ready(function () {
             contentType: false,
             success: function (response) {
                 if (response.success) {
-                    window.location.href = response.redirect;
+                    const writingUrl = "{{ route('ad.writing', ['box' => ':box']) }}";
+                    $("#cancel").attr("href", writingUrl.replace(':box', response.data.box_number));
+                    $writingPopup.removeClass("active");
+                    $("#offerPopup").addClass("active");
                 } else {
                     alert(response.message || "Something went wrong");
                     $writingPopup.removeClass("active");

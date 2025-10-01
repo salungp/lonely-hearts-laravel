@@ -141,7 +141,6 @@ class AuthController extends Controller
             return redirect()->route('auth.verify')->with('error', 'Your OTP is not correct');
         }
 
-
         $user = User::find($otpData['user_id']);
         if (!$user) {
             return back()->withErrors(['Could not find user']);
@@ -171,6 +170,7 @@ class AuthController extends Controller
                 'box_number'          => $box,
             ]);
 
+            Auth::login($user);
             $request->session()->forget(['ads', 'otp']);
             return redirect()->route('ad.writing', ['box' => $box]);
         }
@@ -227,6 +227,7 @@ class AuthController extends Controller
                 });
             }
 
+            Auth::login($user);
             $request->session()->forget(['reply', 'otp']);
             return redirect()->route('reply_confirmation');
         }

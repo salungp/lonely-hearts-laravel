@@ -186,3 +186,7 @@
   .lh-feed-card div div {
     flex-direction: row;
   }
+
+  .lh-message-red {
+    background-color: #F1DFBC;
+  }

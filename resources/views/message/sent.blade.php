@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Home Page')
+@section('title', 'Messages | Sent')
 @section('back')
 <a href="{{ route('profile.view') }}" class="lh-nav-button">
     <img src="{{ asset('/icons/arrow-left-bold.svg') }}" alt="Icon back button" />
@@ -14,7 +14,7 @@
 
     @foreach ($messages as $message)
         <!-- Feed list -->
-        <div data-target="{{ $message->message_id }}" id="messageItem3" class="lh-feed-card gap-2 d-flex flex-direction-row text-decoration-none text-dark">
+        <div data-target="{{ $message->conversation_id }}" id="messageItem3" class="lh-feed-card gap-2 d-flex flex-direction-row text-decoration-none text-dark">
 
             @if ($message->is_read == 0)
                 <div style="
@@ -43,7 +43,8 @@
             @endif
 
             <div class="text-content" style="flex-grow: 1">
-              <h4 class="lh-sub-title">{{ $message->ad_owner_name }}</h4>
+              <h4 class="lh-sub-title">{{ $message->conversation->author->name }}</h4>
+              <em style="color: #888;line-height: 120%" class="mb-2 mt-2"><small>{{ $message->conversation->ad->title }}</small></em>
               <p class="lh-text-small">{{ substr($message->content, 0, 50) . '...' }}</p>
             </div>
             @if ($message->progress == '0%')
@@ -66,130 +67,275 @@
     <!-- Lh popup header -->
     <div class="lh-popup-header">
         <button id="closePopup" class="close-popup">
-            <img src="{{ asset('icons/close.svg') }}" alt="Close button" />
+            <img src="{{ asset('icons/close.svg') }}" data-close alt="Close button" />
         </button>
     </div>
 
     <!-- Lh popup body -->
-    <div
-        class="lh-popup-body"
-        style="height: 100%; overflow-y: scroll; padding-bottom: 100px"
-    >
-    <div class="message-lists" id="messageLists">
-        <div class="container-sm" id="popupBody">
-            @foreach ($messages as $message)
-            <!-- Message body -->
-            <div class="lh-message-card">
-                <div class="lh-message-header">
-                    <div class="left">
-                        <p class="lh-text-small">From</p>
-                        <h4 class="lh-sub-title">{{ $message->ad_owner_name }}</h4>
-                    </div>
-                    <div class="right">
-                        <p class="lh-text-small">12, June 2025</p>
-                        @if ($message->progress == '0%')
-                            <img style="width: 24px" src="{{ asset('images/heart-fill-0.svg') }}" alt="Heart fill progress" />
-                        @elseif ($message->progress == '25%')
-                            <img style="width: 24px" src="{{ asset('images/heart-fill-25.svg') }}" alt="Heart fill progress" />
-                        @elseif ($message->progress == '50%')
-                            <img style="width: 24px" src="{{ asset('images/heart-fill-50.svg') }}" alt="Heart fill progress" />
-                        @elseif ($message->progress == '75%')
-                            <img style="width: 24px" src="{{ asset('images/heart-fill-75.svg') }}" alt="Heart fill progress" />
-                        @elseif ($message->progress == '100%')
-                            <img style="width: 24px" src="{{ asset('images/heart-fill-100.svg') }}" alt="Heart fill progress" />
-                        @endif
-                    </div>
+    <div class="lh-popup-body" style="height: 100%; overflow-y: scroll; padding-bottom: 150px">
+        <div class="container-sm">
+            <div id="popupBody"></div>
+            <div class="bottom">
+                <div class="container-sm">
+                    <button id="ctaButton1" class="lh-button mb-2">
+                    <img src="{{ asset('icons/envelope-border.svg') }}" alt="Envelope border icon"/>
+                    Write a reply
+                    </button>
                 </div>
-                <div class="lh-message-body">
-                    <div class="d-flex">
-                    <h4>Patricia, 46, F semi-retired gold digger</h4>
-
-                    <div class="lh-mini-dropdown-wrapper">
-                        <div role="button" class="lh-mini-dropdown-btn">
-                        <img
-                            src="{{ asset('icons/ellipsis.svg') }}"
-                            class="lh-small-icon"
-                            alt="Share icon"
-                        />
-                        </div>
-
-                        <div class="lh-mini-dropdown">
-                        <a href="#">
-                            <span style="color: var(--red);">Report message</span>
-                        </a>
-                        <a href="#">
-                            <span style="color: var(--red);">Block account</span>
-                        </a>
-                        </div>
-                    </div>
-
-                    </div>
-                    <p class="lh-text-paragraph">
-                    {{ $message->content }}
-                    </p>
-                </div>
-            </div>
-            @endforeach
-        </div>
-
-        <div class="bottom">
-            <div class="container-sm">
-                <button id="ctaButton1" class="lh-button mb-2">
-                <img
-                    src="{{ asset('icons/envelope-border.svg') }}"
-                    alt="Envelope border icon"
-                />
-                Write a reply
-                </button>
             </div>
         </div>
     </div>
+</div>
+<!-- Reply container -->
+<div id="popup3" class="lh-popup" style="z-index: 999999999999999;">
+    <div class="lh-popup-header">
+        <button id="closePopup3">
+            <img src="{{ asset('icons/close.svg') }}" alt="Close button" />
+        </button>
+    </div>
+
+    <div id="popupBody"></div>
+
+    <div class="lh-popup-body">
+        <div class="container-sm">
+            <div class="d-flex justify-content-between">
+                <h2 class="lh-title mb-3" style="text-align: left">Reply</h2>
+                <span id="dearDate"></span>
+            </div>
+
+            <h3 style="font-family: 'Merriweather'; text-align: left">Dear <span id="dearName"></span></h3>
+
+            <form id="replyForm">
+                @csrf
+                <div style="position: relative; margin-bottom: 20px;">
+                    <textarea
+                        class="lh-textarea"
+                        oninput="updateLHtextarea()"
+                        name="content"
+                        id="lh-textarea"
+                        maxlength="300"
+                        placeholder="Write your own ad"
+                        ></textarea>
+                    <div class="lh-textarea-info">
+                        <span id="lh-textarea-info">0</span>/300
+                    </div>
+                    <button
+                        class="d-flex lh-box-no"
+                        style="
+                            position: absolute;
+                            bottom: 6px;
+                            left: 16px;
+                            z-index: 99;
+                        "
+                        id="showPopup"
+                    >
+                    Help me write
+                    </button>
+                </div>
+
+                <button id="ctaButton3" class="lh-button mb-2">
+                    <img
+                    src="{{ asset('icons/envelope-border.svg') }}"
+                    alt="Envelope border icon"
+                    type="submit"
+                    />
+                    Send reply
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Message pop up component -->
+<div id="messagePopup" class="lh-popup" style="z-index: 999999999999999;">
+    <div class="lh-popup-header">
+        <button id="closeMessagePopup">
+            <img src="{{ asset('icons/close.svg') }}" alt="Close button" />
+        </button>
+    </div>
+
+    <div class="lh-popup-body">
+        <div class="container-sm">
+            <div class="d-flex justify-content-center" style="margin-bottom: 20px">
+                <img
+                style="width: 100px;margin-top: 30px;"
+                src="{{ asset('images/envelope-icon.png') }}"
+                alt="Envelope icon symbol of lonely hearts"
+                />
+            </div>
+
+            <h2 id="messagePopupTitle" style="margin-bottom: 30px;"></h2>
+
+            <a href="" class="lh-button" id="ctaMessagePopup">OK</a>
+        </div>
     </div>
 </div>
 <!-- end pop up -->
 @endsection
 @section('script')
 <script>
+    const loggedInUserId = @json(auth()->id());
+</script>
+<script>
     let globalSentMessages = [];
+    const popup = document.getElementById("popup");
+    const popup3 = document.getElementById("popup3");
+    const dearName = document.getElementById("dearName");
+    const dearDate = document.getElementById("dearDate");
+    const replyForm = document.getElementById("replyForm");
+    const replyContent = document.getElementById("lh-textarea");
+    const tokenMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = tokenMeta ? tokenMeta.content : '';
+
+    function showMessagePopup(status, message) {
+        const messagePopup = document.getElementById("messagePopup");
+        const messagePopupTitle = document.getElementById("messagePopupTitle");
+
+        messagePopup.classList.add("active");
+        messagePopupTitle.innerHTML = message;
+
+        clickAction("#closeMessagePopup", (e) => {
+            messagePopup.classList.remove("active");
+        });
+
+        clickAction("#ctaMessagePopup", (e) => {
+            messagePopup.classList.remove("active");
+        });
+    }
+
+    clickAction("#ctaButton1", (e) => {
+        popup3.classList.add("active");
+        popup.classList.remove("active");
+        dearName.innerHTML = globalSentMessages[0].sender_name;
+        dearDate.innerHTML = globalSentMessages[0].created_at;
+    });
+
+    clickAction("#closePopup3", (e) => {
+        popup3.classList.remove("active");
+    });
+
+    clickAction("#closePopup", (e) => {
+        popup.classList.remove("active");
+    });
+
+    // Send a reply
+    replyForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const content = replyContent.value;
+        if (!content.trim()) return;
+
+        const replyBtn = document.getElementById("ctaButton3");
+        const originalBtnText = replyBtn.innerHTML;
+
+        try {
+            // 🔹 Set loading state
+            replyBtn.disabled = true;
+            replyBtn.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Sending...
+            `;
+
+            const conversationId = globalSentMessages[0]?.conversation_id;
+            if (!conversationId) {
+                alert("No conversation selected!");
+                return;
+            }
+
+            const res = await fetch(`/conversations/${conversationId}/messages`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRF-TOKEN": csrfToken
+                },
+                body: JSON.stringify({ content })
+            });
+
+            const newMessage = await res.json();
+
+            // Add new message to globalSentMessages and update UI
+            globalSentMessages.push(newMessage);
+            const popupBody = document.getElementById("popupBody");
+            popupBody.innerHTML += `
+            <div class="lh-message-card">
+                <div class="lh-message-header">
+                    <div class="left">
+                        <p class="lh-text-small">From</p>
+                        <h4 class="lh-sub-title">${newMessage.sender_name}</h4>
+                    </div>
+                    <div class="right">
+                        <p class="lh-text-small">${new Date(newMessage.created_at).toLocaleString()}</p>
+                    </div>
+                </div>
+                <div class="lh-message-body">
+                    <p class="lh-text-paragraph">${newMessage.content}</p>
+                </div>
+            </div>
+            `;
+
+            popup3.classList.remove("active");
+            showMessagePopup("success", "The message has been sent!");
+
+            // Clear input
+            replyContent.value = "";
+
+        } catch (err) {
+            console.error("Failed to send reply:", err);
+            showMessagePopup("error", "Failed to send message!");
+        } finally {
+            // 🔹 Reset button state
+            replyBtn.disabled = false;
+            replyBtn.innerHTML = originalBtnText;
+        }
+    });
 
     document.querySelectorAll(".lh-feed-card").forEach(item => {
         item.addEventListener("click", async () => {
             const receiverId = item.dataset.target; // 👈 assuming dataset has the receiver user id
 
             try {
-            const res = await fetch(`/conversations/${receiverId}/sent-messages/`, {
-                headers: {
-                "X-Requested-With": "XMLHttpRequest",
-                "Accept": "application/json"
-                }
-            });
 
-            const messages = await res.json();
+                const res = await fetch(`/conversations/${receiverId}/sent-messages/`, {
+                    headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "application/json"
+                    }
+                });
 
-            // 👇 Save globally
-            globalSentMessages = messages;
+                const messages = await res.json();
 
-            // Fill popup
-            const popupBody = document.getElementById("popupBody");
-            popupBody.innerHTML = messages.map(msg => `
-                <div class="lh-message-card">
-                <div class="lh-message-header">
-                    <div class="left">
-                    <p class="lh-text-small">To</p>
-                    <h4 class="lh-sub-title">${msg.receiver_name}</h4>
+                // 👇 Save globally
+                globalSentMessages = messages;
+
+                // Fill popup
+                const popupBody = document.getElementById("popupBody");
+                popupBody.innerHTML = messages.map(msg => {
+                    // If sender is logged in user, override name
+                    const displayName = msg.sender_id === loggedInUserId ? "You" : msg.sender_name;
+                    const senderClass = msg.sender_id === loggedInUserId ? "lh-message-red" : "";
+                    const check = msg.sender_id === loggedInUserId ? true : false;
+
+                    return `
+                    <div class="lh-message-card" style="${check ? "margin-left: 40px" : "margin-right: 40px"}">
+                        <div class="lh-message-header ${senderClass}">
+                        <div class="left">
+                            <p class="lh-text-small">From</p>
+                            <h4 class="lh-sub-title">${displayName}</h4>
+                        </div>
+                        <div class="right">
+                            <p class="lh-text-small">${new Date(msg.created_at).toLocaleString()}</p>
+                        </div>
+                        </div>
+                        <div class="lh-message-body">
+                        <p class="lh-text-paragraph">${msg.content}</p>
+                        </div>
                     </div>
-                    <div class="right">
-                    <p class="lh-text-small">${new Date(msg.created_at).toLocaleString()}</p>
-                    </div>
-                </div>
-                <div class="lh-message-body">
-                    <p class="lh-text-paragraph">${msg.content}</p>
-                </div>
-                </div>
-            `).join("");
+                    `;
+                }).join("");
 
-            // Open popup
-            // document.getElementById("popup").classList.add("active");
+                // Open popup
+                document.getElementById("popup").classList.add("active");
 
             } catch (err) {
                 console.error("Failed to fetch sent messages:", err);

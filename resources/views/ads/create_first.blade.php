@@ -85,10 +85,10 @@
             <h2 class="lh-title mb-3" style="text-align: left">Address</h2>
             <div class="location-field">
                 <input
-                type="text"
-                id="searchInput"
-                placeholder="Search location..."
-                class="input-none"
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search location..."
+                    class="input-none"
                 />
                 <button class="current-location-btn">
                 <img src="{{ asset('icons/location.svg') }}" alt="Pin svg icon">
@@ -133,18 +133,10 @@
     <div class="modal-dialog lh-modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header lh-modal-header">
-            <h1
-                class="modal-title lh-modal-title fs-5"
-                id="exampleModalLabel"
-            >
-                Stay Safe
-            </h1>
-            <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-            ></button>
+                <h1 class="modal-title lh-modal-title fs-5" id="exampleModalLabel">
+                    Stay Safe
+                </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="d-flex justify-content-center mb-4">
@@ -187,10 +179,8 @@
 @section('script')
 <script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script>
 <script>
-    const locationField = document.getElementById("locationField");
     const searchInput = document.getElementById("searchInput");
     const selectedLocation = document.getElementById("selectedLocation");
-    const screenOne = getIdElement("screenOne");
     const loadingText = document.getElementById("loading-text");
     const writing = document.getElementById("writing");
     let dotCount = 0;
@@ -202,7 +192,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
     
-        updateDescription("description");
+        // updateDescription("lh-textarea");
         locations.shift();
         renderLocations(locations, "locationList", "location");
     });
@@ -223,7 +213,7 @@
                     if (response.success) {
                         window.location.href = "/ad/confirmation/" + response.data.box_number;
                     } else {
-                        alert(response.message || "Something went wrong");
+                        alert(response.message || response);
                         $("#writingPopup").removeClass("active");
                     }
                 },

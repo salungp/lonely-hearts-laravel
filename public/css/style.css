@@ -32,7 +32,7 @@
   
   body {
     background-color: var(--color-bg);
-    background-image: url("../images/paper.png");
+    background-image: url("../images/paper.webp");
     background-size: cover;
     background-repeat: no-repeat;
     overflow-x: hidden !important;
@@ -1058,6 +1058,7 @@
   
   .lh-sub-title {
     font-size: 18px;
+    margin-bottom: 0 !important;
   }
   
   .lh-description {
@@ -1085,7 +1086,7 @@
   }
   
   .lh-message-header {
-    padding: 20px;
+    padding: 12px;
     background: var(--color-bg);
     border-bottom: 2px solid var(--dark);
     display: flex;
@@ -1101,7 +1102,7 @@
   }
   
   .lh-message-body {
-    padding: 20px;
+    padding: 12px;
     background: var(--fill);
   }
   
