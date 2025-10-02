@@ -20,19 +20,12 @@
       <h2 class="text-center mb-3">
         Enter Box Number
       </h2>
-      <form action="{{ url('/ad/check_box') }}" method="POST">
+      <form action="{{ url('/ad') }}" method="POST">
         @csrf
         <!-- PIN Input Container -->
         <div class="pin-container d-flex mb-4">
           @for ($i = 1; $i < 7; $i++)
-          <input
-            type="text"
-            class="text-center lh-input pin-input-field"
-            maxlength="1"
-            data-index="{{ $i }}"
-            name="{{ 'box_'.$i }}"
-            inputmode="numeric"
-          />
+            <input type="text" class="text-center lh-input pin-input-field" maxlength="1" data-index="{{ $i }}" name="{{ 'box_'.$i }}" inputmode="numeric"/>
           @endfor
         </div>
 

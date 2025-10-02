@@ -278,10 +278,6 @@ class Ads extends Controller
 
     public function writing($box)
     {
-        if (Auth::check()) {
-            return redirect()->route('ad.confirmation', ['box'=>$box]);
-        }
-
         $ad = Ad::where('box_number', $box)->first();
 
         if (!$ad) {
@@ -313,11 +309,7 @@ class Ads extends Controller
                 ],
             ]);
 
-            return response()->json([
-                'success'  => true,
-                'message'  => 'Ad stored in session, please log in first.',
-                'redirect' => route('offer'),
-            ]);
+            return redirect()->route('offer');
         }
 
         // --- Case 2: Logged-in user ---
@@ -376,11 +368,7 @@ class Ads extends Controller
             });
         }
 
-        return response()->json([
-            'success'  => true,
-            'message'  => 'Ad stored in session, please log in first.',
-            'redirect' => route('offer'),
-        ]);
+        return redirect()->route('reply_confirmation');
     }
 
     public function store(Request $request)
@@ -402,14 +390,7 @@ class Ads extends Controller
                 ],
             ]);
 
-            return response()->json([
-                'success'  => true,
-                'message'  => 'Create ad stored in session, please log in first.',
-                'data' => [
-                    'box_number' => $box
-                ],
-                'redirect' => route('offer'),
-            ]);
+            return redirect()->route('offer');
         }
 
         // --- Case 2: Logged in but no profile ---
@@ -445,14 +426,7 @@ class Ads extends Controller
 
         if (!$profile) {
             // Force them to create a profile before posting an ad
-            return response()->json([
-                'success'  => false,
-                'message'  => 'Please create your profile before posting an ad.',
-                'data' => [
-                    'box_number' => $box
-                ],
-                'redirect' => route('profile.create'),
-            ], 403);
+            return redirect()->route('ad.writing', ['box' => $box]);
         }
 
         // --- Save Ad ---
@@ -472,17 +446,7 @@ class Ads extends Controller
             'is_featured'         => $isFeatured,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Ad created successfully',
-            'data' => [
-                'id'         => $ad->id,
-                'title'      => $title,
-                'slug'       => $slug,
-                'box_number' => $box,
-            ],
-            'redirect' => route('ad.confirmation', ['box' => $box]),
-        ]);
+        return redirect()->route('ad.writing', ['box' => $box]);
     }
 
     /**

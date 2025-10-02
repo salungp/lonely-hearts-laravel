@@ -103,9 +103,55 @@ class Home extends Controller
         ]);
     }
 
-    public function detail($box): View
+    public function detail(Request $request, $box): View
     {
-        $ad = DB::table('ads')->where('box_number', $box)->first();
+        $box_1 = $request->input('box_1');
+        $box_2 = $request->input('box_2');
+        $box_3 = $request->input('box_3');
+        $box_4 = $request->input('box_4');
+        $box_5 = $request->input('box_5');
+        $box_6 = $request->input('box_6');
+
+        if ($request) {
+            $box = $box_1.$box_2.$box_3.$box_4.$box_5.$box_6;
+        }
+
+        $ad = Ad::where('box_number', $box)->first();
+
+        if (!$ad) {
+            abort(404);
+        }
+        
+        $sessionKey = 'viewed_ad_' . $ad->id;
+
+        if (!session()->has($sessionKey)) {
+            DB::table('ads')
+                ->where('box_number', $box)
+                ->increment('views');
+    
+            session([$sessionKey => now()]);
+        }
+
+        return view('detail', [
+            'conversation' => 2,
+            'ad' => $ad
+        ]);
+    }
+
+    public function detail_ad(Request $request): View
+    {
+        $box_1 = $request->input('box_1');
+        $box_2 = $request->input('box_2');
+        $box_3 = $request->input('box_3');
+        $box_4 = $request->input('box_4');
+        $box_5 = $request->input('box_5');
+        $box_6 = $request->input('box_6');
+
+        if ($request) {
+            $box = $box_1.$box_2.$box_3.$box_4.$box_5.$box_6;
+        }
+
+        $ad = Ad::where('box_number', $box)->first();
 
         if (!$ad) {
             abort(404);
@@ -137,7 +183,7 @@ class Home extends Controller
         $box_6 = $request->input('box_6');
         $box = $box_1.$box_2.$box_3.$box_4.$box_5.$box_6;
 
-        $ad = DB::table('ads')->where('box_number', $box)->first();
+        $ad = Ad::where('box_number', $box)->first();
 
         if ($ad) {
             return view('detail', [

@@ -73,7 +73,8 @@ Route::post('/ad/{ad}/toggle-like', [Ads::class, 'toggleLike'])
 Route::post('/ad/{ad}/toggle-like', [Ads::class, 'toggleLike'])
     ->name('ad.toggle-like');
 Route::post('/ad/apply-style', [Ads::class, 'apply_style']);
-Route::get('/ad/{box}', [Home::class, 'detail']);
+Route::get('/ad/{box}', [Home::class, 'detail'])->name('ad.detail');
+Route::post('/ad', [Home::class, 'check_box']);
 
 // Test mail
 // Route::get('/test-mail', function () {

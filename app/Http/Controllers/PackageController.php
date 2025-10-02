@@ -9,23 +9,25 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Payment;
 use App\Models\Package;
 use App\Models\UserPackage;
+use App\Models\Ad;
 use Carbon\Carbon;
 
 class PackageController extends Controller
 {
     public function offer(): View
     {
-        $link = 'ad.writing';
         $package = Package::get();
-        $package_id = Package::where('id', 1)->first();
+        $package_id = Package::first();
+
         if (session()->has('reply')) {
-            $ad = DB::table('ads')->where('id', session('reply')['ad_id'])->first();
+            $ad = Ad::where('id', session('reply')['ad_id'])->first();
             $link = '/ad/confirmation/'.$ad->box_number;
         }
+
         return view('package.offer', [
-            'link' => $link,
             'package' => $package,
-            'package_id' => $package_id
+            'package_id' => $package_id,
+            'box' => 12344
         ]);
     }
 

@@ -49,23 +49,18 @@
 
         <div class="location-field file-field">
             <div class="d-flex align-items-center" style="gap: 12px;">
-            <span class="icon">
-                <img src="{{ asset('icons/file.svg') }}" alt="Pin svg icon">
-            </span>
-            <span>SELECT PHOTO</span>
+                <span class="icon">
+                    <img src="{{ asset('icons/file.svg') }}" alt="Pin svg icon">
+                </span>
+                <span>SELECT PHOTO</span>
             </div>
             <button class="file-info" type="button">
                 <img src="{{ asset('icons/info.svg') }}" alt="Pin svg icon">
             </button>
         </div>
 
-        <button
-            class="lh-button-secondary mb-2 mt-2"
-            data-bs-toggle="modal"
-            data-bs-target="#staySafeModal"
-            type="button"
-        >
-                Stay Safe
+        <button class="lh-button-secondary mb-2 mt-2" data-bs-toggle="modal" data-bs-target="#staySafeModal" type="button">
+            Stay Safe
         </button>
 
         <button class="lh-button" type="submit">Continue</button>
@@ -137,66 +132,12 @@
 
 @include('components.location')
 
-@include('package.offer', ['package' => $package, 'package_id' => $package_id])
-
-@include('components.writing')
-
 @endsection
 @section('script')
 <script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script>
 <script>
     const searchInput = document.getElementById("searchInput");
     const selectedLocation = document.getElementById("selectedLocation");
-    const loadingText = document.getElementById("loading-text");
-    const writing = document.getElementById("writing");
-    let dotCount = 0;
-
-    const interval = setInterval(() => {
-        dotCount = (dotCount + 1) % 4;
-        loadingText.textContent = "WRITING AD" + ".".repeat(dotCount);
-    }, 500);
-
-    document.addEventListener("DOMContentLoaded", () => {
-    
-        // updateDescription("lh-textarea");
-        renderLocations(locations, "locationList", "location");
-    });
-
-    $(document).ready(function () {
-        $("form").on("submit", function (e) {
-            e.preventDefault();
-
-            $("#writingPopup").addClass("active");
-
-            $.ajax({
-                url: $(this).attr("action"),
-                method: "POST",
-                data: new FormData(this),
-                processData: false,
-                contentType: false,
-                success: function (response) {
-                    if (response.success) {
-                        const writingUrl = "{{ route('ad.writing', ['box' => ':box']) }}";
-                        $("#cancel").attr("href", writingUrl.replace(':box', response.data.box_number));
-                        $("#writingPopup").removeClass("active");
-                        $("#offerPopup").addClass("active");
-                    } else {
-                        alert(response.message || response);
-                        $("#writingPopup").removeClass("active");
-                    }
-                },
-                error: function (xhr) {
-                    alert("Error: " + xhr.responseText);
-                    $("#writingPopup").removeClass("active");
-                }
-            });
-        });
-    });
-
-    document.addEventListener("DOMContentLoaded", () => {
-        locations.shift();
-        renderLocations(locations, "locationList", "location");
-    });
 
     clickAction(".lh-tag", (el) => {
         el.classList.toggle("active");
@@ -212,6 +153,8 @@
     });
 
     document.addEventListener("DOMContentLoaded", () => {
+        locations.shift();
+        renderLocations(locations, "locationList", "location");
         let selectedStyle = null;
 
         // Handle style button clicks

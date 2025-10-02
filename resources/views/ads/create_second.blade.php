@@ -133,147 +133,19 @@
 </div>
 
 @include('components.location')
-@include('package.offer', ['package' => $package, 'package_id' => $package_id])
-@include('components.writing')
 
 @endsection
 @section('script')
-<script src="https://js.stripe.com/v3/"></script>
-<script>
-    const lhFeed = document.querySelectorAll(".lh-feed-card");
-    const priceDisplay = document.querySelector(".lh-offer-price");
-    const packageId = document.getElementById("package");
-    const cancel = document.getElementById("cancel");
-
-    document.addEventListener("DOMContentLoaded", function() {
-        const stripe = Stripe("{{ config('services.stripe.key') }}"); // pk_test_xxx
-
-        // Create a payment request for the Featured package ($20)
-        const paymentRequest = stripe.paymentRequest({
-            country: 'US',
-            currency: 'usd',
-            total: {
-                label: 'Featured Package',
-                amount: 2000, // $20
-            },
-            requestPayerName: true,
-            requestPayerEmail: true,
-        });
-
-        const elements = stripe.elements();
-        const prButton = elements.create('paymentRequestButton', {
-            paymentRequest: paymentRequest,
-            style: {
-                paymentRequestButton: {
-                    type: 'default',
-                    theme: 'dark',
-                    height: '48px',
-                },
-            },
-        });
-
-        // Check if Apple Pay / Google Pay is available
-        paymentRequest.canMakePayment().then(function(result) {
-            if (result) {
-                prButton.mount('#payment-request-button');
-            } else {
-                document.getElementById('payment-request-button').style.display = 'none';
-            }
-        });
-
-        // Handle payment
-        paymentRequest.on('paymentmethod', async function(ev) {
-            // Create PaymentIntent on server
-            const response = await fetch("{{ route('payment.intent.create', $package_id->id) }}", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
-            });
-            const { clientSecret } = await response.json();
-
-            const {error, paymentIntent} = await stripe.confirmCardPayment(
-                clientSecret,
-                { payment_method: ev.paymentMethod.id },
-                { handleActions: false }
-            );
-
-            if (error) {
-                ev.complete('fail');
-                alert(error.message);
-            } else {
-                ev.complete('success');
-                if (paymentIntent.status === "requires_action") {
-                    await stripe.confirmCardPayment(clientSecret);
-                }
-                if (paymentIntent.status === "succeeded") {
-                    window.location.href = "{{ route('checkout.success', $package_id->id) }}";
-                }
-            }
-        });
-    });
-
-    lhFeed.forEach((card) => {
-    card.addEventListener("click", () => {
-        // remove active from all
-        lhFeed.forEach((c) => c.classList.remove("lh-active-feed"));
-            // add active to clicked one
-            card.classList.add("lh-active-feed");
-
-            // update price
-            const price = card.getAttribute("data-price");
-            priceDisplay.textContent = `$${price}`;
-            packageId.value = card.getAttribute("data-package");
-        });
-    });
-</script>
 <script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script>
 <script>
 $(document).ready(function () {
     const $searchInput = $("#searchInput");
     const $selectedLocation = $("#selectedLocation");
-    const $loadingText = $("#loading-text");
-    const $writingPopup = $("#writingPopup");
-
-    // Animate "WRITING AD..."
-    let dotCount = 0;
-    setInterval(() => {
-        dotCount = (dotCount + 1) % 4;
-        $loadingText.text("WRITING AD" + ".".repeat(dotCount));
-    }, 500);
 
     // Initial setup
     updateDescription("description");
     locations.shift();
     renderLocations(locations, "locationList", "location");
-
-    // Handle form submit with AJAX
-    $("form").on("submit", function (e) {
-        e.preventDefault();
-        $writingPopup.addClass("active");
-
-        $.ajax({
-            url: $(this).attr("action"),
-            method: "POST",
-            data: new FormData(this),
-            processData: false,
-            contentType: false,
-            success: function (response) {
-                if (response.success) {
-                    const writingUrl = "{{ route('ad.writing', ['box' => ':box']) }}";
-                    $("#cancel").attr("href", writingUrl.replace(':box', response.data.box_number));
-                    $writingPopup.removeClass("active");
-                    $("#offerPopup").addClass("active");
-                } else {
-                    alert(response.message || "Something went wrong");
-                    $writingPopup.removeClass("active");
-                }
-            },
-            error: function (xhr) {
-                alert("Error: " + xhr.responseJSON.message);
-                console.log(xhr)
-                $writingPopup.removeClass("active");
-            }
-        });
-    });
 
     // Search filter
     $searchInput.on("input", function () {
