@@ -116,6 +116,51 @@
 @section('script')
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // Share button
+        document.getElementById('shareBtn').addEventListener('click', async () => {
+            const shareData = {
+                title: "{{ $ad->location }}",
+                text: "{{ Str::limit($ad->description, 100) }}",
+                url: "{{ route('ad.show', ['slug' => $ad->slug]) }}"
+            };
+
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                    console.log('✅ Post shared successfully');
+                } catch (err) {
+                    console.warn('❌ Share cancelled or failed:', err);
+                }
+            } else {
+                // Fallback: Copy link if native share not supported
+                navigator.clipboard.writeText(shareData.url).then(() => {
+                    alert("Link copied to clipboard!");
+                });
+            }
+        });
+
+        const copyBtn = document.getElementById("copyAdUrl");
+        const toastEl = document.getElementById("copyToast");
+        const toast = new bootstrap.Toast(toastEl);
+
+        let tooltipTriggerList = [].slice.call(
+            document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        );
+        let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        copyBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            const url = this.getAttribute("data-url");
+
+            navigator.clipboard.writeText(url).then(() => {
+                toast.show();
+            }).catch(err => {
+                console.error("Failed to copy: ", err);
+            });
+        });
+
         document.querySelectorAll(".like-btn").forEach(button => {
             const adId = button.dataset.id;
             const icon = button.querySelector(".like-icon");

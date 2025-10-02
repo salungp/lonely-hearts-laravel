@@ -7,7 +7,7 @@
 @endsection
 @section('content')
 <div class="container-sm">
-      <h1 class="lh-title mb-3">My ads</h1>
+    <h1 class="lh-title mb-3">My ads</h1>
 
       @if (session('success'))
           <div class="lh-alert mb-3 lh-alert-success" id="alert">
@@ -28,9 +28,20 @@
       @endif
 
       @foreach($ads as $ad)
+      @php
+          $featured = '';
+          if ($ad->is_featured == 1) {
+          $featured = 'lh-feed-featured';
+          }
+      @endphp
       <!-- Feed list -->
-      <div class="lh-feed-card text-decoration-none text-dark" >
+      <div class="lh-feed-card text-decoration-none text-dark {{ $featured }}" >
         <div>
+          @if ($ad->is_featured == 1)
+              <div class="d-flex">
+                  <span style="margin-bottom: 6px;background: var(--red); border-radius: 6px;border: 2px solid var(--red-dark)" class="badge badge-success">Featured</span>
+              </div>
+          @endif
           <h2>
             <b>{{ $ad->snapshot_name }}, {{ $ad->snapshot_age }}, {{ $ad->snapshot_gender }}, {{ $ad->location }}, {{ $ad->snapshot_status }} .</b> {{ substr($ad->description, 0, 50) . '...' }}
           </h2>
@@ -63,7 +74,7 @@
                 />
                 </div>
 
-                <div class="lh-mini-dropdown">
+                <div class="lh-mini-dropdown" style="flex-direction: column">
                     <a href="{{ route('profile.ad_edit', ['id' => $ad->id]) }}">
                         <span style="color: var(--dark);">Edit</span>
                     </a>

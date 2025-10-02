@@ -95,7 +95,10 @@ class Ads extends Controller
     {
         $ad = Ad::where('id', $id)->first();
 
-        return view('profile.ads.edit', ['ad' => $ad]);
+        return view('profile.ads.edit', [
+            'ad' => $ad,
+            'prompts' => $this->stylePrompts,
+        ]);
     }
 
     public function update(Request $request)
