@@ -1,7 +1,7 @@
 @extends('layouts.app')
-@section('title', 'Home Page')
+@section('title', 'Account | Privacy Policy')
 @section('back')
-<a href="{{ route('home') }}" class="lh-nav-button">
+<a href="{{ route('profile.view') }}" class="lh-nav-button">
     <img src="{{ asset('/icons/arrow-left-bold.svg') }}" alt="Icon back button" />
 </a>
 @endsection
