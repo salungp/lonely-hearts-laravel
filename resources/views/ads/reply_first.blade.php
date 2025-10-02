@@ -183,6 +183,7 @@
                 .then(res => res.json())
                 .then(data => {
                     textarea.value = data.styled_text;
+                    updateLHtextarea();
                     document.getElementById("helpMePopup").classList.remove("active");
                 })
                 .catch(err => {

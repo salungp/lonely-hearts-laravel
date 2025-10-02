@@ -13,6 +13,21 @@ use League\Uri\IPv4\Converter;
 
 class MessageController extends Controller
 {
+    public $stylePrompts = [
+        'funny',
+        'romantic',
+        'casual',
+        'formal',
+        'literature',
+        'adventurous',
+        'mysterious',
+        'rom-com',
+        'philosophical',
+        'trendy',
+        'storytelling',
+        'cinematic',
+    ];
+
     public function show(): View
     {
         $user_id = Auth::id();
@@ -32,7 +47,10 @@ class MessageController extends Controller
             ->orderByDesc('id')
             ->get();
 
-        return view('message.show', compact('messages'));
+        return view('message.show', [
+            'messages' => $messages,
+            'prompts' => $this->stylePrompts
+        ]);
     }
 
     public function sent(): View
@@ -53,7 +71,10 @@ class MessageController extends Controller
             // ✅ Keep only the latest message per ad
             ->unique(fn($msg) => $msg->conversation->ad_id);
 
-        return view('message.sent', ['messages' => $sent]);
+        return view('message.sent', [
+            'messages' => $sent,
+            'prompts' => $this->stylePrompts
+        ]);
     }
 
     public function conversationMessages($replier_id)

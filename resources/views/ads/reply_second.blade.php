@@ -117,28 +117,7 @@
     
 </div>
 <!-- Location pop up -->
-<div class="lh-popup" id="locationPopup">
-    <div class="lh-popup-header">
-        <button id="closePopupLocation">
-            <img src="{{ asset('icons/close.svg') }}" alt="Close button" />
-        </button>
-    </div>
-    <div class="lh-popup-body">
-        <h2 class="lh-title mb-3" style="text-align: left">Address</h2>
-        <div class="location-field">
-            <input
-            type="text"
-            id="searchInput"
-            placeholder="Search location..."
-            class="input-none"
-            />
-            <button class="current-location-btn">
-            <img src="{{ asset('icons/location.svg') }}" alt="Pin svg icon">
-            </button>
-        </div>
-        <ul id="locationList"></ul>
-    </div>
-</div>
+@include('components.location')
 <!-- Location pop up -->
 <div class="lh-popup" id="confirmPopup">
     <div class="lh-popup-header">
@@ -297,6 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(res => res.json())
             .then(data => {
                 textarea.value = data.styled_text;
+                updateLHtextarea();
                 document.getElementById("helpMePopup").classList.remove("active");
             })
             .catch(err => {

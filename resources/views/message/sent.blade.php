@@ -119,17 +119,8 @@
                     <div class="lh-textarea-info">
                         <span id="lh-textarea-info">0</span>/300
                     </div>
-                    <button
-                        class="d-flex lh-box-no"
-                        style="
-                            position: absolute;
-                            bottom: 6px;
-                            left: 16px;
-                            z-index: 99;
-                        "
-                        id="showPopup"
-                    >
-                    Help me write
+                    <button onclick="helpWrite()" data-target="helpMePopup" type="button" class="d-flex textarea-button position-absolute" id="showPopup">
+                        Help me write
                     </button>
                 </div>
 
@@ -145,7 +136,30 @@
         </div>
     </div>
 </div>
+<div data-modal id="helpMePopup" class="lh-popup" style="height: 90vh" style="z-index: 999999999999999999999999 !important;">
+    <div class="lh-popup-header">
+        <button data-close>
+            <img src="{{ asset('icons/close.svg') }}" alt="Close button" />
+        </button>
+    </div>
+    <div class="lh-popup-body">
+        <!-- Screen one secenario -->
+        <div class="container-sm" id="screenOne">
+            <h2 class="lh-title mb-3" style="text-align: left">Reword it</h2>
+            <div id="tags-container" class="tags-container">
+                @foreach ($prompts as $style)
+                    <button class="lh-tag" data-style="{{ $style }}">{{ $style }}</button>
+                @endforeach
+            </div>
 
+            <button id="applyStyle" class="lh-button">
+                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                <span class="btn-text">Apply Style</span>
+            </button>
+        </div>
+    <!-- End scenario -->
+    </div>
+</div>
 <!-- Message pop up component -->
 <div id="messagePopup" class="lh-popup" style="z-index: 999999999999999;">
     <div class="lh-popup-header">
@@ -186,6 +200,73 @@
     const replyContent = document.getElementById("lh-textarea");
     const tokenMeta = document.querySelector('meta[name="csrf-token"]');
     const csrfToken = tokenMeta ? tokenMeta.content : '';
+
+    function helpWrite() {
+        const popup = document.getElementById("helpMePopup");
+
+        popup.classList.add("active");
+        popup3.classList.remove("active");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        let selectedStyle = null;
+
+        // Handle style button clicks
+        document.querySelectorAll("#tags-container button").forEach(btn => {
+            btn.addEventListener("click", () => {
+                selectedStyle = btn.dataset.style;
+
+                // highlight active button
+                document.querySelectorAll("#tags-container button").forEach(b => b.classList.remove("active"));
+                    btn.classList.add("active");
+            });
+        });
+
+        // Handle Apply Style
+        document.getElementById("applyStyle").addEventListener("click", () => {
+            const btn = document.getElementById("applyStyle");
+            const spinner = btn.querySelector(".spinner-border");
+            const btnText = btn.querySelector(".btn-text");
+            const textarea = document.getElementById("lh-textarea");
+            const text = textarea.value;
+
+            if (!selectedStyle) {
+                alert("Please select a style first.");
+                return;
+            }
+
+            // Show loading spinner
+            btn.disabled = true;
+            spinner.classList.remove("d-none");
+            btnText.textContent = "Generating...";
+
+            fetch("/ad/apply-style", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                },
+                body: JSON.stringify({ text: text, style: selectedStyle })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    textarea.value = data.styled_text;
+                    updateLHtextarea();
+                    popup3.classList.add("active");
+                    document.getElementById("helpMePopup").classList.remove("active");
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Something went wrong!");
+                })
+                .finally(() => {
+                    // Reset button
+                    btn.disabled = false;
+                    spinner.classList.add("d-none");
+                    btnText.textContent = "Apply Style";
+                });
+        });
+    });
 
     function showMessagePopup(status, message) {
         const messagePopup = document.getElementById("messagePopup");

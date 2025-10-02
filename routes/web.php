@@ -10,7 +10,6 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\PaymentIntentController;
 use App\Http\Controllers\PaymentController;
-use Illuminate\Support\Facades\Mail;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
 use App\Models\Ad;

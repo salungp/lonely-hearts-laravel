@@ -39,7 +39,7 @@ class Profiles extends Controller
     public function email(): View
     {
         $id = Auth::id();
-        $user = DB::table('users')->where('id', $id)->first();
+        $user = User::where('id', $id)->first();
         return view('profile.email', [
             'user' => $user
         ]);
@@ -57,7 +57,7 @@ class Profiles extends Controller
     public function profile_edit(): View
     {
         $id = Auth::id();
-        $user = DB::table('table_profiles')->where('user_id', $id)->first();
+        $user = Profile::where('user_id', $id)->first();
 
         return view('profile.edit', [
             'user' => $user,
@@ -77,7 +77,7 @@ class Profiles extends Controller
 
         $id = Auth::id();
 
-        DB::table('table_profiles')->where('user_id', $id)->update([
+        Profile::where('user_id', $id)->update([
             'display_name' => $validated['person_name'],
             'occupation' => $validated['occupation'],
             'age' => $validated['age'],
