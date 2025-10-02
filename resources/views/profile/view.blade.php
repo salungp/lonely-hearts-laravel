@@ -16,54 +16,54 @@
         </div>
     </div>
 
-    <div class="d-flex lh-link-list mb-3">
+    <a href="{{ route('profile.my_ads') }}" class="d-flex lh-link-list mb-3">
         <span class="lh-link-icon">
-        <img src="{{ asset('icons/frame.svg') }}" alt="Chain icon" />
+            <img src="{{ asset('icons/frame.svg') }}" alt="Chain icon" />
         </span>
-        <a href="{{ route('profile.my_ads') }}">My Ads</a>
-    </div>
+        <span>My Ads</span>
+    </a>
 
-    <div class="d-flex lh-link-list mb-3">
+    <a href="#" class="d-flex lh-link-list mb-3">
         <span class="lh-link-icon">
-        <img src="{{ asset('icons/link-icon.svg') }}" alt="Chain icon" />
+            <img src="{{ asset('icons/link-icon.svg') }}" alt="Chain icon" />
         </span>
-        <a href="#">Preferences</a>
-    </div>
+        <span>Preferences</span>
+    </a>
 
-    <div class="d-flex lh-link-list mb-3">
+    <a href="{{ route('profile.email') }}" class="d-flex lh-link-list mb-3">
         <span class="lh-link-icon">
         <img src="{{ asset('icons/mail-white.svg') }}" alt="Chain icon" />
         </span>
-        <a href="{{ route('profile.email') }}">Email address</a>
-    </div>
+        <span>Email address</span>
+    </a>
 
-    <div class="d-flex lh-link-list mb-3">
+    <a href="{{ route('profile.payment') }}" class="d-flex lh-link-list mb-3">
         <span class="lh-link-icon">
-        <img src="{{ asset('icons/dollar.svg') }}" alt="Chain icon" />
+            <img src="{{ asset('icons/dollar.svg') }}" alt="Chain icon" />
         </span>
-        <a href="{{ route('profile.payment') }}">Payments</a>
-    </div>
+        <span>Payments</span>
+    </a>
 
-    <div class="d-flex lh-link-list mb-3">
+    <a href="{{ route('help') }}" class="d-flex lh-link-list mb-3">
         <span class="lh-link-icon">
-        <img src="{{ asset('icons/help.svg') }}" alt="Chain icon" />
+            <img src="{{ asset('icons/help.svg') }}" alt="Chain icon" />
         </span>
-        <a href="{{ route('help') }}">Help</a>
-    </div>
+        <span>Help</span>
+    </a>
 
-    <div class="d-flex lh-link-list mb-3">
+    <a href="{{ route('toc') }}" class="d-flex lh-link-list mb-3">
         <span class="lh-link-icon">
-        <img src="{{ asset('icons/doc.svg') }}" alt="Chain icon" />
+            <img src="{{ asset('icons/doc.svg') }}" alt="Chain icon" />
         </span>
-        <a href="{{ route('toc') }}">Terms of services</a>
-    </div>
+        <span>Terms of services</span>
+    </a>
 
-    <div class="d-flex lh-link-list mb-3">
+    <a href="{{ route('policy') }}" class="d-flex lh-link-list mb-3">
         <span class="lh-link-icon">
-        <img src="{{ asset('icons/doc.svg') }}" alt="Chain icon" />
+            <img src="{{ asset('icons/doc.svg') }}" alt="Chain icon" />
         </span>
-        <a href="{{ route('policy') }}">Privacy policy</a>
-    </div>
+        <span>Privacy policy</span>
+    </a>
 </div>
 <div class="container-sm">
     <form action="{{ route('logout') }}" method="POST" onsubmit="return confirm('Are you sure you want to logout?');">
