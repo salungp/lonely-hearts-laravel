@@ -37,6 +37,47 @@
 
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/components.css') }}">
+    <style>
+      .heart {
+        background: #dd775a;
+        width: 10px;
+        height: 10px;
+        box-shadow:
+          10px -10px 0 black, 20px -10px 0 black, 0px -10px 0 black,
+          60px -10px 0 black, 70px -10px 0 black, 80px -10px 0 black,
+          10px 0px 0 #dd775a, 20px 0px 0 #dd775a, 30px 0px 0 black, -10px 0px 0 black,
+          50px 0px 0 black, 70px 0px 0 #dd775a, 80px 0px 0 #c45a41, 60px 0px 0 #dd775a, 90px 0px 0 black,
+          40px 10px 0 black, 60px 10px 0 #dd775a, 70px 10px 0 #dd775a, 80px 10px 0 #dd775a, 90px 10px 0 #c45a41, 100px 10px 0 black,
+          50px 10px 0 #dd775a, -20px 10px 0 black, -10px 10px 0 #dd775a, 0px 10px 0 #dd775a, 10px 10px 0 white, 20px 10px 0 #dd775a, 30px 10px 0 #dd775a,
+          -20px 20px 0 black, -10px 20px 0 #dd775a, 0px 20px 0 white, 10px 20px 0 #dd775a, 20px 20px 0 #dd775a, 30px 20px 0 #dd775a,
+          40px 20px 0 #dd775a, 50px 20px 0 #dd775a, 60px 20px 0 #dd775a, 70px 20px 0 #dd775a, 80px 20px 0 #dd775a, 90px 20px 0 #c45a41, 100px 20px 0 black,
+          -20px 30px 0 black, -10px 30px 0 #dd775a, 0px 30px 0 #dd775a, 10px 30px 0 #dd775a, 20px 30px 0 #dd775a, 30px 30px 0 #dd775a,
+          40px 30px 0 #dd775a, 50px 30px 0 #dd775a, 60px 30px 0 #dd775a, 70px 30px 0 #dd775a, 80px 30px 0 #dd775a, 90px 30px 0 #c45a41, 100px 30px 0 black,
+          -20px 40px 0 black, -10px 40px 0 #dd775a, 0px 40px 0 #dd775a, 10px 40px 0 #dd775a, 20px 40px 0 #dd775a, 30px 40px 0 #dd775a,
+          40px 40px 0 #dd775a, 50px 40px 0 #dd775a, 60px 40px 0 #dd775a, 70px 40px 0 #dd775a, 80px 40px 0 #dd775a, 90px 40px 0 #c45a41, 100px 40px 0 black,
+          -10px 50px 0 black, 0px 50px 0 #dd775a, 10px 50px 0 #dd775a, 20px 50px 0 #dd775a, 30px 50px 0 #dd775a,
+          40px 50px 0 #dd775a, 50px 50px 0 #dd775a, 60px 50px 0 #dd775a, 70px 50px 0 #dd775a, 80px 50px 0 #c45a41, 90px 50px 0 black,
+          0px 60px 0 black, 10px 60px 0 #dd775a, 20px 60px 0 #dd775a, 30px 60px 0 #dd775a,
+          40px 60px 0 #dd775a, 50px 60px 0 #dd775a, 60px 60px 0 #dd775a, 70px 60px 0 #c45a41, 80px 60px 0 black,
+          10px 70px 0 black, 20px 70px 0 #dd775a, 30px 70px 0 #dd775a,
+          40px 70px 0 #dd775a, 50px 70px 0 #dd775a, 60px 70px 0 #c45a41, 70px 70px 0 black,
+          20px 80px 0 black, 30px 80px 0 #dd775a, 40px 80px 0 #dd775a, 50px 80px 0 #c45a41, 60px 80px 0 black,
+          30px 90px 0 black, 40px 90px 0 #c45a41, 50px 90px 0 black;
+        animation: heart-beat .8s ease-in-out infinite alternate;
+        transform: scale(0.225); /* scaled down from 0.25 to 0.225 (≈0.9x) */
+        transform-origin: top left;
+      }
+      
+      .position-center {
+        margin-bottom: 10px;
+        margin-right: 24px;
+      }
+      
+      @keyframes heart-beat {
+        0%, 50% { transform: scale(0.225); }
+        25%, 100% { transform: scale(0.25); }
+      }
+    </style>   
 </head>
 <body>
     {{-- Header --}}
@@ -45,11 +86,9 @@
             <nav>
                 @yield('back')
 
-                <a href="{{ route('home') }}">
-                    <img
-                    src="{{ asset('images/logo-new-white.svg') }}"
-                    alt="Lonely hearts logo heart pixelated"
-                    />
+                <a href="{{ route('home') }}" class="d-flex align-items-center justify-content-center">
+                    <div class="heart position-center"></div>
+                    <span style="font-size: 20px;text-transform:uppercase;color: #fff;text-decoration:none;">Lonely Hearts</span>
                 </a>
     
               <div class="lh-hamburger" id="lhHamburger">

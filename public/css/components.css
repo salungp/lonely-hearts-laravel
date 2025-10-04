@@ -190,3 +190,43 @@
   .lh-message-red {
     background-color: #F1DFBC;
   }
+
+  /* heart love animation */
+  .love-animation-container {
+    position: fixed;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    overflow: visible;
+    z-index: 9999;
+  }
+  
+  .love-particle {
+    position: absolute;
+    bottom: 0;
+    width: 16px;
+    height: 16px;
+    background: url("{{ asset('icons/heart-fill.svg') }}") no-repeat center/contain;
+    animation: loveUp 3s ease-out forwards;
+    opacity: 0;
+  }
+  
+  @keyframes loveUp {
+    0% {
+      transform: translateY(0) scale(0.8) rotate(0deg);
+      opacity: 1;
+    }
+    30% {
+      transform: translateY(-40px) scale(1.1) rotate(10deg);
+    }
+    70% {
+      transform: translateY(-140px) scale(1) rotate(-10deg);
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateY(-220px) scale(0.8) rotate(0deg);
+      opacity: 0;
+    }
+  }
+  
