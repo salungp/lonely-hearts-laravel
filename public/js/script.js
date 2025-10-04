@@ -64,25 +64,36 @@ const selections = {
 function updateDescription(idText) {
   const textarea = document.getElementById(idText);
 
-  const height = selections.height || "";
-  const hair = selections.hair ? ` with ${selections.hair}` : "";
-  const eyes = selections.eyes ? `, ${selections.eyes.toLowerCase()} eyes` : "";
-  const behavior = selections.behavior ? `, who is ${selections.behavior.toLowerCase()}` : "";
-  const seeking = selections.seeking ? `, seeking ${selections.seeking}` : "";
-  const hobby = selections.hobby ? `, into ${selections.hobby}` : "";
+  // Collect all dropdown wrappers dynamically
+  const wraps = document.querySelectorAll(".lh-dropdown-wrap");
 
-  // Build sentence dynamically
   let sentence = "";
-  if (height) sentence += `I'm ${height}`;
-  sentence += hair;
-  sentence += eyes;
-  sentence += behavior;
-  sentence += seeking;
-  sentence += hobby;
-  if (sentence) sentence += "."; // add period at the end
+
+  wraps.forEach((wrap, index) => {
+    const hiddenInput = wrap.querySelector("input[type='hidden']");
+    const value = hiddenInput ? hiddenInput.value : "";
+    const prefixSpan = wrap.previousElementSibling?.querySelector("span");
+
+    const prefix = prefixSpan ? prefixSpan.textContent.trim() : "";
+
+    if (value) {
+      if (sentence === "") {
+        // First item: just use prefix + value
+        sentence += `${prefix} ${value}`;
+      } else {
+        // Next items: add space then prefix + value
+        sentence += ` ${prefix} ${value}`;
+      }
+    }
+  });
+
+  if (sentence) {
+    sentence = sentence.trim() + ".";
+  }
 
   textarea.value = sentence;
 }
+
 
 // Render location function
 // Render list dynamically

@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Home Page')
+@section('title', 'Lonely Hearts | Create Profile')
 @section('back')
 <a href="{{ url()->previous() }}" class="lh-nav-button">
     <img src="{{ asset('/icons/arrow-left-bold.svg') }}" alt="Icon back button" />
@@ -24,75 +24,34 @@
         @endif
 
 
-        <div class="d-flex mb-3">
-            <span style="font-size: 20px; text-transform: uppercase; margin-right: 16px;" >My Name is</span
-            >
+        <div class="d-flex mb-3" style="flex-grow: 0;flex-shrink: 0;gap: 16px;">
+            <span style="font-size: 20px; text-transform: uppercase;" >My Name is</span>
             <input style="text-transform: uppercase;" type="text" name="person_name" class="input-line" required />
         </div>
 
-        <div class="sentence d-inline-block text-uppercase mb-2">
-            <span>I'm in a</span>
-        </div>
-
-        <div class="lh-dropdown-wrap" data-field="height">
-            <button class="lh-dropdown-button" type="button">Work</button>
-            <div class="lh-dropdown-menu">
-                <input type="hidden" name="occupation" value="work">
-                <div class="lh-option">Work</div>
-                <div class="lh-option">School</div>
-                <div class="lh-option">Freelance</div>
-                <div class="lh-option">Unemployed</div>
+        @foreach($options as $opt)
+            <div class="sentence d-inline-block text-uppercase mb-2">
+                <span>{{ $opt->text }}</span>
             </div>
-        </div>
 
-        <div class="sentence d-inline-block text-uppercase mb-2">
-            <span>In</span>
-        </div>
-
-        <div class="lh-dropdown-wrap" data-field="height">
-            <button class="lh-dropdown-button" type="button">30</button>
-            <div class="lh-dropdown-menu">
-                <input type="hidden" name="age" value="30">
-                <div class="lh-option">18</div>
-                <div class="lh-option">20</div>
-                <div class="lh-option">25</div>
-                <div class="lh-option">30</div>
-                <div class="lh-option">35</div>
-                <div class="lh-option">38</div>
-                <div class="lh-option">42</div>
-                <div class="lh-option">46</div>
-                <div class="lh-option">50</div>
-            </div>
-        </div>
-
-        <div class="sentence d-inline-block text-uppercase mb-2">
-            <span>Into</span>
-        </div>
-
-        <div class="lh-dropdown-wrap" data-field="height">
-            <button class="lh-dropdown-button" type="button">MALE</button>
-            <div class="lh-dropdown-menu">
-                <input type="hidden" name="gender" value="MALE">
-                <div class="lh-option">MALE</div>
-                <div class="lh-option">FEMALE</div>
-                <div class="lh-option">ALL</div>
-            </div>
-        </div>
-
-        <div class="sentence d-inline-block text-uppercase mb-2">
-            <span>Status</span>
-        </div>
-
-        <div class="lh-dropdown-wrap" data-field="height">
-            <button class="lh-dropdown-button" type="button">Single</button>
-            <div class="lh-dropdown-menu">
-                <input type="hidden" name="status" value="Single">
-                <div class="lh-option">Single</div>
-                <div class="lh-option">Taken</div>
-                <div class="lh-option">Complicated</div>
-                <div class="lh-option">Secret</div>
-            </div>
-        </div>
+            @if($opt->input_type === 'dropdown')
+                <div class="lh-dropdown-wrap" data-field="{{ $opt->title }}">
+                    <button class="lh-dropdown-button" type="button">
+                        {{ strtoupper($opt->value[0]) }}
+                    </button>
+                    <div class="lh-dropdown-menu">
+                        <input type="hidden" name="{{ $opt->title }}" value="{{ $opt->value[0] }}">
+                        @foreach($opt->value as $val)
+                            <div class="lh-option">{{ strtoupper($val) }}</div>
+                        @endforeach
+                    </div>
+                </div>
+            @elseif($opt->input_type === 'text')
+                <input type="text" name="{{ $opt->title }}" class="input-line" />
+            @elseif($opt->input_type === 'textarea')
+                <textarea name="{{ $opt->title }}"></textarea>
+            @endif
+        @endforeach
 
         <div class="mb-4"></div>
 

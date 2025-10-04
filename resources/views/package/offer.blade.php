@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Home Page')
+@section('title', 'Lonely Hearts | Offer')
 @section('back')
 <a href="{{ url('/ad/') }}" class="lh-nav-button">
     <img src="{{ asset('/icons/arrow-left-bold.svg') }}" alt="Icon back button" />
@@ -19,12 +19,12 @@
                 data-price="{{ $item->price }}"
                 data-package="feature_reply"
                 >
-                <div class="d-flex" style="gap: 16px; align-items: flex-start">
-                    <div class="lh-feed-icon">
+                <div class="d-flex" style="gap: 16px; align-items: flex-start;flex-direction: row;">
+                    <div class="lh-feed-icon d-flex justify-content-center">
                         <img src="{{ asset('images/envelope-icon.png') }}" alt="Envelope icon" />
                     </div>
 
-                    <div class="lh-feed-content">
+                    <div class="lh-feed-content d-block">
                         <h2>{{ $item->name }}</h2>
 
                         <p>{{ $item->description }}</p>

@@ -24,108 +24,49 @@
 
         <input type="hidden" name="location" id="location">
 
-        <div class="sentence d-inline-block text-uppercase mb-2">
-            <span>I'm</span>
-        </div>
-
-        <div class="lh-dropdown-wrap" data-field="height">
-            <button class="lh-dropdown-button" type="button">Tall</button>
-            <div class="lh-dropdown-menu">
-                @foreach ($options["height"] as $item)
-                    <div class="lh-option">{{ $item }}</div>
-                @endforeach
+        @foreach($options as $opt)
+            <div class="sentence d-inline-block text-uppercase mb-2">
+                <span>{{ $opt->text }}</span>
             </div>
-        </div>
 
-        <div class="lh-dropdown-wrap" data-field="hair">
-            <button class="lh-dropdown-button" type="button">Blue hair</button>
-            <div class="lh-dropdown-menu">
-                @foreach ($options["hair"] as $item)
-                    <div class="lh-option">{{ $item }}</div>
-                @endforeach
-            </div>
-        </div>
+            @if($opt->input_type === 'dropdown')
+                <div class="lh-dropdown-wrap" data-field="{{ $opt->title }}">
+                    <button class="lh-dropdown-button" type="button">
+                        {{ strtoupper($opt->value[0]) }}
+                    </button>
+                    <div class="lh-dropdown-menu">
+                        <input type="hidden" name="{{ $opt->title }}" value="{{ $opt->value[0] }}">
+                        @foreach($opt->value as $val)
+                            <div class="lh-option">{{ strtoupper($val) }}</div>
+                        @endforeach
+                    </div>
+                </div>
+            @elseif($opt->input_type === 'text')
+                <input type="text" name="{{ $opt->title }}" class="input-line" />
+            @elseif($opt->input_type === 'textarea')
+                <textarea name="{{ $opt->title }}"></textarea>
+            @endif
+        @endforeach
 
-        <div class="sentence d-inline-block text-uppercase mb-2">
-            <span>And</span>
-        </div>
-
-        <div class="lh-dropdown-wrap" data-field="eyes">
-            <button class="lh-dropdown-button" type="button">Who</button>
-            <div class="lh-dropdown-menu">
-                @foreach ($options["eyes"] as $item)
-                    <div class="lh-option">{{ $item }}</div>
-                @endforeach
-            </div>
-        </div>
-
-        <div class="sentence d-inline-block text-uppercase mb-2">
-            <span>Eyes, Who</span>
-        </div>
-
-        <div class="lh-dropdown-wrap" data-field="behavior">
-            <button class="lh-dropdown-button" type="button">Who</button>
-            <div class="lh-dropdown-menu">
-                @foreach ($options["behavior"] as $item)
-                    <div class="lh-option">{{ $item }}</div>
-                @endforeach
-            </div>
-        </div>
-
-        <div class="sentence d-inline-block text-uppercase mb-2">
-            <span>Seeking</span>
-        </div>
-
-        <div class="lh-dropdown-wrap" data-field="seeking">
-            <button class="lh-dropdown-button" type="button">Seeking</button>
-            <div class="lh-dropdown-menu">
-                @foreach ($options["seeking"] as $item)
-                    <div class="lh-option">{{ $item }}</div>
-                @endforeach
-            </div>
-        </div>
-
-        <div class="sentence d-inline-block text-uppercase mb-2">
-            <span>Into</span>
-        </div>
-
-        <div class="lh-dropdown-wrap" data-field="hobby">
-            <button class="lh-dropdown-button" type="button">INTO</button>
-            <div class="lh-dropdown-menu">
-                @foreach ($options["hobby"] as $item)
-                    <div class="lh-option">{{ $item }}</div>
-                @endforeach
-            </div>
-        </div>
-
-        <!-- One textarea to store the final description -->
-        <textarea style="display: none;" name="description" id="description" rows="3" class="w-full mt-3" readonly></textarea>
+        <button class="lh-dropdown-button" id="selectedLocation" type="button" data-target="locationPopup">
+            LOCATION
+        </button>
 
         <div class="mb-4"></div>
 
-        <div class="location-field" id="locationField" data-target="locationPopup" style="margin-bottom: 16px;">
-            <div class="d-flex align-items-center" style="gap: 12px;">
-                <span class="icon">
-                    <img src="{{ asset('icons/pin.svg') }}" alt="Pin svg icon">
-                </span>
-                <span id="selectedLocation">SELECT LOCATION</span>
-            </div>
-            <button class="current-location-btn" type="button">
-                <img src="{{ asset('icons/location.svg') }}" alt="Pin svg icon">
-            </button>
-        </div>
-
         <div class="location-field file-field mb-4">
             <div class="d-flex align-items-center" style="gap: 12px;">
-            <span class="icon">
-                <img src="{{ asset('icons/file.svg') }}" alt="Pin svg icon">
-            </span>
-            <span>SELECT PHOTO</span>
+                <span class="icon">
+                    <img src="{{ asset('icons/file.svg') }}" alt="Pin svg icon">
+                </span>
+                <span>SELECT PHOTO</span>
             </div>
             <button class="file-info" type="button">
                 <img src="{{ asset('icons/info.svg') }}" alt="Pin svg icon">
             </button>
         </div>
+
+        <textarea style="display: none;" name="description" id="description" rows="3" class="w-full mt-3" readonly></textarea>
 
         <button class="lh-button" type="submit">Continue</button>
         

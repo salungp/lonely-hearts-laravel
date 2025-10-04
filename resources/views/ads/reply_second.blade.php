@@ -19,96 +19,29 @@
             </div>
         @endif
 
-        <input type="hidden" name="location" id="location">
-
-        <div class="sentence d-inline-block text-uppercase mb-2">
-            <span>I'm</span>
-        </div>
-
-        <div class="lh-dropdown-wrap" data-field="height">
-            <button class="lh-dropdown-button" type="button">Tall</button>
-            <div class="lh-dropdown-menu">
-                <div class="lh-option">Tall</div>
-                <div class="lh-option">Kinda Tall</div>
-                <div class="lh-option">Perfectly average</div>
-                <div class="lh-option">Not too tall</div>
-                <div class="lh-option">Petite</div>
+        @foreach($options as $opt)
+            <div class="sentence d-inline-block text-uppercase mb-2">
+                <span>{{ $opt->text }}</span>
             </div>
-        </div>
 
-        <div class="lh-dropdown-wrap" data-field="hair">
-            <button class="lh-dropdown-button" type="button">Blue hair</button>
-            <div class="lh-dropdown-menu">
-                <div class="lh-option">Blue hair</div>
-                <div class="lh-option">Highlights</div>
-                <div class="lh-option">Two-Tone</div>
-                <div class="lh-option">Rainbow Hair</div>
-            </div>
-        </div>
-
-        <div class="sentence d-inline-block text-uppercase mb-2">
-            <span>And</span>
-        </div>
-
-        <div class="lh-dropdown-wrap" data-field="eyes">
-            <button class="lh-dropdown-button" type="button">Red</button>
-            <div class="lh-dropdown-menu">
-                <div class="lh-option">Red</div>
-                <div class="lh-option">Blue</div>
-                <div class="lh-option">Brown</div>
-                <div class="lh-option">Black</div>
-            </div>
-        </div>
-
-        <div class="sentence d-inline-block text-uppercase mb-2">
-            <span>Eyes, Who</span>
-        </div>
-
-        <div class="lh-dropdown-wrap" data-field="behavior">
-            <button class="lh-dropdown-button" type="button">Who</button>
-            <div class="lh-dropdown-menu">
-                <div class="lh-option">Bubbly</div>
-                <div class="lh-option">Calm</div>
-                <div class="lh-option">Adventurous</div>
-                <div class="lh-option">Playful</div>
-                <div class="lh-option">Serious</div>
-                <div class="lh-option">Confident</div>
-            </div>
-        </div>
-
-        <div class="sentence d-inline-block text-uppercase mb-2">
-            <span>Seeking</span>
-        </div>
-
-        <div class="lh-dropdown-wrap" data-field="seeking">
-            <button class="lh-dropdown-button" type="button">Seeking</button>
-            <div class="lh-dropdown-menu">
-                <div class="lh-option">Sugar Daddy</div>
-                <div class="lh-option">Sugar Baby</div>
-                <div class="lh-option">Sugar Mommy</div>
-                <div class="lh-option">Mentor</div>
-                <div class="lh-option">Sponsor</div>
-                <div class="lh-option">Companion</div>
-            </div>
-        </div>
-
-        <div class="sentence d-inline-block text-uppercase mb-2">
-            <span>Into</span>
-        </div>
-
-        <div class="lh-dropdown-wrap" data-field="hobby">
-            <button class="lh-dropdown-button" type="button">Traveling</button>
-            <div class="lh-dropdown-menu">
-                <div class="lh-option">Reading</div>
-                <div class="lh-option">Traveling</div>
-                <div class="lh-option">Cooking</div>
-                <div class="lh-option">Gaming</div>
-                <div class="lh-option">Music</div>
-                <div class="lh-option">Sports</div>
-                <div class="lh-option">Drawing</div>
-                <div class="lh-option">Art</div>
-            </div>
-        </div>
+            @if($opt->input_type === 'dropdown')
+                <div class="lh-dropdown-wrap" data-field="{{ $opt->title }}">
+                    <button class="lh-dropdown-button" type="button">
+                        {{ strtoupper($opt->value[0]) }}
+                    </button>
+                    <div class="lh-dropdown-menu">
+                        <input type="hidden" name="{{ $opt->title }}" value="{{ $opt->value[0] }}">
+                        @foreach($opt->value as $val)
+                            <div class="lh-option">{{ strtoupper($val) }}</div>
+                        @endforeach
+                    </div>
+                </div>
+            @elseif($opt->input_type === 'text')
+                <input type="text" name="{{ $opt->title }}" class="input-line" />
+            @elseif($opt->input_type === 'textarea')
+                <textarea name="{{ $opt->title }}"></textarea>
+            @endif
+        @endforeach
 
 
         <div class="mb-4"></div>
@@ -217,18 +150,30 @@ document.querySelectorAll(".lh-option").forEach((option) => {
   option.addEventListener("click", function () {
     const wrap = this.closest(".lh-dropdown-wrap");
     const btn = wrap.querySelector(".lh-dropdown-button");
+    const hiddenInput = wrap.querySelector("input[type='hidden']");
     const field = wrap.dataset.field;
 
-    // Save selection
-    selections[field] = this.textContent;
+    // Original text (from DB / option)
+    const selectedText = this.textContent.trim();
 
-    // Update button text
-    btn.textContent = this.textContent;
+    // Lowercase version
+    const lowerValue = selectedText.toLowerCase();
+
+    // Update button (show original text, not forced lowercase)
+    btn.textContent = selectedText;
+
+    // Save lowercase value into hidden input
+    if (hiddenInput) {
+      hiddenInput.value = lowerValue;
+    }
+
+    // Also save into JS selections if you still use it
+    selections[field] = lowerValue;
 
     // Close dropdown
     wrap.classList.remove("open");
 
-    // Update textarea with readable sentence
+    // Update textarea
     updateDescription("lh-textarea");
   });
 });

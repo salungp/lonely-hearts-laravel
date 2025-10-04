@@ -20,46 +20,9 @@
                 <span style="margin-bottom: 12px;background: var(--red); border-radius: 6px;border: 2px solid var(--red-dark)" class="badge badge-success">Featured</span>
             </div>
         @endif
-        <h2 class="ad-title text-uppercase mb-2">
+        <h2 style="font-size: 24px;text-align:center;font-family: 'Merriweather';text-transform:uppercase;font-weight: bold;">
             {{ $ad->title }}
         </h2>
-
-        @if ($conversation >= 3)
-        <div class="d-flex justify-content-center">
-            <!-- Carousel -->
-            <div class="carousel">
-                <div class="carousel-track">
-                    <div class="carousel-slide">
-                        <img src="assets/ad-image.png" alt="" />
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="assets/Images/ad-detail-2.png" alt="" />
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="assets/Images/ad-detail-3.png" alt="" />
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="assets/Images/ad-detail-4.png" alt="" />
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="assets/ad-image.png" alt="" />
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="assets/Images/ad-detail-2.png" alt="" />
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="assets/Images/ad-detail-3.png" alt="" />
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="assets/Images/ad-detail-4.png" alt="" />
-                    </div>
-                </div>
-                <button class="carousel-button prev">&#8249;</button>
-                <button class="carousel-button next">&#8250;</button>
-            </div>
-            <!-- End carousel -->
-        </div>
-        @endif
 
         <p style="text-align: justify">
             {{ $ad->description }}

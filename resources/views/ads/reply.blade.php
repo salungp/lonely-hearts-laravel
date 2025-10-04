@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Reply ad | '.$box)
 @section('back')
-<a href="{{ url('/ad/'.$box) }}" class="lh-nav-button">
+<a href="{{ route('ad.detail', ['box'=>$box]) }}" class="lh-nav-button">
     <img src="{{ asset('/icons/arrow-left-bold.svg') }}" alt="Icon back button" />
 </a>
 @endsection

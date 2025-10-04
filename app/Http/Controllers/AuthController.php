@@ -21,6 +21,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\Package;
 use App\Models\UserPackage;
+use App\Models\Option;
 use OpenAI\Laravel\Facades\OpenAI;
 
 class AuthController extends Controller
@@ -39,6 +40,9 @@ class AuthController extends Controller
 
     public function verify_code(): View
     {
+        if (!session()->has('otp')) {
+            abort(404);
+        }
         return view('auth.verify');
     }
 
@@ -152,6 +156,7 @@ class AuthController extends Controller
         // ✅ Case 1: User is creating an ad
         if ($ads = session('ads')) {
             $profile = Profile::where('user_id', $user->id)->first();
+            
             if (!$profile) {
                 return back()->withErrors(['Profile not found']);
             }

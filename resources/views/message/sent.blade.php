@@ -9,7 +9,7 @@
 <div class="container-sm">
     <div class="d-flex justify-content-between">
         <h1 class="lh-title mb-3">Sent</h1>
-        <a href="{{ route('message') }}" class="lh-link" style="padding: 0 !important; text-align: right;">Receive</a>
+        <a href="{{ route('message') }}" class="lh-link" style="padding: 0 !important; text-align: right;">Inbox</a>
     </div>
 
     @foreach ($messages as $message)

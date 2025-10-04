@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PackageSeeder::class,
             UserPackageSeeder::class,
+            OptionsSeeder::class,
+            HelpCreateAdSeeder::class,
         ]);
     }
 }

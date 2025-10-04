@@ -11,14 +11,15 @@ use Carbon\Carbon;
 use App\Models\Ad;
 use App\Models\User;
 use App\Models\Profile;
-use App\Models\Package;
 use App\Models\UserPackage;
+use App\Models\Option;
 
 class Profiles extends Controller
 {
     public function create(): View
     {
-        return view('profile.create');
+        $options = Option::where('category', 'profile')->orderBy('sort_order')->get();
+        return view('profile.create', ['options' => $options]);
     }
 
     public function profile(): View

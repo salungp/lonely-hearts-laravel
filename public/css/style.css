@@ -36,6 +36,7 @@
     background-size: cover;
     background-repeat: no-repeat;
     overflow-x: hidden !important;
+    min-height: 100vh;
   }
   
   .lh-header nav {
@@ -104,7 +105,7 @@
     position: fixed;
     bottom: 0;
     left: 0;
-    background-color: var(--fill);
+    background-color: none !important;
   }
   
   .lh-header {
@@ -474,11 +475,12 @@
     padding: 5px;
     flex-wrap: wrap;
     gap: 4px;
+    max-height: 400px;
+    overflow-y: scroll;
   }
   
   .lh-dropdown-wrap.open .lh-dropdown-menu {
-    display: flex;
-    flex-wrap: wrap;
+    display: block;
     flex-direction: column;
   }
   
@@ -487,6 +489,7 @@
     color: #e15b42;
     padding: 6px 10px;
     margin: 2px;
+    margin-bottom: 4px;
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
@@ -1178,7 +1181,7 @@
     width: 100%;
     padding: 20px;
     border-radius: 4px 4px 0px 0px;
-    max-height: 80vh;
+    height: 80vh;
     overflow-y: auto;
   }
   

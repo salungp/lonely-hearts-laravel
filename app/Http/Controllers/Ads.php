@@ -17,6 +17,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\Package;
 use App\Models\UserPackage;
+use App\Models\Option;
 
 class Ads extends Controller
 {
@@ -212,7 +213,7 @@ class Ads extends Controller
             'ad' => $ad,
             'prompts' => $stylePrompts,
             'package' => $package,
-            'package_id' => $package_id
+            'package_id' => $package_id,
         ]);
     }
 
@@ -222,6 +223,7 @@ class Ads extends Controller
         $package = Package::get();
         $package_id = Package::where('id', 'cff06bcb-339f-427e-865a-7169074b2d0c')->first();
         $stylePrompts = $this->stylePrompts;
+        $options = Option::where('category', 'help_create_ad')->orderBy('sort_order')->get();
         if (!$ad) {
             abort(404);
         }
@@ -229,7 +231,8 @@ class Ads extends Controller
             'ad' => $ad,
             'prompts' => $stylePrompts,
             'package' => $package,
-            'package_id' => $package_id
+            'package_id' => $package_id,
+            'options' => $options,
         ]);
     }
 
@@ -272,8 +275,9 @@ class Ads extends Controller
     {
         $package = Package::get();
         $package_id = Package::where('id', 'cff06bcb-339f-427e-865a-7169074b2d0c')->first();
+        $options = Option::where('category', 'help_create_ad')->orderBy('sort_order')->get();
         return view('ads.create_second', [
-            "options" => $this->options,
+            "options" => $options,
             'package' => $package,
             'package_id' => $package_id
         ]);
@@ -377,9 +381,41 @@ class Ads extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'description' => 'required|string|max:255',
             'location'    => 'required|string|max:255',
         ]);
+
+        $fields = Option::where('category', 'help_create_ad')
+        ->orderBy('sort_order')
+        ->get();
+
+        $inputs = $request->only($fields->pluck('title')->toArray());
+
+        // Build sentence dynamically
+        $sentence = '';
+        foreach ($fields as $field) {
+            $title  = $field->title;
+            $prefix = $field->text;
+            $value  = $inputs[$title] ?? null;
+
+            if ($value) {
+                if ($sentence === '') {
+                    $sentence .= "{$prefix} {$value}";
+                } else {
+                    $sentence .= " {$prefix} {$value}";
+                }
+            }
+        }
+
+        if ($sentence) {
+            $sentence = trim($sentence) . ".";
+        }
+
+        // ❌ If sentence is empty, return with error
+        if (empty($sentence)) {
+            return back()
+                ->withInput()
+                ->withErrors(['description' => 'Please complete your selections to generate an ad description.']);
+        }
         
         // Generate box number
         $box = rand(100000, 999999);
@@ -388,7 +424,7 @@ class Ads extends Controller
         if (!Auth::check()) {
             session([
                 'ads' => [
-                    'description' => $validated['description'],
+                    'description' => $sentence,
                     'location'    => $validated['location'],
                 ],
             ]);
@@ -405,7 +441,7 @@ class Ads extends Controller
             ->exists();
 
         // --- Generate witty title ---
-        $prompt = $this->generateAdPrompt($profile, $validated['description']);
+        $prompt = $this->generateAdPrompt($profile, $sentence);
         $response = OpenAI::chat()->create([
             'model' => 'gpt-4o-mini',
             'messages' => [
@@ -435,7 +471,7 @@ class Ads extends Controller
         // --- Save Ad ---
         $ad = Ad::create([
             'user_id'             => $user->id,
-            'description'         => $validated['description'],
+            'description'         => $sentence,
             'title'               => $title,
             'slug'                => $slug,
             'snapshot_name'       => $profile->display_name,
