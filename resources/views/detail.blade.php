@@ -290,7 +290,7 @@
 
                 // ❤️ Only show animation when the action ends up 'liked'
                 if (likeState) {
-                    burstHeartsFromElement(button, 4000, 28); // ~10s show, fast particles
+                    burstHeartsFromElement(button, 3000, 28); // ~10s show, fast particles
                 }
                 })
                 .catch(err => {

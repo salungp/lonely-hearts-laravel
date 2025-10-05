@@ -633,10 +633,11 @@ class BootstrapPinInput {
     document.querySelectorAll("[data-target]").forEach(trigger => {
       trigger.addEventListener("click", () => {
         const modalId = trigger.getAttribute("data-target");
+        if (!modalId) return; // skip if missing or empty
         const modal = document.querySelector(`.lh-popup#${modalId}`);
-        if (modal) modal.classList.add("active");
+        modal?.classList.add("active"); // safe optional chaining
       });
-    });
+    });    
   
     // Close popup
     document.querySelectorAll(".lh-popup[data-modal]").forEach(modal => {

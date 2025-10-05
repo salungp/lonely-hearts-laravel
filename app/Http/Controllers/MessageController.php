@@ -77,6 +77,16 @@ class MessageController extends Controller
         ]);
     }
 
+    public function is_read(Request $request, $id)
+    {
+        $message = Message::findOrFail($id);
+        if (!$message) {
+            return response()->json(['error' => "Something wrong!"]);
+        }
+        $message->update(['is_read' => 1]);
+        return response()->json(['success' => true]);
+    }
+
     public function conversationMessages($replier_id)
     {
         $userId = Auth::id();
@@ -87,9 +97,7 @@ class MessageController extends Controller
         // 2) mark as read all messages from the other person in this conversation
         DB::table('messages')
             ->where('conversation_id', $conversation->id)
-            ->where('sender_id', '!=', $userId)
-            ->where('is_read', 0)
-            ->update(['is_read' => 1, 'read_at' => now()]);
+            ->where('sender_id', '!=', $userId);
 
         // 3) fetch messages with the sender name
         $messages = DB::table('messages as m')
@@ -210,7 +218,6 @@ class MessageController extends Controller
         }
     }
 
-
     public function sent_messages($receiverId)
     {
         $userId = Auth::id();
@@ -222,6 +229,4 @@ class MessageController extends Controller
 
         return response()->json($messages);
     }
-
-
 }

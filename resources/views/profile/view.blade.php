@@ -7,7 +7,7 @@
     <div class="d-flex align-items-center mb-3" style="gap: 20px;">
         <img src="{{ asset('images/profile-empty.png') }}" alt="Profile image" style="width: 70px; border-radius: 8px">
         <div class="text-content">
-            <h3 class="ad-title">{{ $user->display_name ?? '' }}, {{ $user->age ?? '' }}
+            <h3 style="font-size: 24px;text-transform:uppercase;">{{ $user->display_name ?? '' }}, {{ $user->age ?? '' }}
                 @if ($is_featured == 1)
                     <span style="margin-left: 4px;background: var(--red); border-radius: 6px;border: 2px solid var(--red-dark)" class="badge badge-success">Featured</span>
                 @endif

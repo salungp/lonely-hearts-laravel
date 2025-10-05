@@ -104,6 +104,7 @@ Route::get('/message/{sender_Id}', [MessageController::class, 'show_by_sender'])
 Route::middleware('auth')->get('/conversations/{conversationId}/messages', [MessageController::class, 'conversationMessages']);
 Route::post('/conversations/{conversation}/messages', [MessageController::class, 'store']);
 Route::get('/conversations/{receiver}/sent-messages', [MessageController::class, 'sent_messages']);
+Route::post('/messages/{id}/read', [MessageController::class, 'is_read']);
 
 // Site links
 Route::get('/what-is-lonely-hearts', function() {

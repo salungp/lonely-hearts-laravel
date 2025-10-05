@@ -314,23 +314,23 @@
                 },
                 body: JSON.stringify({ text: text, style: selectedStyle })
             })
-                .then(res => res.json())
-                .then(data => {
-                    textarea.value = data.styled_text;
-                    updateLHtextarea();
-                    popup3.classList.add("active");
-                    document.getElementById("helpMePopup").classList.remove("active");
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Something went wrong!");
-                })
-                .finally(() => {
-                    // Reset button
-                    btn.disabled = false;
-                    spinner.classList.add("d-none");
-                    btnText.textContent = "Apply Style";
-                });
+            .then(res => res.json())
+            .then(data => {
+                textarea.value = data.styled_text;
+                updateLHtextarea();
+                popup3.classList.add("active");
+                document.getElementById("helpMePopup").classList.remove("active");
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Something went wrong!");
+            })
+            .finally(() => {
+                // Reset button
+                btn.disabled = false;
+                spinner.classList.add("d-none");
+                btnText.textContent = "Apply Style";
+            });
         });
     });
 

@@ -14,7 +14,8 @@ class Message extends Model
         'sender_id',
         'content',
         'attachment',
-        'read_at'
+        'read_at',
+        'is_read',
     ];
 
     protected static function boot()
