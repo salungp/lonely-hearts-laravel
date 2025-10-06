@@ -248,17 +248,27 @@
             const adId = button.dataset.id;
             const icon = button.querySelector(".like-icon");
 
-            let likeState = @json(
-                DB::table('likes')
-                    ->where('ad_id', $ad->id)
-                    ->where('user_id', auth()->id())
-                    ->exists()
-            );
+            // --- Determine initial like state ---
+            let likeState = false;
+            const userIsLoggedIn = "{{ auth()->check() ? 'true' : 'false' }}" === "true";
+
+            if (userIsLoggedIn) {
+                likeState = @json(
+                    DB::table('likes')
+                        ->where('ad_id', $ad->id)
+                        ->where('user_id', auth()->id())
+                        ->exists()
+                );
+            } else {
+                // check localStorage for guest likes
+                const guestLikes = JSON.parse(localStorage.getItem("guestLikes") || "[]");
+                likeState = guestLikes.includes(adId);
+            }
 
             function setLike(state) {
                 icon.style.background = state
-                ? "url({{ asset('icons/heart-fill.svg') }})"
-                : "url({{ asset('icons/heart.svg') }})";
+                    ? "url({{ asset('icons/heart-fill.svg') }})"
+                    : "url({{ asset('icons/heart.svg') }})";
                 icon.style.backgroundSize = "cover";
             }
 
@@ -269,37 +279,45 @@
                 setLike(likeState);
 
                 fetch(`/ad/${adId}/toggle-like`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                },
-                body: JSON.stringify({})
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                    },
+                    body: JSON.stringify({})
                 })
                 .then(r => r.json())
                 .then(data => {
-                if (data.error) {
-                    alert("You need to login or create account first!");
-                    likeState = !likeState; // revert
+                    // --- Guest like handling ---
+                    if (data.guest) {
+                        const guestLikes = JSON.parse(localStorage.getItem("guestLikes") || "[]");
+                        if (likeState) {
+                            // Add like
+                            if (!guestLikes.includes(adId)) guestLikes.push(adId);
+                        } else {
+                            // Remove like
+                            const idx = guestLikes.indexOf(adId);
+                            if (idx !== -1) guestLikes.splice(idx, 1);
+                        }
+                        localStorage.setItem("guestLikes", JSON.stringify(guestLikes));
+
+                        // Only animate when liked
+                        if (likeState) burstHeartsFromElement(button, 3000, 28);
+                        return;
+                    }
+
+                    // --- Logged-in like handling ---
+                    likeState = data.liked;
                     setLike(likeState);
-                    return;
-                }
-
-                likeState = data.liked;
-                setLike(likeState);
-
-                // ❤️ Only show animation when the action ends up 'liked'
-                if (likeState) {
-                    burstHeartsFromElement(button, 3000, 28); // ~10s show, fast particles
-                }
+                    if (likeState) burstHeartsFromElement(button, 3000, 28);
                 })
                 .catch(err => {
-                console.error("❌ Fetch error:", err);
-                likeState = !likeState; // revert
-                setLike(likeState);
+                    console.error("❌ Fetch error:", err);
+                    likeState = !likeState; // revert
+                    setLike(likeState);
                 });
             });
-            });
+        });
     });
 </script>    
 @endsection

@@ -36,55 +36,6 @@ class Ads extends Controller
         'cinematic',
     ];
 
-    public $options = [
-        "height" => [
-            "Tall",
-            "Kinda Tall",
-            "Perfectly average",
-            "Not too tall",
-            "Petite",
-            "Small"
-        ],
-        "hair" => [
-            "Blue hair",
-            "Highlights",
-            "Two-Tone",
-            "Rainbow Hair"
-        ],
-        "eyes" => [
-            "Red",
-            "Blue",
-            "Brown",
-            "Black"
-        ],
-        "behavior" => [
-            "Bubbly",
-            "Calm",
-            "Adventurous",
-            "Playful",
-            "Serious",
-            "Confident"
-        ],
-        "seeking" => [
-            "Sugar Daddy",
-            "Sugar Baby",
-            "Sugar Mommy",
-            "Mentor",
-            "Sponsor",
-            "Companion"
-        ],
-        "hobby" => [
-            "Reading",
-            "Traveling",
-            "Cooking",
-            "Gaming",
-            "Music",
-            "Sports",
-            "Drawing",
-            "Art"
-        ]
-    ];
-
     public function reply($box): View
     {
         return view('ads.reply', [
@@ -517,20 +468,24 @@ class Ads extends Controller
     }
 
     
-    public function toggleLike(Ad $ad)
+    public function toggleLike(Request $request, Ad $ad)
     {
-        $userId = Auth::id();
-        if (!$userId) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        if (!Auth::check()) {
+            // Guest user — return a response that JS can handle locally
+            return response()->json([
+                'guest' => true,
+                'ad_id' => $ad->id,
+            ]);
         }
 
+        $userId = Auth::id();
         $existing = Like::where('ad_id', $ad->id)->where('user_id', $userId)->first();
 
         if ($existing) {
             $existing->delete();
             $liked = false;
         } else {
-            Like::create(['ad_id' => $ad->id, 'user_id' => $userId]); // UUID set by model
+            Like::create(['ad_id' => $ad->id, 'user_id' => $userId]);
             $liked = true;
         }
 
