@@ -19,7 +19,37 @@ class Profiles extends Controller
     public function create(): View
     {
         $options = Option::where('category', 'profile')->orderBy('sort_order')->get();
-        return view('profile.create', ['options' => $options]);
+        $options_ad = Option::where('category', 'help_create_ad')->orderBy('sort_order')->get();
+        $state = 'login';
+        $mode = 'options'; // default
+
+        if (session()->has('state')) {
+            $state = session('state');
+            $ad = Ad::where('box_number', session('ad_box'))->first();
+        }
+
+        // 🔹 Detect from intended URL
+        $intended = session('intended_url');
+        if ($intended) {
+            if (str_contains($intended, 'reply_first') || str_contains($intended, 'create_first')) {
+                $mode = 'textarea';
+            } elseif (str_contains($intended, 'reply_second') || str_contains($intended, 'create_second')) {
+                $mode = 'options';
+            }
+        }
+
+        return view('profile.create', [
+            'options'    => $options,
+            'options_ad' => $options_ad,
+            'state'      => $state,
+            'ad'         => $ad ?? null,
+            'prompts'    => [
+                'funny', 'romantic', 'casual', 'formal', 'literature',
+                'adventurous', 'mysterious', 'rom-com', 'philosophical',
+                'trendy', 'storytelling', 'cinematic',
+            ],
+            'reply_mode' => $mode, // 👈 pass this to blade
+        ]);
     }
 
     public function profile(): View
@@ -168,6 +198,39 @@ class Profiles extends Controller
         }        
 
         // --- CASE 2: User hasn’t registered yet (profile saved in session before creating user) ---
+
+        if (session()->has('state') && !Auth::check()) {
+            $state = session('state');
+            if ($state == 'create') {
+                // The case to create ad without login
+            } else if ($state == 'reply') {
+                // The case to reply ad without login
+                $validated = $request->validate([
+                    'content'=> 'required|string|max:255',
+                    'location'=> 'required|string|max:255',
+                ]);
+
+                session([
+                    'profile' => [
+                        'display_name' => $request->person_name,
+                        'occupation'   => $request->occupation,
+                        'age'          => $request->age,
+                        'status'       => $request->status,
+                        'gender'       => $request->gender,
+                        'location'     => $validated['location'],
+                    ],
+                    'reply' => [
+                        'ad_id'   => $request->ad_id,
+                        'content' => $validated['content'],
+                    ],
+                ]);
+    
+                return redirect()->route('offer');
+            } else if ($state == 'login') {
+                // The case to handle if user come from login
+            }
+        }
+
         session([
             'profile' => [
                 'display_name' => $validated['person_name'],

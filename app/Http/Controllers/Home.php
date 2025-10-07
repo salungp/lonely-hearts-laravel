@@ -38,7 +38,7 @@ class Home extends Controller
         }
 
         // Clear session if user came from create flow
-        session()->forget(['profile', 'ads']);
+        session()->forget(['profile', 'ads', 'state', 'ad_box']);
 
         $ads = $query->orderByDesc('is_featured') // ✅ featured first
              ->orderByDesc('created_at')  // ✅ newest next

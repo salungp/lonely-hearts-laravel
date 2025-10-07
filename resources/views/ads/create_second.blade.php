@@ -140,33 +140,6 @@ $(document).ready(function () {
             () => alert("Permission denied or unavailable")
         );
     });
-
-    // Toggle dropdowns
-    $(".lh-dropdown-button").on("click", function () {
-        const $wrap = $(this).parent();
-        $(".lh-dropdown-wrap").not($wrap).removeClass("open");
-        $wrap.toggleClass("open");
-    });
-
-    // Select option
-    $(".lh-option").on("click", function () {
-        const $wrap = $(this).closest(".lh-dropdown-wrap");
-        const $btn = $wrap.find(".lh-dropdown-button");
-        const field = $wrap.data("field");
-
-        selections[field] = $(this).text(); // save selection
-        $btn.text($(this).text()); // update button
-        $wrap.removeClass("open");
-
-        updateDescription("description");
-    });
-
-    // Close dropdowns when clicking outside
-    $(document).on("click", function (e) {
-        if (!$(e.target).closest(".lh-dropdown-wrap").length) {
-            $(".lh-dropdown-wrap").removeClass("open");
-        }
-    });
 });
 </script>
 @endsection

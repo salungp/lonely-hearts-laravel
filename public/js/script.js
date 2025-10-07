@@ -663,6 +663,47 @@ class BootstrapPinInput {
       }
     });
   });
+
+  document.querySelectorAll(".lh-dropdown-button").forEach((btn) => {
+    btn.addEventListener("click", function () {
+      const wrap = this.parentElement;
+      document.querySelectorAll(".lh-dropdown-wrap").forEach((el) => {
+        if (el !== wrap) el.classList.remove("open");
+      });
+      wrap.classList.toggle("open");
+    });
+  });
+  
+  // Select option
+  document.querySelectorAll(".lh-option").forEach((option) => {
+    option.addEventListener("click", function () {
+      const wrap = this.closest(".lh-dropdown-wrap");
+      const btn = wrap.querySelector(".lh-dropdown-button");
+      const hiddenInput = wrap.querySelector("input[type='hidden']");
+  
+      // Set button text
+      btn.textContent = this.textContent;
+  
+      // Set hidden input value
+      hiddenInput.value = this.textContent;
+  
+      // Close dropdown
+      wrap.classList.remove("open");
+    });
+  });
+  
+  // Close dropdown when clicking outside
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest(".lh-dropdown-wrap")) {
+      document.querySelectorAll(".lh-dropdown-wrap").forEach((el) => {
+        el.classList.remove("open");
+      });
+    }
+  });
+
+  clickAction(".lh-alert-close", (e) => {
+    document.getElementById("alert").style.display = "none";
+  });
     
   
     

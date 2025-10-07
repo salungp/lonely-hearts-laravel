@@ -265,7 +265,7 @@ class AuthController extends Controller
             }
 
             Auth::login($user);
-            $request->session()->forget(['reply', 'otp']);
+            $request->session()->forget(['reply', 'otp', 'state', 'ad_box']);
             return redirect()->route('reply_confirmation');
         }
 

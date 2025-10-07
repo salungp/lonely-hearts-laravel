@@ -38,6 +38,11 @@ class Ads extends Controller
 
     public function reply($box): View
     {
+        session([
+            'state'  => 'reply',
+            'ad_box' => $box
+        ]);
+
         return view('ads.reply', [
             'box' => $box
         ]);
@@ -207,6 +212,7 @@ class Ads extends Controller
 
     public function create_ad(): View
     {
+        session(['state' => 'create']);
         return view('ads.create');
     }
 
@@ -359,6 +365,10 @@ class Ads extends Controller
 
         if ($sentence) {
             $sentence = trim($sentence) . ".";
+        }
+
+        if (!empty($request->description)) {
+            $sentence = $request->description;
         }
 
         // ❌ If sentence is empty, return with error

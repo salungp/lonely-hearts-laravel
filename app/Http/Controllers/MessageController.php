@@ -44,7 +44,7 @@ class MessageController extends Controller
                 $q->where('author_id', $user_id);
             })
             ->with('conversation') // eager load
-            ->orderByDesc('id')
+            ->orderByDesc('created_at')
             ->get();
 
         return view('message.show', [
