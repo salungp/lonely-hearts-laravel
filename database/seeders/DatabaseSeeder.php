@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             UserPackageSeeder::class,
             OptionsSeeder::class,
             HelpCreateAdSeeder::class,
+            PackagesTableSeeder::class,
         ]);
     }
 }

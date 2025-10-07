@@ -21,7 +21,7 @@
                 >
                 <div class="d-flex" style="gap: 16px; align-items: flex-start;flex-direction: row;">
                     <div class="lh-feed-icon d-flex justify-content-center">
-                        <img src="{{ asset('images/envelope-icon.png') }}" alt="Envelope icon" />
+                        <img src="{{ asset('images/'.$item->icon) }}" alt="Envelope icon" />
                     </div>
 
                     <div class="lh-feed-content d-block">

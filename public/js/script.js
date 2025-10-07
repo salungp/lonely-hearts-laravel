@@ -704,6 +704,7 @@ class BootstrapPinInput {
   clickAction(".lh-alert-close", (e) => {
     document.getElementById("alert").style.display = "none";
   });
+  
     
   
     

@@ -20,8 +20,9 @@ class PackageController extends Controller
         $package_id = Package::first();
 
         if (session()->has('reply')) {
-            $ad = Ad::where('id', session('reply')['ad_id'])->first();
-            $link = '/ad/confirmation/'.$ad->box_number;
+            $package = $package = Package::get();
+        } else {
+            $package = Package::where('name', 'Featured')->get();
         }
 
         return view('package.offer', [
