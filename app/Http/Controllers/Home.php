@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use App\Models\Ad;
+use App\Models\Photo;
 
 class Home extends Controller
 {
@@ -38,7 +39,7 @@ class Home extends Controller
         }
 
         // Clear session if user came from create flow
-        session()->forget(['profile', 'ads', 'state', 'ad_box', 'reply']);
+        session()->forget(['profile', 'ads', 'state', 'ad_box', 'reply', 'uploaded_photos']);
 
         $ads = $query->orderByDesc('is_featured') // ✅ featured first
              ->orderByDesc('created_at')  // ✅ newest next
@@ -82,6 +83,7 @@ class Home extends Controller
     public function detail_slug($slug): View
     {
         $ad = Ad::where('slug', $slug)->first();
+        $photo = Photo::where('ad_id', $ad->id)->get();
 
         if (!$ad) {
             abort(404);
@@ -98,8 +100,9 @@ class Home extends Controller
         }
 
         return view('detail', [
-            'conversation' => 2,
-            'ad' => $ad,
+            'conversation' => 10,
+            'ad'           => $ad,
+            'photo'        => $photo
         ]);
     }
 

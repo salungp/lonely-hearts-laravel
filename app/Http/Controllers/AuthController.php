@@ -22,6 +22,7 @@ use App\Models\Message;
 use App\Models\Package;
 use App\Models\UserPackage;
 use App\Models\Option;
+use App\Models\Photo;
 use OpenAI\Laravel\Facades\OpenAI;
 
 class AuthController extends Controller
@@ -192,7 +193,7 @@ class AuthController extends Controller
                 $slug = $originalSlug.'-'.$count++;
             }
 
-            Ad::create([
+            $ad = Ad::create([
                 'user_id'             => $user->id,
                 'description'         => $ads['description'],
                 'title'               => $title,
@@ -206,6 +207,16 @@ class AuthController extends Controller
                 'views'               => 0,
                 'box_number'          => $box,
             ]);
+
+            if (session()->has('uploaded_photos')) {
+                foreach (session('uploaded_photos') as $photo) {
+                    Photo::create([
+                        ...$photo,
+                        'ad_id' => $ad->id
+                    ]);
+                }
+                session()->forget('uploaded_photos');
+            }
 
             Auth::login($user);
             $request->session()->forget(['ads', 'otp']);

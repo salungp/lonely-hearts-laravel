@@ -10,6 +10,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\PaymentIntentController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PhotoController;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
 use App\Models\Ad;
@@ -96,6 +97,10 @@ Route::post('/account/update', [Profiles::class, 'update'])->name('profile.updat
 
 // Payment
 Route::get('/account/payment', [PaymentController::class, 'show'])->name('profile.payment');
+
+// Photos
+Route::post('/photos/upload', [PhotoController::class, 'upload'])->name('photos.upload');
+Route::delete('/photos/remove', [PhotoController::class, 'remove'])->name('photos.remove');
 
 // Message
 Route::get('/message', [MessageController::class, 'show'])->name('message')->middleware('auth');

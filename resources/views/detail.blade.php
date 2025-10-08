@@ -1,6 +1,8 @@
 @extends('layouts.app')
 @section('title', $ad->title)
 @section('meta')
+<link rel="stylesheet" href={{ asset('owl-carousel/assets/owl.carousel.min.css') }}>
+<link rel="stylesheet" href={{ asset('owl-carousel/assets/owl.theme.default.min.css') }}>
 <style>
     /* Full-page overlay for particles */
     #loveLayer {
@@ -33,6 +35,21 @@
     @media (prefers-reduced-motion: reduce) {
       .love-spark { animation: none !important; opacity: 0 !important; }
     }
+
+    .photo-item {
+        height: 120px;
+        overflow: hidden;
+        border-radius: 4px;
+        border: 2px solid var(--dark);
+    }
+
+    .photo-item img {
+        height: 100%;
+        object-fit: cover;
+        image-rendering: pixelated;
+        transform: scale(1.05);
+        filter: grayscale(100%);
+    }
 </style>    
 @endsection
 @section('back')
@@ -56,9 +73,40 @@
                 <span style="margin-bottom: 12px;background: var(--red); border-radius: 6px;border: 2px solid var(--red-dark)" class="badge badge-success">Featured</span>
             </div>
         @endif
+
         <h2 style="font-size: 24px;text-align:center;font-family: 'Merriweather';text-transform:uppercase;font-weight: bold;">
             {{ $ad->title }}
         </h2>
+
+        @if($photo->count() == 1)
+            <div class="d-flex justify-content-center mt-2 mb-2 align-items-center">
+                @foreach($photo as $item)
+                <div style="height: 120px; width: 100px;border-radius: 4px;overflow: hidden; border: 2px solid var(--dark);">
+                    <img style="height: 100%; width: 100%; object-fit: cover;filter: grayscale(100%);" src="{{ asset($item->file_path) }}" alt="Ad photo">
+                </div>
+                @endforeach
+            </div>
+        @endif
+
+        @if($photo->count() < 4 && $photo->count() != 1)
+            <div class="d-flex mt-2 mb-2" style="gap: 10px">
+                @foreach($photo as $item)
+                <div class="photo-item w-100" style="height: 160px !important;">
+                    <img style="height: 100%; width: 100%; object-fit: cover;" src="{{ asset($item->file_path) }}" alt="Ad photo">
+                </div>
+                @endforeach
+            </div>
+        @endif
+
+        @if($photo->count() > 3)
+            <div class="owl-carousel mt-2 mb-2 owl-theme">
+                @foreach($photo as $item)
+                <div class="photo-item">
+                    <img src="{{ asset($item->file_path) }}" alt="Ad photo">
+                </div>
+                @endforeach
+            </div>
+        @endif
 
         <p style="text-align: justify">
             {{ $ad->description }}
@@ -113,7 +161,26 @@
 </div>
 @endsection
 @section('script')
+<script src="{{ asset('js/jquery-3.7.1.min.js') }}"></script>
+<script src={{ asset('owl-carousel/owl.carousel.min.js') }}></script>
 <script>
+    $('.owl-carousel').owlCarousel({
+        loop:true,
+        margin:10,
+        nav:true,
+        responsive:{
+            0:{
+                items:4
+            },
+            600:{
+                items:3
+            },
+            1000:{
+                items:5
+            }
+        }
+    });
+    
     function ensureLoveLayer() {
         let layer = document.getElementById('loveLayer');
         if (!layer) {

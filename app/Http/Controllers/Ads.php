@@ -18,6 +18,7 @@ use App\Models\Message;
 use App\Models\Package;
 use App\Models\UserPackage;
 use App\Models\Option;
+use App\Models\Photo;
 
 class Ads extends Controller
 {
@@ -82,12 +83,25 @@ class Ads extends Controller
     public function destroy($id)
     {
         $ad = Ad::findOrFail($id);
+        $photos = Photo::where('ad_id', $id)->get();
 
         // optional: check ownership
         if ($ad->user_id !== Auth::id()) {
             return redirect()->back()->with('error', 'Unauthorized');
         }
+        
+        // Delete photo files from /public/uploads/ad_photos
+        foreach ($photos as $photo) {
+            $filePath = public_path($photo->file_path);
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
 
+        // Delete the photo record on the DB
+        Photo::where('ad_id', $id)->delete();
+
+        // Delete the ad record
         $ad->delete();
 
         return redirect()->back()->with('success', 'Ad deleted successfully');
@@ -338,16 +352,18 @@ class Ads extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'location'    => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'photos'   => 'nullable|array',
+            'photos.*' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $fields = Option::where('category', 'help_create_ad')
-        ->orderBy('sort_order')
-        ->get();
+            ->orderBy('sort_order')
+            ->get();
 
         $inputs = $request->only($fields->pluck('title')->toArray());
 
-        // Build sentence dynamically
+        // --- Build sentence dynamically ---
         $sentence = '';
         foreach ($fields as $field) {
             $title  = $field->title;
@@ -355,11 +371,9 @@ class Ads extends Controller
             $value  = $inputs[$title] ?? null;
 
             if ($value) {
-                if ($sentence === '') {
-                    $sentence .= "{$prefix} {$value}";
-                } else {
-                    $sentence .= " {$prefix} {$value}";
-                }
+                $sentence .= $sentence === ''
+                    ? "{$prefix} {$value}"
+                    : " {$prefix} {$value}";
             }
         }
 
@@ -377,8 +391,8 @@ class Ads extends Controller
                 ->withInput()
                 ->withErrors(['description' => 'Please complete your selections to generate an ad description.']);
         }
-        
-        // Generate box number
+
+        // --- Generate box number ---
         $box = rand(100000, 999999);
 
         // --- Case 1: User not logged in yet ---
@@ -390,12 +404,54 @@ class Ads extends Controller
                 ],
             ]);
 
+            // Save uploaded photos (either files or filenames) to session
+            $sessionPhotos = [];
+
+            // ✅ Case A: Actual file uploads
+            if ($request->hasFile('photos')) {
+                foreach ($request->file('photos') as $index => $file) {
+                    if (!$file) continue;
+
+                    $uploadPath = base_path('public_html/uploads/ad_photos');
+                    if (!file_exists($uploadPath)) mkdir($uploadPath, 0755, true);
+
+                    $fileName = Str::random(40) . '.' . $file->getClientOriginalExtension();
+                    $file->move($uploadPath, $fileName);
+
+                    $sessionPhotos[] = [
+                        'id'         => Str::uuid(),
+                        'file_path'  => 'uploads/ad_photos/' . $fileName,
+                        'sort_order' => $index,
+                        'is_primary' => $index === 0,
+                    ];
+                }
+            }
+            // ✅ Case B: Only filenames came through
+            elseif ($request->has('photos')) {
+                foreach ($request->input('photos') as $index => $photoName) {
+                    $photoPath = 'uploads/ad_photos/' . $photoName;
+                    if (file_exists(public_path($photoPath))) {
+                        $sessionPhotos[] = [
+                            'id'         => Str::uuid(),
+                            'file_path'  => $photoPath,
+                            'sort_order' => $index,
+                            'is_primary' => $index === 0,
+                        ];
+                    }
+                }
+            }
+
+            if (!empty($sessionPhotos)) {
+                session(['uploaded_photos' => $sessionPhotos]);
+            }
+
             return redirect()->route('offer');
         }
 
         // --- Case 2: Logged in but no profile ---
         $user = Auth::user();
         $profile = Profile::where('user_id', $user->id)->first();
+
         $isFeatured = UserPackage::where('user_id', Auth::id())
             ->where('status', 'active')
             ->where('end_date', '>=', now())
@@ -414,14 +470,14 @@ class Ads extends Controller
         $title = trim($response['choices'][0]['message']['content'] ?? 'Seeking someone special');
         $title = preg_replace('/^["“]|["”]$/u', '', $title);
         $title = str_replace('!', '', $title);
-        $title = trim($profile->display_name.' '.$validated['location'].' '.$title);
+        $title = trim($profile->display_name . ' ' . $validated['location'] . ' ' . $title);
 
-        // Ensure slug is unique
-        $slug = Str::slug($title).'-'.$box;
+        // --- Ensure slug is unique ---
+        $slug = Str::slug($title) . '-' . $box;
         $originalSlug = $slug;
         $count = 1;
         while (Ad::where('slug', $slug)->exists()) {
-            $slug = $originalSlug.'-'.$count++;
+            $slug = $originalSlug . '-' . $count++;
         }
 
         if (!$profile) {
@@ -445,6 +501,58 @@ class Ads extends Controller
             'box_number'          => $box,
             'is_featured'         => $isFeatured,
         ]);
+
+        // --- Handle uploaded photos (optional) ---
+        $uploadedPhotos = [];
+
+        // ✅ Case A: Real uploaded files
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $index => $file) {
+                if (!$file) continue;
+
+                $uploadPath = base_path('public_html/uploads/ad_photos');
+                if (!file_exists($uploadPath)) mkdir($uploadPath, 0755, true);
+
+                $fileName = Str::random(40) . '.' . $file->getClientOriginalExtension();
+                $file->move($uploadPath, $fileName);
+
+                $photoData = [
+                    'id'         => Str::uuid(),
+                    'file_path'  => 'uploads/ad_photos/' . $fileName,
+                    'sort_order' => $index,
+                    'is_primary' => $index === 0,
+                ];
+
+                Photo::create([...$photoData, 'ad_id' => $ad->id]);
+                $uploadedPhotos[] = $photoData;
+            }
+        }
+
+        // ✅ Case B: Only filenames sent (JS passed names, not files)
+        elseif ($request->has('photos')) {
+            foreach ($request->input('photos') as $index => $photoName) {
+                $photoPath = 'uploads/ad_photos/' . $photoName;
+                if (file_exists(public_path($photoPath))) {
+                    $photoData = [
+                        'id'         => Str::uuid(),
+                        'file_path'  => $photoPath,
+                        'sort_order' => $index,
+                        'is_primary' => $index === 0,
+                    ];
+
+                    Photo::create([...$photoData, 'ad_id' => $ad->id]);
+                    $uploadedPhotos[] = $photoData;
+                }
+            }
+        }
+
+        // ✅ Case C: Session photos (guest flow)
+        if (session()->has('uploaded_photos')) {
+            foreach (session('uploaded_photos') as $photo) {
+                Photo::create([...$photo, 'ad_id' => $ad->id]);
+            }
+            session()->forget('uploaded_photos');
+        }
 
         return redirect()->route('ad.writing', ['box' => $box]);
     }
