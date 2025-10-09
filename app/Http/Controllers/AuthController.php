@@ -21,7 +21,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\Package;
 use App\Models\UserPackage;
-use App\Models\Option;
+use App\Models\Payment;
 use App\Models\Photo;
 use OpenAI\Laravel\Facades\OpenAI;
 
@@ -122,7 +122,6 @@ class AuthController extends Controller
         ]);
 
         // If this was a brand new user → force profile creation
-        // If this was a brand new user → force profile creation
         if ($user->wasRecentlyCreated) {
             session(['must_create_profile' => true]);
 
@@ -154,6 +153,22 @@ class AuthController extends Controller
             return back()->withErrors(['Could not find user']);
         }
 
+        if (session()->has('payment')) {
+            $payment = session('payment');
+            $package = session('user_package');
+            $payment['user_id'] = $user->id;
+            $package['user_id'] = $user->id;
+
+            // activate package
+            $user_package = UserPackage::create($package);
+            $payment['user_package_id'] = $user_package->id;
+
+            // record payment
+            $create_payment = Payment::create($payment);
+
+            session()->forget(['payment', 'package']);
+        }
+
         // ✅ Case 1: User is creating an ad
         if ($ads = session('ads')) {
             $profile = Profile::where('user_id', $user->id)->first();
@@ -163,12 +178,21 @@ class AuthController extends Controller
             }
 
             $box  = rand(100000, 999999);
+            // Get the active user package with its related package data
+                $userPackage = UserPackage::with('package')
+                ->where('user_id', Auth::id())
+                ->where('status', 'active')
+                ->where('end_date', '>', now())
+                ->first();
 
-            $profile = Profile::where('user_id', $user->id)->first();
-            $isFeatured = UserPackage::where('user_id', Auth::id())
-            ->where('status', 'active')
-            ->where('end_date', '>=', now())
-            ->exists();
+            // Resolve the feature status (package title or default value)
+            $isFeatured = $userPackage?->package?->title ?? null;
+
+            if ($isFeatured == 'featured') {
+                $isFeatured = 1;
+            } else {
+                $isFeatured = 0;
+            }
 
             // --- Generate witty title ---
             $prompt = $this->generateAdPrompt($profile, $ads['description']);
@@ -205,6 +229,7 @@ class AuthController extends Controller
                 'snapshot_gender'     => $profile->gender,
                 'location'            => $profile->location,
                 'views'               => 0,
+                'is_featured'         => $isFeatured,
                 'box_number'          => $box,
             ]);
 

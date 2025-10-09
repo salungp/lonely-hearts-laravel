@@ -139,7 +139,7 @@ Route::get('/offer', [PackageController::class, 'offer'])->name('offer');
 Route::post('/packages/{id}/buy', [PackageController::class, 'buy'])->name('packages.buy');
 
 // Checkout
-Route::post('/checkout/{id}', [CheckoutController::class, 'checkout'])->name('checkout.start');
+Route::post('/checkout/', [CheckoutController::class, 'checkout'])->name('checkout.start');
 Route::get('/checkout/success/{packageId}', [CheckoutController::class, 'success'])->name('checkout.success');
 
 Route::post('/create-payment-intent/{package}', [PaymentIntentController::class, 'create'])

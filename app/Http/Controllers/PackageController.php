@@ -18,8 +18,18 @@ class PackageController extends Controller
     {
         $package = Package::get();
         $package_id = Package::first();
+        $box = 123456;
+        $link = 'create';
 
-        if (session()->has('reply')) {
+        if (session()->has('state')) {
+            $link = session('state');
+        }
+
+        if (session()->has('box')) {
+            $box = session('box');
+        }
+
+        if (session('state') == 'reply') {
             $package = $package = Package::get();
         } else {
             $package = Package::where('name', 'Featured')->get();
@@ -28,7 +38,8 @@ class PackageController extends Controller
         return view('package.offer', [
             'package' => $package,
             'package_id' => $package_id,
-            'box' => 12344
+            'box' => $box,
+            'link' => $link,
         ]);
     }
 

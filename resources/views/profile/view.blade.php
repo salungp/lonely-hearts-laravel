@@ -8,8 +8,11 @@
         <img src="{{ asset('images/profile-empty.png') }}" alt="Profile image" style="width: 70px; border-radius: 8px">
         <div class="text-content">
             <h3 style="font-size: 24px;text-transform:uppercase;">{{ $user->display_name ?? '' }}, {{ $user->age ?? '' }}
-                @if ($is_featured == 1)
+                @if ($is_featured == 'featured')
                     <span style="margin-left: 4px;background: var(--red); border-radius: 6px;border: 2px solid var(--red-dark)" class="badge badge-success">Featured</span>
+                @endif
+                @if ($is_featured == 'flower')
+                    <img style="width: 30px;" src="{{ asset('images/rose.png') }}" alt="Flower icon">
                 @endif
             </h3>
             <a href="{{ route('profile.edit') }}" class="lh-link" style="padding: 0 !important; text-align: left;">Edit profile</a>

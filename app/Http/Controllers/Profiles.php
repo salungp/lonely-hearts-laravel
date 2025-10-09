@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\Profile;
 use App\Models\UserPackage;
 use App\Models\Option;
+use App\Models\Package;
 
 class Profiles extends Controller
 {
@@ -54,16 +55,24 @@ class Profiles extends Controller
 
     public function profile(): View
     {
-        $id = Auth::id();
-        $user = Profile::where('user_id', $id)->first();
-        $isFeatured = UserPackage::where('user_id', $id)
+        $userId = Auth::id();
+
+        // Eager load profile and package in a single step
+        $profile = Profile::where('user_id', $userId)->first();
+
+        // Get the active user package with its related package data
+        $userPackage = UserPackage::with('package')
+            ->where('user_id', $userId)
             ->where('status', 'active')
-            ->where('end_date', '>=', now())
-            ->exists();
+            ->where('end_date', '>', now())
+            ->first();
+
+        // Resolve the feature status (package title or default value)
+        $isFeatured = $userPackage?->package?->title ?? null;
 
         return view('profile.view', [
-            'user' => $user,
-            'is_featured' => $isFeatured
+            'user' => $profile,
+            'is_featured' => $isFeatured,
         ]);
     }
 

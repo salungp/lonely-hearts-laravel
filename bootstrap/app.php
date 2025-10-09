@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'profile.or.create' => \App\Http\Middleware\EnsureProfileIsComplete::class,
             'ensure.auth'       => \App\Http\Middleware\EnsureUserAuthenticated::class,
+            'active.package' => \App\Http\Middleware\EnsureUserHasActivePackage::class,
         ]);
 
         // ✅ Trust ALL proxies

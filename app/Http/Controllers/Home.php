@@ -39,7 +39,7 @@ class Home extends Controller
         }
 
         // Clear session if user came from create flow
-        session()->forget(['profile', 'ads', 'state', 'ad_box', 'reply', 'uploaded_photos']);
+        session()->forget(['profile', 'ads', 'state', 'ad_box', 'reply', 'uploaded_photos', 'box']);
 
         $ads = $query->orderByDesc('is_featured') // ✅ featured first
              ->orderByDesc('created_at')  // ✅ newest next
@@ -85,6 +85,8 @@ class Home extends Controller
         $ad = Ad::where('slug', $slug)->first();
         $photo = Photo::where('ad_id', $ad->id)->get();
 
+        session()->forget(['box']);
+
         if (!$ad) {
             abort(404);
         }
@@ -109,6 +111,9 @@ class Home extends Controller
     public function detail($box): View
     {
         $ad = Ad::where('box_number', $box)->first();
+        $photo = Photo::where('ad_id', $ad->id)->get();
+
+        session()->forget(['box']);
 
         if (!$ad) {
             abort(404);
@@ -125,8 +130,9 @@ class Home extends Controller
         }
 
         return view('detail', [
-            'conversation' => 2,
-            'ad' => $ad
+            'conversation' => 10,
+            'ad'           => $ad,
+            'photo'        => $photo
         ]);
     }
 

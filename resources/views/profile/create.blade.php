@@ -120,8 +120,8 @@
 
         <div class="mb-4"></div>
 
-        @if ($state === 'create')
-        <button class="lh-button" type="submit">Continue</button>
+        @if ($state === 'create' || !session()->has('state'))
+            <button class="lh-button" type="submit">Continue</button>
         @endif
     </form>
 </div>

@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Http\RedirectResponse;
 use Carbon\Carbon;
 use App\Models\Ad;
 use OpenAI\Laravel\Facades\OpenAI;
@@ -84,25 +83,12 @@ class Ads extends Controller
     public function destroy($id)
     {
         $ad = Ad::findOrFail($id);
-        $photos = Photo::where('ad_id', $id)->get();
 
         // optional: check ownership
         if ($ad->user_id !== Auth::id()) {
             return redirect()->back()->with('error', 'Unauthorized');
         }
-        
-        // Delete photo files from /public/uploads/ad_photos
-        foreach ($photos as $photo) {
-            $filePath = public_path($photo->file_path);
-            if (file_exists($filePath)) {
-                unlink($filePath);
-            }
-        }
 
-        // Delete the photo record on the DB
-        Photo::where('ad_id', $id)->delete();
-
-        // Delete the ad record
         $ad->delete();
 
         return redirect()->back()->with('success', 'Ad deleted successfully');
@@ -220,25 +206,8 @@ class Ads extends Controller
         ]);
     }
 
-    public function reply_confirmation(Request $request): View|RedirectResponse
+    public function reply_confirmation(): View
     {
-        $user = Auth::user();
-
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Please login to continue.');
-        }
-
-        // Check if user has an active package
-        $hasActivePackage = UserPackage::where('user_id', $user->id)
-            ->where('status', 'active')
-            ->where('end_date', '>', now())
-            ->exists();
-
-        if (!$hasActivePackage && !session()->pull('offer_shown')) {
-            session(['offer_shown' => true]); // prevent loop
-            return redirect()->route('offer')->with('info', 'You can continue for free or upgrade for more features.');
-        }
-
         return view('ads.reply_confirmation');
     }
 
@@ -274,33 +243,10 @@ class Ads extends Controller
 
     public function writing($box)
     {
-        if (session()->has('box')) {
-            $ad = Ad::where('box_number', session('box'))->first();
-            $box = session('box');
-        } else {
-            $ad = Ad::where('box_number', $box)->first();
-        }
+        $ad = Ad::where('box_number', $box)->first();
 
         if (!$ad) {
             abort(404);
-        }
-
-        $user = Auth::user();
-
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Please login to continue.');
-        }
-
-        // Check if user has an active package
-        $hasActivePackage = UserPackage::where('user_id', $user->id)
-            ->where('status', 'active')
-            ->where('end_date', '>', now())
-            ->exists();
-
-        if (!$hasActivePackage && !session()->pull('offer_shown')) {
-            session(['offer_shown' => true]); // prevent loop
-            session(['box' => $box]);
-            return redirect()->route('offer')->with('info', 'You can continue for free or upgrade for more features.');
         }
 
         return view('ads.writing', [
@@ -453,7 +399,7 @@ class Ads extends Controller
                 foreach ($request->file('photos') as $index => $file) {
                     if (!$file) continue;
 
-                    $uploadPath = base_path('public_html/uploads/ad_photos');
+                    $uploadPath = '/home/lonelyhe/public_html/uploads/ad_photos';
                     if (!file_exists($uploadPath)) mkdir($uploadPath, 0755, true);
 
                     $fileName = Str::random(40) . '.' . $file->getClientOriginalExtension();
@@ -493,20 +439,10 @@ class Ads extends Controller
         $user = Auth::user();
         $profile = Profile::where('user_id', $user->id)->first();
 
-        $userPackage = UserPackage::with('package')
-                ->where('user_id', Auth::id())
-                ->where('status', 'active')
-                ->where('end_date', '>', now())
-                ->first();
-
-        // Resolve the feature status (package title or default value)
-        $isFeatured = $userPackage?->package?->title ?? null;
-
-        if ($isFeatured == 'featured') {
-            $isFeatured = 1;
-        } else {
-            $isFeatured = 0;
-        }
+        $isFeatured = UserPackage::where('user_id', Auth::id())
+            ->where('status', 'active')
+            ->where('end_date', '>=', now())
+            ->exists();
 
         // --- Generate witty title ---
         $prompt = $this->generateAdPrompt($profile, $sentence);
@@ -561,7 +497,7 @@ class Ads extends Controller
             foreach ($request->file('photos') as $index => $file) {
                 if (!$file) continue;
 
-                $uploadPath = base_path('public_html/uploads/ad_photos');
+                $uploadPath = '/home/lonelyhe/public_html/uploads/ad_photos';
                 if (!file_exists($uploadPath)) mkdir($uploadPath, 0755, true);
 
                 $fileName = Str::random(40) . '.' . $file->getClientOriginalExtension();

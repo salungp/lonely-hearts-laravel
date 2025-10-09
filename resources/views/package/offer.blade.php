@@ -9,15 +9,33 @@
 <div class="container-sm">
     <h1 class="lh-title mb-3">Stand out</h1>
 
+    @if (session('success'))
+        <div class="lh-alert mb-3 lh-alert-success" id="alert">
+        {{ session('success') }}
+        <button class="lh-alert-close" type="button">
+            <img src="{{ asset('icons/close.svg') }}" alt="Close button icon">
+        </button>
+        </div>
+    @endif
+
+    @if (session('info'))
+        <div class="lh-alert mb-3 lh-alert-success" id="alert">
+        {{ session('info') }}
+        <button class="lh-alert-close" type="button">
+            <img src="{{ asset('icons/close.svg') }}" alt="Close button icon">
+        </button>
+        </div>
+    @endif
+
     <!-- Feed list -->
-    <form action="{{ route('checkout.start', $package_id) }}" method="POST">
+    <form action="{{ route('checkout.start') }}" method="POST">
         @csrf
         <input type="hidden" name="package" id="package" value="">
         @foreach ($package as $item)
             <div
                 class="lh-feed-card text-decoration-none text-dark"
                 data-price="{{ $item->price }}"
-                data-package="feature_reply"
+                data-package="{{ $item->id }}"
                 >
                 <div class="d-flex" style="gap: 16px; align-items: flex-start;flex-direction: row;">
                     <div class="lh-feed-icon d-flex justify-content-center">
@@ -34,7 +52,7 @@
             <!-- end card -->
         @endforeach
 
-        <h1 class="lh-offer-price mb-4">$50</h1>
+        <h1 class="lh-offer-price mb-4">$20.00</h1>
 
         <div class="form-check d-flex justify-content-center mb-4" style="gap: 10px" >
             <input class="form-check-input" type="checkbox" value="" id="checkDefault" />
@@ -62,95 +80,121 @@
 
     <div id="payment-request-button"></div>
 
-    <a href="{{ route('ad.writing', ['box'=>$box]) }}" class="lh-link" data-close>No, thank you</a>
+    @if ($link == 'create')
+        <a href="{{ route('ad.writing', ['box' => $box]) }}" class="lh-link">No, thank you</a>
+    @elseif ($link == 'reply')
+        <a href="{{ route('reply_confirmation') }}" class="lh-link">No, thank you</a>
+    @endif
 </div>
 @endsection
 @section('script')
 <script src="https://js.stripe.com/v3/"></script>
 <script>
+document.addEventListener("DOMContentLoaded", function() {
     const lhFeed = document.querySelectorAll(".lh-feed-card");
     const priceDisplay = document.querySelector(".lh-offer-price");
     const packageId = document.getElementById("package");
-    document.addEventListener("DOMContentLoaded", function() {
-        const stripe = Stripe("{{ config('services.stripe.key') }}"); // pk_test_xxx
+    const checkDefault = document.getElementById("checkDefault");
+    const payWithApple = document.getElementById("payWithApple");
+    const payWithGoogle = document.getElementById("payWithGoogle");
 
-        // Create a payment request for the Featured package ($20)
-        const paymentRequest = stripe.paymentRequest({
-            country: 'US',
-            currency: 'usd',
-            total: {
-                label: 'Featured Package',
-                amount: 2000, // $20
-            },
-            requestPayerName: true,
-            requestPayerEmail: true,
-        });
+    // ✅ Make the first package active by default
+    if (lhFeed.length > 0) {
+        const firstCard = lhFeed[0];
+        firstCard.classList.add("lh-active-feed");
+        priceDisplay.textContent = `$${firstCard.dataset.price}`;
+        packageId.value = firstCard.dataset.package;
+    }
 
-        const elements = stripe.elements();
-        const prButton = elements.create('paymentRequestButton', {
-            paymentRequest: paymentRequest,
-            style: {
-                paymentRequestButton: {
-                    type: 'default',
-                    theme: 'dark',
-                    height: '48px',
-                },
-            },
-        });
+    // ✅ Prevent payment if terms not agreed
+    function checkAgreement(e) {
+        if (!checkDefault.checked) {
+            e.preventDefault();
+            alert("Please agree with the Terms & Conditions to continue.");
+            return false;
+        }
+        return true;
+    }
 
-        // Check if Apple Pay / Google Pay is available
-        paymentRequest.canMakePayment().then(function(result) {
-            console.log(result);
-            if (result) {
-                prButton.mount('#payment-request-button');
-            } else {
-                document.getElementById('payment-request-button').style.display = 'none';
-            }
-        });
+    // Apply validation to buttons
+    payWithApple.addEventListener("click", checkAgreement);
+    payWithGoogle.addEventListener("click", checkAgreement);
 
-        // Handle payment
-        paymentRequest.on('paymentmethod', async function(ev) {
-            // Create PaymentIntent on server
-            const response = await fetch("{{ route('payment.intent.create', $package_id->id) }}", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
-            });
-            const { clientSecret } = await response.json();
-
-            const {error, paymentIntent} = await stripe.confirmCardPayment(
-                clientSecret,
-                { payment_method: ev.paymentMethod.id },
-                { handleActions: false }
-            );
-
-            if (error) {
-                ev.complete('fail');
-                alert(error.message);
-            } else {
-                ev.complete('success');
-                if (paymentIntent.status === "requires_action") {
-                    await stripe.confirmCardPayment(clientSecret);
-                }
-                if (paymentIntent.status === "succeeded") {
-                    window.location.href = "{{ route('checkout.success', $package_id->id) }}";
-                }
-            }
-        });
-    });
-
-
+    // ✅ Handle package card click selection
     lhFeed.forEach((card) => {
-    card.addEventListener("click", () => {
-        // remove active from all
-        lhFeed.forEach((c) => c.classList.remove("lh-active-feed"));
-            // add active to clicked one
+        card.addEventListener("click", () => {
+            lhFeed.forEach((c) => c.classList.remove("lh-active-feed"));
             card.classList.add("lh-active-feed");
-
-            // update price
-            const price = card.getAttribute("data-price");
-            priceDisplay.textContent = `$${price}`;
-            packageId.value = card.getAttribute("data-package");
+            priceDisplay.textContent = `$${card.dataset.price}`;
+            packageId.value = card.dataset.package;
         });
     });
+
+    // ✅ Stripe logic
+    const stripe = Stripe("{{ config('services.stripe.key') }}");
+    const paymentRequest = stripe.paymentRequest({
+        country: 'US',
+        currency: 'usd',
+        total: { label: 'Featured Package', amount: 2000 },
+        requestPayerName: true,
+        requestPayerEmail: true,
+    });
+
+    const elements = stripe.elements();
+    const prButton = elements.create('paymentRequestButton', {
+        paymentRequest: paymentRequest,
+        style: {
+            paymentRequestButton: {
+                type: 'default',
+                theme: 'dark',
+                height: '48px',
+            },
+        },
+    });
+
+    paymentRequest.canMakePayment().then(function(result) {
+        if (result) {
+            prButton.mount('#payment-request-button');
+        } else {
+            document.getElementById('payment-request-button').style.display = 'none';
+        }
+    });
+
+    paymentRequest.on('paymentmethod', async function(ev) {
+        // stop if user not agreed
+        if (!checkDefault.checked) {
+            ev.complete('fail');
+            alert("Please agree with the Terms & Conditions to continue.");
+            return;
+        }
+
+        // Continue to payment
+        const response = await fetch("{{ route('payment.intent.create', $package_id->id) }}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+        });
+        const { clientSecret } = await response.json();
+
+        const {error, paymentIntent} = await stripe.confirmCardPayment(
+            clientSecret,
+            { payment_method: ev.paymentMethod.id },
+            { handleActions: false }
+        );
+
+        if (error) {
+            ev.complete('fail');
+            alert(error.message);
+        } else {
+            ev.complete('success');
+            if (paymentIntent.status === "requires_action") {
+                await stripe.confirmCardPayment(clientSecret);
+            }
+            if (paymentIntent.status === "succeeded") {
+                window.location.href = "{{ route('checkout.success', $package_id->id) }}";
+            }
+        }
+    });
+});
 </script>
 @endsection
+
