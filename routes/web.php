@@ -23,7 +23,7 @@ Route::get('/sitemap.xml', function () {
     $ads = Ad::all();
     foreach ($ads as $ad) {
         $sitemap->add(
-            Url::create("/ads/{$ad->id}")
+            Url::create("/{$ad->slug}.html")
                 ->setLastModificationDate($ad->updated_at)
         );
     }
